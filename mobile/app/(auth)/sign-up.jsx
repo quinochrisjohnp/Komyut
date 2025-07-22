@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSignUp } from '@clerk/clerk-expo';
 import { Link, useRouter } from 'expo-router';
@@ -7,11 +7,12 @@ export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp()
   const router = useRouter()
 
-  const [emailAddress, setEmailAddress] = React.useState('')
-  const [username, setUsername] = React.useState('') //New
-  const [password, setPassword] = React.useState('')
-  const [pendingVerification, setPendingVerification] = React.useState(false)
-  const [code, setCode] = React.useState('')
+  const [emailAddress, setEmailAddress] = useState('')
+  const [username, setUsername] = useState('') //New
+  const [password, setPassword] = useState('')
+  const [pendingVerification, setPendingVerification] = useState(false)
+  const [code, setCode] = useState('')
+  const [error, setError] = useState('')
 
   // Handle submission of sign-up form
   const onSignUpPress = async () => {
@@ -109,8 +110,8 @@ export default function SignUpScreen() {
         </TouchableOpacity>
         <View style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
           <Text>Already have an account?</Text>
-          <Link href="/(root)/index"> {/* new add 7/21/2025 11:45am */}
-            <Text>Sign in</Text>
+          <Link href="/(auth)/log-in"> {/* new add 7/21/2025 11:45am */}
+            <Text>Log in</Text>
           </Link>
         </View>
       </>
