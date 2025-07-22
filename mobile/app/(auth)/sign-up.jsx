@@ -1,13 +1,14 @@
-import * as React from 'react'
-import { Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { useSignUp } from '@clerk/clerk-expo'
-import { Link, useRouter } from 'expo-router'
+import * as React from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSignUp } from '@clerk/clerk-expo';
+import { Link, useRouter } from 'expo-router';
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp()
   const router = useRouter()
 
   const [emailAddress, setEmailAddress] = React.useState('')
+  const [username, setUsername] = React.useState('') //New
   const [password, setPassword] = React.useState('')
   const [pendingVerification, setPendingVerification] = React.useState(false)
   const [code, setCode] = React.useState('')
@@ -21,6 +22,7 @@ export default function SignUpScreen() {
       await signUp.create({
         emailAddress,
         password,
+        username,
       })
 
       // Send user an email with verification code
@@ -50,7 +52,7 @@ export default function SignUpScreen() {
       // and redirect the user
       if (signUpAttempt.status === 'complete') {
         await setActive({ session: signUpAttempt.createdSessionId })
-        router.replace('/')
+        router.replace('/(root)') //* new add 7/21/2025 11:46am
       } else {
         // If the status is not complete, check why. User may need to
         // complete further steps.
@@ -84,6 +86,13 @@ export default function SignUpScreen() {
       <>
         <Text>Sign up</Text>
         <TextInput
+        autoCapitalize="none"
+        value={username}
+        placeholder="Enter username"
+        onChangeText={(text) => setUsername(text)}
+        /> 
+
+        <TextInput
           autoCapitalize="none"
           value={emailAddress}
           placeholder="Enter email"
@@ -100,7 +109,7 @@ export default function SignUpScreen() {
         </TouchableOpacity>
         <View style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
           <Text>Already have an account?</Text>
-          <Link href="/sign-in">
+          <Link href="/(root)/index"> {/* new add 7/21/2025 11:45am */}
             <Text>Sign in</Text>
           </Link>
         </View>
