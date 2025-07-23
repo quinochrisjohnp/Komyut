@@ -1,7 +1,7 @@
 import { Stack, Redirect } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
 
-export default function AuthRoutesLayout() {
+export default function Layout() {
   const { isSignedIn } = useAuth();
 
   if (isSignedIn) {
@@ -9,12 +9,18 @@ export default function AuthRoutesLayout() {
   }
 
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: 'fade',
+        animationDuration: 300,
+      }}
+    >
       <Stack.Screen
-        name="welcome"
+        name="index"
         options={{
-          title: '', // Hides the default title
-          headerShown: false, // Hide top bar for welcome
+          title: '',
+          headerShown: false,
         }}
       />
     </Stack>
