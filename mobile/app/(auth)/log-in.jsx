@@ -13,6 +13,12 @@ import {
 } from 'react-native';
 import Colors from '../Constant_Design';
 
+import { useOAuth } from '@clerk/clerk-expo';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
+
+
 export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn()
   const router = useRouter()
@@ -47,6 +53,34 @@ export default function Page() {
       console.error(JSON.stringify(err, null, 2))
     }
   }
+
+  const { startOAuthFlow: googleAuth } = useOAuth({ strategy: 'oauth_google' });
+  const { startOAuthFlow: facebookAuth } = useOAuth({ strategy: 'oauth_facebook' });
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const { createdSessionId, setActive } = await googleAuth();
+      if (createdSessionId) {
+        await setActive({ session: createdSessionId });
+        router.replace('/(root)');
+      }
+    } catch (err) {
+      console.error('Google sign-in error:', err);
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    try {
+      const { createdSessionId, setActive } = await facebookAuth();
+      if (createdSessionId) {
+        await setActive({ session: createdSessionId });
+        router.replace('/(root)');
+      }
+    } catch (err) {
+      console.error('Facebook sign-in error:', err);
+    }
+  };
+
 
   return (
 
@@ -99,13 +133,10 @@ export default function Page() {
           <Text style={styles.signInWithText}>Or log in with</Text>
 
           <View style={styles.iconRow}>
-            <TouchableOpacity style={styles.iconBtn}>
+            <TouchableOpacity style={styles.iconBtn} onPress={handleGoogleSignIn}>
               <Image source={require('../../assets/images/google_icon.png')} style={styles.icon} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconBtn}>
-              <Image source={require('../../assets/images/apple_icon.png')} style={styles.icon} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconBtn}>
+            <TouchableOpacity style={styles.iconBtn} onPress={handleFacebookSignIn}>
               <Image source={require('../../assets/images/facebook_icon.webp')} style={styles.icon} />
             </TouchableOpacity>
           </View>
@@ -134,7 +165,7 @@ const styles = StyleSheet.create({
   },
   topSection: {
     alignItems: 'center',
-    marginTop: 180, 
+    marginTop: 160, 
   },
   logo: {
     width: 200,

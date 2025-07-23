@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   },
   topSection: {
     alignItems: 'center',
-    marginTop: 180, 
+    marginTop: 160, 
   },
   logo: {
     width: 200,

@@ -13,6 +13,11 @@ import {
 } from 'react-native';
 import Colors from '../Constant_Design';
 
+import { useOAuth } from '@clerk/clerk-expo';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
+
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp()
@@ -77,6 +82,33 @@ export default function SignUpScreen() {
     }
   }
 
+  const { startOAuthFlow: googleOAuth } = useOAuth({ strategy: 'oauth_google' });
+  const { startOAuthFlow: facebookOAuth } = useOAuth({ strategy: 'oauth_facebook' });
+
+  const handleGoogleSignUp = async () => {
+    try {
+      const { createdSessionId, setActive } = await googleOAuth();
+      if (createdSessionId) {
+        await setActive({ session: createdSessionId });
+        router.replace('/(root)');
+      }
+    } catch (err) {
+      console.error('Google OAuth error:', err);
+    }
+  };
+
+  const handleFacebookSignUp = async () => {
+    try {
+      const { createdSessionId, setActive } = await facebookOAuth();
+      if (createdSessionId) {
+        await setActive({ session: createdSessionId });
+        router.replace('/(root)');
+      }
+    } catch (err) {
+      console.error('Facebook OAuth error:', err);
+    }
+  };
+
   if (pendingVerification) {
     return (
       <>
@@ -89,7 +121,7 @@ export default function SignUpScreen() {
           </TouchableOpacity>
           <View style={styles.container}>
             {/* Top: Logo */}
-            <View style={styles.topSection}>
+            <View style={styles.logoContainer}>
               <Image
                 source={require('../../assets/images/app_logo.png')}
                 style={styles.logo}
@@ -98,9 +130,9 @@ export default function SignUpScreen() {
             </View>
 
             {/* Middle: Inputs & Buttons */}
-            <View style={styles.middleSection}>
-              <Text style={styles.title}>Verify your Identity</Text>
-              <Text style={styles.forgotText}>A code has been sent to your email. Enter the code to verify your identity.</Text>
+            <View style={styles.formContainer}>
+              <Text style={styles.verifyTitle}>Verify your Identity</Text>
+              <Text style={styles.verifyText}>A code has been sent to your email. Enter the code to verify your identity.</Text>
 
               <TextInput
                 style={styles.input}
@@ -109,10 +141,10 @@ export default function SignUpScreen() {
                 value={code}
                 onChangeText={(code) => setCode(code)}
               />
-              <Text style={styles.forgotText}>Didn’t get the code?</Text>
+              <Text style={styles.verifyText}>Didn’t get the code?</Text>
 
-              <TouchableOpacity style={styles.loginBtn} onPress={onVerifyPress}>
-                <Text style={styles.loginText}>Enter Code</Text>
+              <TouchableOpacity style={styles.signUpBtn} onPress={onVerifyPress}>
+                <Text style={styles.signUpText}>Enter Code</Text>
               </TouchableOpacity>
             </View>
 
@@ -181,21 +213,14 @@ export default function SignUpScreen() {
           <Text style={styles.altText}>Or sign up with</Text>
 
           <View style={styles.iconRow}>
-            <TouchableOpacity style={styles.iconBtn}>
+            <TouchableOpacity style={styles.iconBtn} onPress={handleGoogleSignUp}>
               <Image
                 source={require('../../assets/images/google_icon.png')}
                 style={styles.icon}
                 resizeMode="contain"
               />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconBtn}>
-              <Image
-                source={require('../../assets/images/apple_icon.png')}
-                style={styles.icon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconBtn}>
+            <TouchableOpacity style={styles.iconBtn} onPress={handleFacebookSignUp}> 
               <Image
                 source={require('../../assets/images/facebook_icon.webp')}
                 style={styles.icon}
@@ -227,7 +252,7 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 180,
+    marginTop: 160,
   },
   logo: {
     width: 200,
@@ -241,6 +266,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 30,
     marginBottom: 30,
+    color: '#333',
+  },
+  verifyTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginTop: -20,
+    marginBottom: 25,
     color: '#333',
   },
   input: {
@@ -299,6 +331,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
     textDecorationLine: 'underline',
+  },
+  verifyTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginTop: -20,
+    marginBottom: 25,
+    color: '#333',
   },
   backBtn: {
     position: 'absolute',

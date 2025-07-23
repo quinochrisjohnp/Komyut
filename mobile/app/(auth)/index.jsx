@@ -10,7 +10,7 @@ export default function SplashScreen() {
     Animated.sequence([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 2000,
+        duration: 1000,
         useNativeDriver: true,
       }),
       Animated.delay(2000),
