@@ -1,182 +1,34 @@
-import { useSignIn } from '@clerk/clerk-expo';
-import { Link, useRouter } from 'expo-router';
 import React from 'react';
-
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native';
-import Colors from '../Constant_Design';
-import authStyles from './auth-styles';
-import { useOAuth } from '@clerk/clerk-expo';
-import * as WebBrowser from 'expo-web-browser';
-
-WebBrowser.maybeCompleteAuthSession();
-
-
-export default function Page() {
-  const { signIn, setActive, isLoaded } = useSignIn()
-  const router = useRouter()
-
-  const [emailAddress, setEmailAddress] = React.useState('')
-  const [password, setPassword] = React.useState('')
-
-  // Handle the submission of the sign-in form
-  const onSignInPress = async () => {
-    if (!isLoaded) return
-
-    // Start the sign-in process using the email and password provided
-    try {
-      const signInAttempt = await signIn.create({
-        identifier: emailAddress,
-        password,
-      })
-
-      // If sign-in process is complete, set the created session as active
-      // and redirect the user
-      if (signInAttempt.status === 'complete') {
-        await setActive({ session: signInAttempt.createdSessionId })
-        router.replace('/(root)') // new add 7/21/2025 11:41am
-      } else {
-        // If the status isn't complete, check why. User might need to
-        // complete further steps.
-        console.error(JSON.stringify(signInAttempt, null, 2))
-      }
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
-    }
-  }
-
-  const { startOAuthFlow: googleAuth } = useOAuth({ strategy: 'oauth_google' });
-  const { startOAuthFlow: facebookAuth } = useOAuth({ strategy: 'oauth_facebook' });
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const { createdSessionId, setActive } = await googleAuth();
-      if (createdSessionId) {
-        await setActive({ session: createdSessionId });
-        router.replace('/(root)');
-      }
-    } catch (err) {
-      console.error('Google sign-in error:', err);
-    }
-  };
-
-  const handleFacebookSignIn = async () => {
-    try {
-      const { createdSessionId, setActive } = await facebookAuth();
-      if (createdSessionId) {
-        await setActive({ session: createdSessionId });
-        router.replace('/(root)');
-      }
-    } catch (err) {
-      console.error('Facebook sign-in error:', err);
-    }
-  };
-
-
+import { View, Text, StyleSheet } from 'react-native';
+import BottomNav from '../../components/BottomNav';
+import { SignedOut } from '@clerk/clerk-expo';
+import { SignOutButton } from '@/components/SignOutButton';
+export default function Index() {
   return (
-
-    <SafeAreaView style={authStyles.safeArea}>
-      <TouchableOpacity onPress={() => router.back()} style={authStyles.backBtn}>
-        <Image
-          source={require('../../assets/images/back_icon.png')}
-          style={authStyles.backIcon}
-        />
-      </TouchableOpacity>
-      <View style={authStyles.container}>
-        {/* Top: Logo */}
-        {/* Middle: Inputs & Buttons */}
-        <View style={authStyles.middleSection}>
-          <Text style={styles.title}>Welcome back!</Text>
-
-          <TextInput
-            autoCapitalize="none"
-            style={authStyles.input}
-            value={emailAddress}
-            placeholder="Enter email"
-            placeholderTextColor="#999"
-            onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
-          />
-          <TextInput
-            style={authStyles.input}
-            value={password}
-            placeholder="Enter password"
-            secureTextEntry={true}
-            placeholderTextColor="#999"
-            onChangeText={(password) => setPassword(password)}
-          />
-          
-          <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/(auth)/forget-pass')}>
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.loginBtn} onPress={onSignInPress}>
-            <Text style={styles.loginText}>Login</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.signInWithText}>Or log in with</Text>
-
-          <View style={authStyles.iconRow}>
-            <TouchableOpacity style={authStyles.iconBtn} onPress={handleGoogleSignIn}>
-              <Image source={require('../../assets/images/google_icon.png')} style={authStyles.icon} />
-            </TouchableOpacity>
-            <TouchableOpacity style={authStyles.iconBtn} onPress={handleFacebookSignIn}>
-              <Image source={require('../../assets/images/facebook_icon.webp')} style={authStyles.icon} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Footer */}
-        <View style={authStyles.footer}>
-          <Text style={authStyles.footerText}>Privacy Policy</Text>
-          <Text style={authStyles.footerText}>Terms of Service</Text>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.placeholder}>SETTINGS</Text>
+        <SignOutButton />
       </View>
-    </SafeAreaView>
-  )
+      <BottomNav />
+    </View>
+  );
 }
 
-
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginTop: 30,
-    marginBottom: 20,
-    color: '#333',
+  container: {
+    flex: 1,
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 25,
-  },
-  forgotText: {
-    fontSize: 13,
-    color: '#666',
-  },
-  loginBtn: {
-    width: '100%',
-    paddingVertical: 14,
-    borderRadius: 30,
-    backgroundColor: Colors.primary,
+  content: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 25,
   },
-  loginText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  signInWithText: {
-    fontSize: 14,
-    marginBottom: 10,
+  placeholder: {
+    fontSize: 18,
     color: '#666',
   },
 });
