@@ -9,24 +9,25 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import authStyles from './auth-styles';
 import Colors from '../Constant_Design';
 const Login = () => {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+    <SafeAreaView style={authStyles.safeArea}>
+      <TouchableOpacity onPress={() => router.back()} style={authStyles.backBtn}>
         <Image
           source={require('../../assets/images/back_icon.png')}
-          style={styles.backIcon}
+          style={authStyles.backIcon}
         />
       </TouchableOpacity>
-      <View style={styles.container}>
+      <View style={authStyles.container}>
         {/* Top: Logo */}
-        <View style={styles.topSection}>
+        <View style={authStyles.logoSection}>
           <Image
             source={require('../../assets/images/app_logo.png')}
-            style={styles.logo}
+            style={authStyles.logo}
             resizeMode="contain"
           />
         </View>
@@ -37,7 +38,7 @@ const Login = () => {
           <Text style={styles.forgotText}>Forgot your password? No worries!</Text>
 
           <TextInput
-            style={styles.input}
+            style={authStyles.input}
             placeholder="Email"
             placeholderTextColor="#999"
           />
@@ -49,9 +50,9 @@ const Login = () => {
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Privacy Policy</Text>
-          <Text style={styles.footerText}>Terms of Service</Text>
+        <View style={authStyles.footer}>
+          <Text style={authStyles.footerText}>Privacy Policy</Text>
+          <Text style={authStyles.footerText}>Terms of Service</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -61,23 +62,6 @@ const Login = () => {
 export default Login;
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 30,
-    justifyContent: 'space-between',
-  },
-  topSection: {
-    alignItems: 'center',
-    marginTop: 160, 
-  },
-  logo: {
-    width: 200,
-    height: 80,
-  },
   middleSection: {
     marginTop: -100,
     alignItems: 'center',
@@ -88,16 +72,6 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 10,
     color: '#333',
-  },
-  input: {
-    width: '100%',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: Colors.secondary,
-    borderRadius: 30,
-    fontSize: 14,
-    marginBottom: 15,
-    marginTop: -20,
   },
   loginBtn: {
     width: '100%',
@@ -117,27 +91,5 @@ const styles = StyleSheet.create({
     marginBottom: 50,
     color: '#666',
     alignItems: 'center',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 20,
-    paddingHorizontal: 10,
-  },
-  footerText: {
-    fontSize: 12,
-    color: '#888',
-    textDecorationLine: 'underline',
-  },
-  backBtn: {
-    position: 'absolute',
-    top: 50,
-    left: 0,
-    padding: 10,
-    zIndex: 1,
-  },
-  backIcon: {
-    width: 20,
-    height: 20,
   },
 });

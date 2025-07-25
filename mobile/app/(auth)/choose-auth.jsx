@@ -9,26 +9,26 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
-
+import authStyles from './auth-styles';
 import Colors from '../Constant_Design';
 
 
 const Welcome = () => {
   const router = useRouter();
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <SafeAreaView style={authStyles.safeArea}>
+      <View style={authStyles.container}>
         {/* Top: Logo */}
-        <View style={styles.topSection}>
+        <View style={authStyles.logoSection}>
           <Image
             source={require('../../assets/images/app_logo.png')} // your logo path
-            style={styles.logo}
+            style={authStyles.logo}
             resizeMode="contain"
           />
         </View>
 
         {/* Middle: Title and Buttons */}
-        <View style={styles.middleSection}>
+        <View style={authStyles.middleSection}>
           <Text style={styles.title}>Let’s Get Started!</Text>
 
           <TouchableOpacity style={styles.signUpBtn} onPress={() => router.push('/(auth)/sign-up')}>
@@ -42,9 +42,9 @@ const Welcome = () => {
         </View>
 
         {/* Bottom: Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Privacy Policy</Text>
-          <Text style={styles.footerText}>Terms of Service</Text>
+        <View style={authStyles.footer}>
+          <Text style={authStyles.footerText}>Privacy Policy</Text>
+          <Text style={authStyles.footerText}>Terms of Service</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -54,26 +54,6 @@ const Welcome = () => {
 export default Welcome;
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 30,
-    justifyContent: 'space-between', // space between top, middle, and bottom
-  },
-  topSection: {
-    alignItems: 'center',
-    marginTop: 160,
-  },
-  logo: {
-    width: 200,
-    height: 80,
-  },
-  middleSection: {
-    alignItems: 'center',
-  },
   title: {
     fontSize: 22,
     fontWeight: '600',
@@ -112,37 +92,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#666',
   },
-  iconRow: {
-    flexDirection: 'row',
-    gap: 20,
-    marginBottom: 20,
+  backBtn: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    padding: 10,
+    zIndex: 1,
   },
-  iconBtn: {
-    width: 50,
-    height: 50,
-    marginHorizontal: 10,
-    marginTop: 5,
-    borderRadius: 25,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  icon: {
-    width: 50,
-    height: 50,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 20,
-    paddingHorizontal: 10,
-  },
-  footerText: {
-    fontSize: 12,
-    color: '#888',
-    textDecorationLine: 'underline',
+  backIcon: {
+    width: 20,
+    height: 20,
   },
 });
-
-
-

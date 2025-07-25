@@ -7,7 +7,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.placeholder}>Map Placeholder</Text>
+        <Text style={styles.placeholder}>NOTIFS</Text>
         <SignOutButton />
       </View>
       <BottomNav />

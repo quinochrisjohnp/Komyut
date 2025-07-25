@@ -93,14 +93,6 @@ export default function Page() {
       </TouchableOpacity>
       <View style={authStyles.container}>
         {/* Top: Logo */}
-        <View style={authStyles.logoSection}>
-          <Image
-            source={require('../../assets/images/app_logo.png')}
-            style={authStyles.logo}
-            resizeMode="contain"
-          />
-        </View>
-
         {/* Middle: Inputs & Buttons */}
         <View style={authStyles.middleSection}>
           <Text style={styles.title}>Welcome back!</Text>

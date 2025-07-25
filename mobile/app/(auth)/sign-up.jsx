@@ -12,7 +12,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Colors from '../Constant_Design';
-
+import authStyles from './auth-styles';
 import { useOAuth } from '@clerk/clerk-expo';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -112,30 +112,30 @@ export default function SignUpScreen() {
   if (pendingVerification) {
     return (
       <>
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={authStyles.safeArea}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Image
               source={require('../../assets/images/back_icon.png')}
-              style={styles.backIcon}
+              style={authStyles.backIcon}
             />
           </TouchableOpacity>
-          <View style={styles.container}>
+          <View style={authStyles.container}>
             {/* Top: Logo */}
-            <View style={styles.logoContainer}>
+            <View style={authStyles.logoSection}>
               <Image
                 source={require('../../assets/images/app_logo.png')}
-                style={styles.logo}
+                style={authStyles.logo}
                 resizeMode="contain"
               />
             </View>
 
             {/* Middle: Inputs & Buttons */}
-            <View style={styles.formContainer}>
+            <View style={authStyles.middleSection}>
               <Text style={styles.verifyTitle}>Verify your Identity</Text>
               <Text style={styles.verifyText}>A code has been sent to your email. Enter the code to verify your identity.</Text>
 
               <TextInput
-                style={styles.input}
+                style={authStyles.input}
                 placeholder="Enter code"
                 placeholderTextColor="#999"
                 value={code}
@@ -149,9 +149,9 @@ export default function SignUpScreen() {
             </View>
 
             {/* Footer */}
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Privacy Policy</Text>
-              <Text style={styles.footerText}>Terms of Service</Text>
+            <View style={authStyles.footer}>
+              <Text style={authStyles.footerText}>Privacy Policy</Text>
+              <Text style={authStyles.footerText}>Terms of Service</Text>
             </View>
           </View>
         </SafeAreaView>
@@ -160,29 +160,29 @@ export default function SignUpScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+    <SafeAreaView style={authStyles.safeArea}>
+      <TouchableOpacity onPress={() => router.back()} style={authStyles.backBtn}>
         <Image
           source={require('../../assets/images/back_icon.png')}
-          style={styles.backIcon}
+          style={authStyles.backIcon}
         />
       </TouchableOpacity>
-      <View style={styles.container}>
+      <View style={authStyles.container}>
         {/* Logo */}
-        <View style={styles.logoContainer}>
+        <View style={authStyles.logoSection}>
           <Image
             source={require('../../assets/images/app_logo.png')}
-            style={styles.logo}
+            style={authStyles.logo}
             resizeMode="contain"
           />
         </View>
 
         {/* Form Section */}
-        <View style={styles.formContainer}>
+        <View style={authStyles.middleSection}>
           <Text style={styles.title}>Create Account</Text>
 
           <TextInput
-            style={styles.input}
+            style={authStyles.input}
             placeholder="Enter username"
             placeholderTextColor="#666"
             autoCapitalize="none"
@@ -190,7 +190,7 @@ export default function SignUpScreen() {
             onChangeText={(text) => setUsername(text)}
           />
           <TextInput
-            style={styles.input}
+            style={authStyles.input}
             placeholder="Enter email"
             placeholderTextColor="#666"
             autoCapitalize="none"
@@ -198,7 +198,7 @@ export default function SignUpScreen() {
             onChangeText={(email) => setEmailAddress(email)}
           />
           <TextInput
-            style={styles.input}
+            style={authStyles.input}
             placeholder="Enter password"
             placeholderTextColor="#666"
             value={password}
@@ -212,18 +212,18 @@ export default function SignUpScreen() {
 
           <Text style={styles.altText}>Or sign up with</Text>
 
-          <View style={styles.iconRow}>
-            <TouchableOpacity style={styles.iconBtn} onPress={handleGoogleSignUp}>
+          <View style={authStyles.iconRow}>
+            <TouchableOpacity style={authStyles.iconBtn} onPress={handleGoogleSignUp}>
               <Image
                 source={require('../../assets/images/google_icon.png')}
-                style={styles.icon}
+                style={authStyles.icon}
                 resizeMode="contain"
               />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconBtn} onPress={handleFacebookSignUp}> 
+            <TouchableOpacity style={authStyles.iconBtn} onPress={handleFacebookSignUp}> 
               <Image
                 source={require('../../assets/images/facebook_icon.webp')}
-                style={styles.icon}
+                style={authStyles.icon}
                 resizeMode="contain"
               />
             </TouchableOpacity>
@@ -231,9 +231,9 @@ export default function SignUpScreen() {
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Privacy Policy</Text>
-          <Text style={styles.footerText}>Terms of Service</Text>
+        <View style={authStyles.footer}>
+          <Text style={authStyles.footerText}>Privacy Policy</Text>
+          <Text style={authStyles.footerText}>Terms of Service</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -241,26 +241,6 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 30,
-    justifyContent: 'space-between',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginTop: 160,
-  },
-  logo: {
-    width: 200,
-    height: 80,
-  },
-  formContainer: {
-    alignItems: 'center',
-  },
   title: {
     fontSize: 22,
     fontWeight: '600',
@@ -273,16 +253,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: -20,
     marginBottom: 25,
-    color: '#333',
-  },
-  input: {
-    width: '100%',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    marginBottom: 15,
-    backgroundColor: Colors.secondary,
-    fontSize: 14,
     color: '#333',
   },
   signUpBtn: {
@@ -302,52 +272,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 10,
     color: '#666',
-  },
-  iconRow: {
-    flexDirection: 'row',
-    gap: 20,
-    marginBottom: 20,
-  },
-  iconBtn: {
-    width: 50,
-    height: 50,
-    marginHorizontal: 10,
-    borderRadius: 25,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  icon: {
-    width: 50,
-    height: 50,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 20,
-    paddingHorizontal: 10,
-  },
-  footerText: {
-    fontSize: 12,
-    color: '#888',
-    textDecorationLine: 'underline',
-  },
-  verifyTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginTop: -20,
-    marginBottom: 25,
-    color: '#333',
-  },
-  backBtn: {
-    position: 'absolute',
-    top: 50,
-    left: 0,
-    padding: 10,
-    zIndex: 1,
-  },
-  backIcon: {
-    width: 20,
-    height: 20,
   },
 });
