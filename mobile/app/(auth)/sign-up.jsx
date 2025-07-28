@@ -24,7 +24,8 @@ export default function SignUpScreen() {
   const router = useRouter()
 
   const [emailAddress, setEmailAddress] = useState('')
-  const [username, setUsername] = useState('') //New
+  const [firstName, setFirstname] = useState('')
+  const [lastName, setLastname] = useState('') //New
   const [password, setPassword] = useState('')
   const [pendingVerification, setPendingVerification] = useState(false)
   const [code, setCode] = useState('')
@@ -37,9 +38,10 @@ export default function SignUpScreen() {
     // Start sign-up process using email and password provided
     try {
       await signUp.create({
+        firstName,
+        lastName,
         emailAddress,
         password,
-        username,
       })
 
       // Send user an email with verification code
@@ -183,12 +185,21 @@ export default function SignUpScreen() {
 
           <TextInput
             style={authStyles.input}
-            placeholder="Enter username"
+            placeholder="First Name"
             placeholderTextColor="#666"
             autoCapitalize="none"
-            value={username}
-            onChangeText={(text) => setUsername(text)}
+            value={firstName}
+            onChangeText={(text) => setFirstname(text)}
           />
+
+          <TextInput 
+          style={authStyles.input}
+          placeholder="Last Name"
+          placeholderTextColor="#666"
+          autoCapitalize="none"
+          value={lastName}
+          onChangeText={text => setLastname(text)}/>
+
           <TextInput
             style={authStyles.input}
             placeholder="Enter email"
