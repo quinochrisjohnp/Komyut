@@ -24,38 +24,50 @@ export default function SignUpScreen() {
   const router = useRouter()
 
   const [emailAddress, setEmailAddress] = useState('')
-  const [firstName, setFirstname] = useState('')
-  const [lastName, setLastname] = useState('') //New
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [pendingVerification, setPendingVerification] = useState(false)
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
 
+
   // Handle submission of sign-up form
   const onSignUpPress = async () => {
-    if (!isLoaded) return
+    if (!isLoaded) return;
+    
+    setUsernameError("");
+    setPasswordError("");
 
-    // Start sign-up process using email and password provided
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
+    
     try {
       await signUp.create({
-        firstName,
-        lastName,
+        username,
         emailAddress,
-        password,
-      })
-
-      // Send user an email with verification code
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
-      setPendingVerification(true)
+        password
+      });
+      
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      
+      setPendingVerification(true);
+      setError(""); // Clear error if everything went fine
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+      const errorMessage = err?.errors?.[0]?.message || "Something went wrong.";
+
+       if (errorMessage.toLowerCase().includes("username")) {
+        setUsernameError("Username is already taken.");
+      } else {
+        setError(""); 
+      }
     }
-  }
+  };
+
 
   // Handle submission of verification form
   const onVerifyPress = async () => {
@@ -83,6 +95,7 @@ export default function SignUpScreen() {
       console.error(JSON.stringify(err, null, 2))
     }
   }
+
 
   const { startOAuthFlow: googleOAuth } = useOAuth({ strategy: 'oauth_google' });
   const { startOAuthFlow: facebookOAuth } = useOAuth({ strategy: 'oauth_facebook' });
@@ -183,23 +196,16 @@ export default function SignUpScreen() {
         <View style={authStyles.middleSection}>
           <Text style={styles.title}>Create Account</Text>
 
+          
           <TextInput
             style={authStyles.input}
-            placeholder="First Name"
+            placeholder="Enter username"
             placeholderTextColor="#666"
             autoCapitalize="none"
-            value={firstName}
-            onChangeText={(text) => setFirstname(text)}
+            value={username}
+            onChangeText={(username) => setUsername(username)}
           />
-
-          <TextInput 
-          style={authStyles.input}
-          placeholder="Last Name"
-          placeholderTextColor="#666"
-          autoCapitalize="none"
-          value={lastName}
-          onChangeText={text => setLastname(text)}/>
-
+          {usernameError && <Text style={{ color: "red" }}>{usernameError}</Text>}
           <TextInput
             style={authStyles.input}
             placeholder="Enter email"
@@ -216,6 +222,20 @@ export default function SignUpScreen() {
             secureTextEntry={true}
             onChangeText={(password) => setPassword(password)}
           />
+          <TextInput
+            style={authStyles.input}
+            placeholder="Confirm password"
+            placeholderTextColor="#666"
+            value={confirmPassword}
+            secureTextEntry={true}
+            onChangeText={(confirmPassword) => setConfirmPassword(confirmPassword)}
+          />
+
+          {passwordError !== "" && (
+            <Text style={{ color: 'red', marginBottom: 10, textAlign: 'center' }}>
+              {passwordError}
+              </Text>
+            )}
 
           <TouchableOpacity style={styles.signUpBtn} onPress={onSignUpPress}>
             <Text style={styles.signUpText}>Sign Up</Text>

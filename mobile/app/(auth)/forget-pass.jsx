@@ -44,7 +44,7 @@ const Login = () => {
           />
           <Text style={styles.forgotText}>A password reset link will be sent to your registered email address.</Text>
 
-          <TouchableOpacity style={styles.loginBtn} onPress={() => router.push('/(auth)/verify-acct')}>
+          <TouchableOpacity style={styles.loginBtn} onPress={() => router.push('/(auth)/reset-pass')}>
             <Text style={styles.loginText}>Reset Password</Text>
           </TouchableOpacity>
         </View>

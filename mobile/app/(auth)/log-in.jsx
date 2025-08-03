@@ -25,6 +25,7 @@ export default function Page() {
 
   const [emailAddress, setEmailAddress] = React.useState('')
   const [password, setPassword] = React.useState('')
+  const [error, setError] = React.useState('');
 
   // Handle the submission of the sign-in form
   const onSignInPress = async () => {
@@ -47,12 +48,15 @@ export default function Page() {
         // complete further steps.
         console.error(JSON.stringify(signInAttempt, null, 2))
       }
+      //for password or gmail error
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+      if (err.errors?.[0]?.code === "form_password_incorrect") {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        setError("Invalid email or password. Please try again.");
+      }
     }
-  }
+  };
 
   const { startOAuthFlow: googleAuth } = useOAuth({ strategy: 'oauth_google' });
   const { startOAuthFlow: facebookAuth } = useOAuth({ strategy: 'oauth_facebook' });
@@ -130,6 +134,10 @@ export default function Page() {
             <Text style={styles.loginText}>Login</Text>
           </TouchableOpacity>
 
+          {error !== '' && (
+            <Text style={styles.errorText}>{error}</Text>
+          )}
+
           <Text style={styles.signInWithText}>Or log in with</Text>
 
           <View style={authStyles.iconRow}>
@@ -186,5 +194,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 10,
     color: '#666',
+  },
+  errorText: {
+  color: 'red',
+  fontSize: 14,
+  textAlign: 'center',
+  marginBottom: 15,
   },
 });
