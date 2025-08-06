@@ -23,7 +23,7 @@ export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn()
   const router = useRouter()
 
-  const [emailAddress, setEmailAddress] = React.useState('')
+  const [identifier, setIdentifier] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState('');
 
@@ -34,7 +34,7 @@ export default function Page() {
     // Start the sign-in process using the email and password provided
     try {
       const signInAttempt = await signIn.create({
-        identifier: emailAddress,
+        identifier: identifier,
         password,
       })
 
@@ -112,10 +112,10 @@ export default function Page() {
           <TextInput
             autoCapitalize="none"
             style={authStyles.input}
-            value={emailAddress}
-            placeholder="Enter email"
+            value={identifier}
+            placeholder="Enter email or username"
             placeholderTextColor="#999"
-            onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
+            onChangeText={(identifier) => setIdentifier(identifier)}//for email or username
           />
           <TextInput
             style={authStyles.input}

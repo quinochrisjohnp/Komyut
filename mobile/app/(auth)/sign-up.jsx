@@ -23,15 +23,17 @@ export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp()
   const router = useRouter()
 
-  const [emailAddress, setEmailAddress] = useState('')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [emailAddress, setEmailAddress] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [pendingVerification, setPendingVerification] = useState(false)
-  const [code, setCode] = useState('')
-  const [error, setError] = useState('')
+  const [emailError, setEmailError] = useState('');
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
+  const [verifyError, setVerifyError] = useState("");
 
 
   // Handle submission of sign-up form
@@ -40,6 +42,13 @@ export default function SignUpScreen() {
     
     setUsernameError("");
     setPasswordError("");
+    setEmailError("");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailAddress)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setPasswordError("Passwords do not match");
@@ -62,6 +71,8 @@ export default function SignUpScreen() {
 
        if (errorMessage.toLowerCase().includes("username")) {
         setUsernameError("Username is already taken.");
+      } else if (errorMessage.toLowerCase().includes("email")) {
+        setEmailError("This email address is already registered.");
       } else {
         setError(""); 
       }
@@ -71,30 +82,33 @@ export default function SignUpScreen() {
 
   // Handle submission of verification form
   const onVerifyPress = async () => {
-    if (!isLoaded) return
+    if (!isLoaded) return;
+
+    setVerifyError(""); // Clear previous error
 
     try {
-      // Use the code the user provided to attempt verification
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code,
-      })
+      const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
 
-      // If verification was completed, set the session to active
-      // and redirect the user
       if (signUpAttempt.status === 'complete') {
-        await setActive({ session: signUpAttempt.createdSessionId })
-        router.replace('/(root)') //* new add 7/21/2025 11:46am
+        await setActive({ session: signUpAttempt.createdSessionId });
+        router.replace('/(root)');
       } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
-        console.error(JSON.stringify(signUpAttempt, null, 2))
+        setVerifyError("Verification not complete. Please try again.");
+        console.error("Verification incomplete:", signUpAttempt);
       }
+
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+      const errorCode = err?.errors?.[0]?.code;
+
+      if (errorCode === "form_code_incorrect") {
+        setVerifyError("The verification code you entered is incorrect.");
+      } else {
+        setVerifyError("Something went wrong. Please try again.");
+      }
+
+      console.error("Verification error:", JSON.stringify(err, null, 2));
     }
-  }
+  };
 
 
   const { startOAuthFlow: googleOAuth } = useOAuth({ strategy: 'oauth_google' });
@@ -156,6 +170,7 @@ export default function SignUpScreen() {
                 value={code}
                 onChangeText={(code) => setCode(code)}
               />
+              {verifyError !== "" && (<Text style={{ color: 'red', marginTop: 4 }}>{verifyError}</Text>)}
               <Text style={styles.verifyText}>Didn’t get the code?</Text>
 
               <TouchableOpacity style={styles.signUpBtn} onPress={onVerifyPress}>
@@ -214,6 +229,7 @@ export default function SignUpScreen() {
             value={emailAddress}
             onChangeText={(email) => setEmailAddress(email)}
           />
+          {emailError !== "" && (<Text style={{ color: 'red', marginTop: 4 }}>{emailError}</Text>)}
           <TextInput
             style={authStyles.input}
             placeholder="Enter password"
