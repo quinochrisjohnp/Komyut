@@ -30,6 +30,28 @@ async function initDB() {
     `;
 
     await sql`
+      CREATE TABLE IF NOT EXISTS search_routes (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(255) UNIQUE NOT NULL,
+        start_location VARCHAR(255) NOT NULL,
+        destination VARCHAR(255) NOT NULL
+      );
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS route_options (
+        id SERIAL PRIMARY KEY,                -- unique option ID
+        user_id VARCHAR(255) NOT NULL,        -- user who owns this option
+        search_id INTEGER NOT NULL,           -- link to route_search.id
+        type VARCHAR(50),                     -- "fastest" or "cheapest"
+        transport_mode VARCHAR(50),           -- jeep, bus, walk, etc.
+        duration_minutes INTEGER,             -- travel time in minutes
+        estimated_cost NUMERIC(10, 2),        -- fare or cost
+        FOREIGN KEY (search_id) REFERENCES search_routes(id)
+      );
+    `;
+
+    await sql`
       CREATE TABLE IF NOT EXISTS saved_routes (
         id SERIAL PRIMARY KEY,
         user_id VARCHAR(255) NOT NULL,
