@@ -1,6 +1,5 @@
 import { Link, useRouter } from 'expo-router';
-import React from 'react';
-
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,19 +8,41 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
+
 import authStyles from './auth-styles';
 import Colors from '../Constant_Design';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import TermsModal from '../../components/TermsModal'; // ✅ Keep this one
+import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../../components/TermsOfServiceModal';
 
 const Welcome = () => {
   const router = useRouter();
+  const [agreed, setAgreed] = useState(null);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+
+  useEffect(() => {
+    const checkAgreement = async () => {
+      const value = await AsyncStorage.getItem('userAgreed');
+      setAgreed(value === 'true');
+    };
+    checkAgreement();
+  }, []);
+
+  if (agreed === null) return null;
+
+  if (!agreed) {
+    return <TermsModal onAgreed={() => setAgreed(true)} />;
+  }
+
   return (
     <SafeAreaView style={authStyles.safeArea}>
       <View style={authStyles.container}>
         {/* Top: Logo */}
         <View style={authStyles.logoSection}>
           <Image
-            source={require('../../assets/images/app_logo.png')} // your logo path
+            source={require('../../assets/images/app_logo.png')}
             style={authStyles.logo}
             resizeMode="contain"
           />
@@ -31,20 +52,27 @@ const Welcome = () => {
         <View style={authStyles.middleSection}>
           <Text style={styles.title}>Let’s Get Started!</Text>
 
-          <TouchableOpacity style={styles.signUpBtn} onPress={() => router.push('/(auth)/sign-up')}>
+          <TouchableOpacity
+            style={styles.signUpBtn}
+            onPress={() => router.push('/(auth)/sign-up')}
+          >
             <Text style={styles.signUpText}>Sign up</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.loginBtn} onPress={() => router.push('/(auth)/log-in')}>
+          <TouchableOpacity
+            style={styles.loginBtn}
+            onPress={() => router.push('/(auth)/log-in')}
+          >
             <Text style={styles.loginText}>Log in</Text>
           </TouchableOpacity>
-
         </View>
 
         {/* Bottom: Footer */}
         <View style={authStyles.footer}>
-          <Text style={authStyles.footerText}>Privacy Policy</Text>
-          <Text style={authStyles.footerText}>Terms of Service</Text>
+          <Text style={authStyles.footerText} onPress={() => setShowPrivacy(true)} >Privacy Policy</Text>
+          <Text style={authStyles.footerText} onPress={() => setShowTerms(true)}>Terms of Service</Text>
+          <PrivacyPolicyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
+          <TermsOfServiceModal visible={showTerms} onClose={() => setShowTerms(false)} />
         </View>
       </View>
     </SafeAreaView>

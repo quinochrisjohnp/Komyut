@@ -5,11 +5,15 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Image,
   SafeAreaView,
 } from 'react-native';
 import { useSignIn, useAuth } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
-import Colors from '../Constant_Design'; // use your own colors
+import authStyles from './auth-styles';
+import Colors from '../Constant_Design';
+import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../../components/TermsOfServiceModal';
 
 export default function ResetPasswordScreen() {
   const [email, setEmail] = useState('');
@@ -17,6 +21,8 @@ export default function ResetPasswordScreen() {
   const [newPassword, setNewPassword] = useState('');
   const [successfulCreation, setSuccessfulCreation] = useState(false);
   const [error, setError] = useState('');
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const { signIn, setActive, isLoaded } = useSignIn();
   const { isSignedIn } = useAuth();
@@ -59,83 +65,128 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Reset Password</Text>
 
+    <SafeAreaView style={authStyles.safeArea}>
+      <TouchableOpacity onPress={() => router.back()} style={authStyles.backBtn}>
+        <Image
+          source={require('../../assets/images/back_icon.png')}
+          style={authStyles.backIcon}
+        />
+      </TouchableOpacity>
+      <View style={authStyles.container}>
+        {/* Top: Logo */}
+        <View style={authStyles.logoSection}>
+          <Image
+            source={require('../../assets/images/app_logo.png')}
+            style={authStyles.logo}
+            resizeMode="contain"
+          />
+        </View>
+
+        {/* Middle: Inputs & Buttons */}
+        <View style={styles.middleSection}>
+          <Text style={styles.title}>Reset Password</Text>
+          <Text style={styles.forgotText}>Forgot your password? No worries!</Text>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
       {!successfulCreation ? (
         <>
           <TextInput
-            style={styles.input}
+            style={authStyles.input}
             placeholder="Enter your email"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
           />
-          <TouchableOpacity style={styles.button} onPress={sendResetCode}>
-            <Text style={styles.buttonText}>Send Code</Text>
+          <TouchableOpacity style={styles.loginBtn} onPress={sendResetCode}>
+            <Text style={styles.loginText}>Send Code</Text>
           </TouchableOpacity>
         </>
       ) : (
         <>
           <TextInput
-            style={styles.input}
+            style={authStyles.input}
             placeholder="Enter verification code"
             value={code}
             onChangeText={setCode}
           />
           <TextInput
-            style={styles.input}
+            style={authStyles.input}
             placeholder="Enter new password"
             secureTextEntry
             value={newPassword}
             onChangeText={setNewPassword}
           />
-          <TouchableOpacity style={styles.button} onPress={resetPassword}>
-            <Text style={styles.buttonText}>Reset Password</Text>
+          <TouchableOpacity style={styles.loginBtn} onPress={resetPassword}>
+            <Text style={styles.loginText}>Reset Password</Text>
           </TouchableOpacity>
         </>
       )}
-
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      
+      </View>
+        <View style={authStyles.footer}>
+          <Text style={authStyles.footerText} onPress={() => setShowPrivacy(true)} >Privacy Policy</Text>
+          <Text style={authStyles.footerText} onPress={() => setShowTerms(true)}>Terms of Service</Text>
+          <PrivacyPolicyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
+          <TermsOfServiceModal visible={showTerms} onClose={() => setShowTerms(false)} />
+        </View>
+      </View>
+      
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
-  button: {
-    backgroundColor: Colors.primary,
-    padding: 14,
-    borderRadius: 30,
+  middleSection: {
+    marginTop: -100,
     alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
   },
   error: {
     color: 'red',
     marginTop: 10,
     textAlign: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginBottom: 20,
+    marginTop: 20,
+    color: '#333',
+  },
+  loginBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 30,
+    backgroundColor: Colors.primary,
+    marginBottom: 25,
+    marginTop: 50,
+    alignItems: 'center',
+  },
+  loginText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  signInWithText: {
+    fontSize: 14,
+    marginBottom: 10,
+    color: '#666',
+  },
+  backBtn: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    padding: 10,
+    zIndex: 1,
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+  },
+  forgotText: {
+    fontSize: 14,
+    marginBottom: 20,
+    color: '#666',
+    alignItems: 'center',
   },
 });

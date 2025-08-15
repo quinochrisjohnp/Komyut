@@ -1,7 +1,7 @@
 import { useSignIn } from '@clerk/clerk-expo';
 import { Link, useRouter } from 'expo-router';
 import React from 'react';
-
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,8 @@ import Colors from '../Constant_Design';
 import authStyles from './auth-styles';
 import { useOAuth } from '@clerk/clerk-expo';
 import * as WebBrowser from 'expo-web-browser';
+import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../../components/TermsOfServiceModal';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -22,6 +24,8 @@ WebBrowser.maybeCompleteAuthSession();
 export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn()
   const router = useRouter()
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const [identifier, setIdentifier] = React.useState('')
   const [password, setPassword] = React.useState('')
@@ -126,7 +130,7 @@ export default function Page() {
             onChangeText={(password) => setPassword(password)}
           />
           
-          <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/(auth)/forget-pass')}>
+          <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/(auth)/reset-pass')}>
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -152,8 +156,10 @@ export default function Page() {
 
         {/* Footer */}
         <View style={authStyles.footer}>
-          <Text style={authStyles.footerText}>Privacy Policy</Text>
-          <Text style={authStyles.footerText}>Terms of Service</Text>
+          <Text style={authStyles.footerText} onPress={() => setShowPrivacy(true)} >Privacy Policy</Text>
+          <Text style={authStyles.footerText} onPress={() => setShowTerms(true)}>Terms of Service</Text>
+          <PrivacyPolicyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
+          <TermsOfServiceModal visible={showTerms} onClose={() => setShowTerms(false)} />
         </View>
       </View>
     </SafeAreaView>

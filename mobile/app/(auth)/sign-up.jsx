@@ -15,6 +15,8 @@ import Colors from '../Constant_Design';
 import authStyles from './auth-styles';
 import { useOAuth } from '@clerk/clerk-expo';
 import * as WebBrowser from 'expo-web-browser';
+import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../../components/TermsOfServiceModal';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -22,6 +24,8 @@ WebBrowser.maybeCompleteAuthSession();
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp()
   const router = useRouter()
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const [emailAddress, setEmailAddress] = useState('');
   const [username, setUsername] = useState('');
@@ -180,8 +184,10 @@ export default function SignUpScreen() {
 
             {/* Footer */}
             <View style={authStyles.footer}>
-              <Text style={authStyles.footerText}>Privacy Policy</Text>
-              <Text style={authStyles.footerText}>Terms of Service</Text>
+              <Text style={authStyles.footerText} onPress={() => setShowPrivacy(true)} >Privacy Policy</Text>
+              <Text style={authStyles.footerText} onPress={() => setShowTerms(true)}>Terms of Service</Text>
+              <PrivacyPolicyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
+              <TermsOfServiceModal visible={showTerms} onClose={() => setShowTerms(false)} />
             </View>
           </View>
         </SafeAreaView>
@@ -279,8 +285,10 @@ export default function SignUpScreen() {
 
         {/* Footer */}
         <View style={authStyles.footer}>
-          <Text style={authStyles.footerText}>Privacy Policy</Text>
-          <Text style={authStyles.footerText}>Terms of Service</Text>
+          <Text style={authStyles.footerText} onPress={() => setShowPrivacy(true)} >Privacy Policy</Text>
+          <Text style={authStyles.footerText} onPress={() => setShowTerms(true)}>Terms of Service</Text>
+          <PrivacyPolicyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
+          <TermsOfServiceModal visible={showTerms} onClose={() => setShowTerms(false)} />
         </View>
       </View>
     </SafeAreaView>
