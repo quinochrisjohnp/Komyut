@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000aa',
     justifyContent: 'center',
     alignItems: 'center',
+    margin: 0,
   },
   card: {
     width: '90%',

@@ -10,16 +10,21 @@ import {
 } from "react-native";
 import { WebView } from "react-native-webview";
 import debounce from "lodash.debounce";
+import { useLocalSearchParams } from "expo-router";
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI';
 const MAP_ID = 'c189603921f4de17a7419bb7';
 
 export default function Destination() {
+  const params = useLocalSearchParams();
   const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
+  const [end, setEnd] = useState(params.destinationName || ""); // short title only
+  const [endAddress] = useState(params.destinationAddress || ""); // keep full for routing
+
   const [startPredictions, setStartPredictions] = useState([]);
   const [endPredictions, setEndPredictions] = useState([]);
   const webViewRef = useRef(null);
+  
 
   // 🔹 Debounced search for both start and end
   const debouncedSearch = useRef(
@@ -65,9 +70,15 @@ export default function Destination() {
 
   // 🔹 Select suggestion
   const selectStart = (place) => {
-    setStart(place.description);
+    if (!place.description.includes("Sampaloc")) {
+      alert("Start location must be inside Sampaloc, Manila.");
+      return;
+    }
+    setStart(place.structured_formatting?.main_text || place.description);
     setStartPredictions([]);
   };
+
+
   const selectEnd = (place) => {
     setEnd(place.description);
     setEndPredictions([]);
@@ -82,7 +93,7 @@ export default function Destination() {
         `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(
           start
         )}&destination=${encodeURIComponent(
-          end
+          endAddress
         )}&key=${GOOGLE_MAPS_API_KEY}`
       );
       const data = await res.json();
@@ -106,7 +117,7 @@ export default function Destination() {
     <html>
     <head>
       <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
-      <style>html, body, #map { height: 100%; margin: 0; padding: 0; }</style>
+      <style>html, body, #map { height: 105%; margin: 0; padding: 0; }</style>
       <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&map_ids=${MAP_ID}"></script>
     </head>
     <body>
@@ -115,10 +126,14 @@ export default function Destination() {
         let map;
         let polyline;
         function initMap() {
+          const center = { lat: 14.607835931257247, lng: 120.99465234818744 };
           map = new google.maps.Map(document.getElementById("map"), {
-            center: { lat: 14.5995, lng: 120.9842 },
-            zoom: 13,
+            center: center,
+            zoom: 14.5,
             mapId: "${MAP_ID}",
+            disableDefaultUI: true,
+            clickableIcons: false,
+            gestureHandling: 'greedy',
           });
         }
 
@@ -162,10 +177,15 @@ export default function Destination() {
             strokeWeight: 5,
           });
           polyline.setMap(map);
-          map.fitBounds(new google.maps.LatLngBounds(
-            decodedPath[0], decodedPath[decodedPath.length - 1]
-          ));
+
+          // 🔹 ayusin ang bounds gamit lahat ng points
+          const bounds = new google.maps.LatLngBounds();
+          decodedPath.forEach(p => bounds.extend(p));
+
+          // 🔹 apply padding para hindi sobrang lapit o layo
+          map.fitBounds(bounds, { top: 80, right: 80, bottom: 80, left: 80 });
         };
+
 
         initMap();
       </script>
@@ -198,29 +218,40 @@ export default function Destination() {
             keyExtractor={(item) => item.place_id}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => selectStart(item)}>
-                <Text style={styles.suggestion}>{item.description}</Text>
+                <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+                  {item.structured_formatting?.main_text}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#555', opacity: 0.6 }}>
+                  {item.structured_formatting?.secondary_text}
+                </Text>
               </TouchableOpacity>
             )}
           />
+
         )}
 
         {/* End */}
         <TextInput
-          style={styles.input}
-          placeholder="Destination"
+          style={[styles.input, { backgroundColor: "#eaeaea" }]}
           value={end}
-          onChangeText={handleEndChange}
+          editable={false}
         />
         {endPredictions.length > 0 && (
           <FlatList
-            data={endPredictions}
+            data={startPredictions}
             keyExtractor={(item) => item.place_id}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => selectEnd(item)}>
-                <Text style={styles.suggestion}>{item.description}</Text>
+              <TouchableOpacity onPress={() => selectStart(item)}>
+                <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+                  {item.structured_formatting?.main_text}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#555', opacity: 0.6 }}>
+                  {item.structured_formatting?.secondary_text}
+                </Text>
               </TouchableOpacity>
             )}
           />
+
         )}
 
         {/* Button */}
