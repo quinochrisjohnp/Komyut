@@ -6,13 +6,12 @@ import Colors from '../Constant_Design'; // Assuming you use this for color cons
 import debounce from 'lodash.debounce'
 import Animated, { SlideInUp } from 'react-native-reanimated';    
 import { router } from 'expo-router';
-import { useLocationStore } from '../../store';
+
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI';
 const MAP_ID = 'c189603921f4de17a7419bb7';
 
 export default function Index() {
-  const { setUserLocation, setDestinationLocation } = useLocationStore();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState([]);
   const webviewRef = useRef(null);
