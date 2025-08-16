@@ -12,7 +12,7 @@ const GOOGLE_MAPS_API_KEY = 'AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI';
 const MAP_ID = 'c189603921f4de17a7419bb7';
 
 export default function Index() {
-  const [ setUserLocation, setDestinationLocation ] = useLocationStore();
+  const { setUserLocation, setDestinationLocation } = useLocationStore();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState([]);
   const webviewRef = useRef(null);
@@ -283,7 +283,7 @@ export default function Index() {
             <Text style={{ fontSize: 12, color: '#333' }}>{selectedPlaceData.address}</Text>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 16 }}>
-              <IconButton icon={require('../../assets/images/directions-icon.png')} label="Direction" onPress={() => router.push('/Destination')} />
+              <IconButton icon={require('../../assets/images/directions-icon.png')} label="Direction" onPress={() => router.push('/destination')} />
 
               <IconButton icon={require('../../assets/images/saved-route-selected-logo.png')} label="Save" onPress={() => {}} />
 
