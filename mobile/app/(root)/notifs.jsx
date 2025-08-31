@@ -1,34 +1,31 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import BottomNav from '../../components/BottomNav';
-import { SignedOut } from '@clerk/clerk-expo';
-import { SignOutButton } from '@/components/SignOutButton';
-export default function Index() {
-  return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.placeholder}>NOTIFS</Text>
-        <SignOutButton />
+// app/loading-demo.jsx
+import React, { useEffect, useState } from "react";
+import { View, Text, ActivityIndicator } from "react-native";
+
+export default function LoadingDemo() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // simulate loading for 3 seconds
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+        <Text style={{ marginTop: 10 }}>Loading Demo...</Text>
       </View>
-      <BottomNav />
+    );
+  }
+
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text style={{ fontSize: 20 }}>✅ Content Loaded!</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'space-between',
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholder: {
-    fontSize: 18,
-    color: '#666',
-  },
-});

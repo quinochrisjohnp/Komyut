@@ -17,6 +17,7 @@ import { useOAuth } from '@clerk/clerk-expo';
 import * as WebBrowser from 'expo-web-browser';
 import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 import TermsOfServiceModal from '../../components/TermsOfServiceModal';
+import { useLoading } from "../../components/LoadingContext";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -39,6 +40,14 @@ export default function SignUpScreen() {
   const [error, setError] = useState('');
   const [verifyError, setVerifyError] = useState("");
 
+  const { setLoading } = useLoading();
+
+  const handleClick = () => {
+    setLoading(true);       // show loader
+    setTimeout(() => {
+      setLoading(false);    // hide loader
+    }, 3000);
+  };
 
   // Handle submission of sign-up form
   const onSignUpPress = async () => {

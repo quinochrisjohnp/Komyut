@@ -17,6 +17,7 @@ import { useOAuth } from '@clerk/clerk-expo';
 import * as WebBrowser from 'expo-web-browser';
 import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
 import TermsOfServiceModal from '../../components/TermsOfServiceModal';
+import { useLoading } from "../../components/LoadingContext";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -30,6 +31,14 @@ export default function Page() {
   const [identifier, setIdentifier] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState('');
+  const { setLoading } = useLoading();
+
+  const handleClick = () => {
+    setLoading(true);       // show loader
+    setTimeout(() => {
+      setLoading(false);    // hide loader
+    }, 3000);
+  };
 
   // Handle the submission of the sign-in form
   const onSignInPress = async () => {
