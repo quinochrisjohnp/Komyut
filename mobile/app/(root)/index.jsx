@@ -88,10 +88,11 @@ export default function Index() {
 
       setSelectedPlaceData({
         name: data.result.name,
-        description,
+        description: data.result.name, // only title
         address,
         location: { lat, lng },
       });
+
 
       // ✅ Clear search
       setQuery('');
@@ -218,13 +219,19 @@ export default function Index() {
                 keyExtractor={(item) => item.place_id}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    onPress={() => handleSelect(item.place_id, item.description)}
+                    onPress={() => handleSelect(item.place_id, item.structured_formatting.main_text)}
                     style={styles.dropdownItem}
                   >
-                    <Text>{item.description}</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+                      {item.structured_formatting?.main_text}
+                    </Text>
+                    <Text style={{ fontSize: 12, color: '#555', opacity: 0.6 }}>
+                      {item.structured_formatting?.secondary_text}
+                    </Text>
                   </TouchableOpacity>
                 )}
               />
+
             </View>
           )}
         </View>
@@ -282,7 +289,14 @@ export default function Index() {
             <Text style={{ fontSize: 12, color: '#333' }}>{selectedPlaceData.address}</Text>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 16 }}>
-              <IconButton icon={require('../../assets/images/directions-icon.png')} label="Direction" onPress={() => router.push('/destination')} />
+              <IconButton icon={require('../../assets/images/directions-icon.png')} label="Direction" onPress={() => router.push({
+                  pathname: '/destination',
+                  params: { 
+                    destinationName: selectedPlaceData.name,        // title
+                    destinationAddress: selectedPlaceData.address   // full address
+                  }
+                })}
+              /> 
 
               <IconButton icon={require('../../assets/images/saved-route-selected-logo.png')} label="Save" onPress={() => {}} />
 
