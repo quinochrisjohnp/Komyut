@@ -18,15 +18,12 @@ const GOOGLE_MAPS_API_KEY = 'AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI';
 const MAP_ID = 'c189603921f4de17a7419bb7';
 
 export default function Destination() {
-<<<<<<< HEAD
-  // 🚦 Inputs + predictions
-=======
   const params = useLocalSearchParams();
->>>>>>> 6752f8438caef01b7bd768fcb6a6d04cd882ec4d
+
+  // 🚦 Inputs + predictions
   const [start, setStart] = useState("");
   const [end, setEnd] = useState(params.destinationName || ""); // short title only
   const [endAddress] = useState(params.destinationAddress || ""); // keep full for routing
-
   const [startPredictions, setStartPredictions] = useState([]);
   const [endPredictions, setEndPredictions] = useState([]);
 
@@ -35,12 +32,11 @@ export default function Destination() {
   const [endPlace, setEndPlace] = useState(null);
 
   // 🚗 Route choices (dynamic cards)
-  const [quickRoute, setQuickRoute] = useState(null);       // { duration, distance, fare, polyline }
+  const [quickRoute, setQuickRoute] = useState(null); // { duration, distance, fare, polyline }
   const [affordableRoute, setAffordableRoute] = useState(null);
   const [loadingRoutes, setLoadingRoutes] = useState(false);
 
   const webViewRef = useRef(null);
-  
 
   // ============= AUTOCOMPLETE =============
   const fetchPredictions = useRef(
@@ -66,29 +62,19 @@ export default function Destination() {
 
   // When user taps a suggestion, store description + place_id
   const selectStart = (place) => {
-<<<<<<< HEAD
     setStart(place.description);
     setStartPlace({ description: place.description, place_id: place.place_id });
-=======
-    if (!place.description.includes("Sampaloc")) {
-      alert("Start location must be inside Sampaloc, Manila.");
-      return;
-    }
-    setStart(place.structured_formatting?.main_text || place.description);
->>>>>>> 6752f8438caef01b7bd768fcb6a6d04cd882ec4d
     setStartPredictions([]);
+
     // If end is already chosen, compute routes
     if (endPlace) computeRoutes(place.place_id, endPlace.place_id);
   };
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 6752f8438caef01b7bd768fcb6a6d04cd882ec4d
   const selectEnd = (place) => {
     setEnd(place.description);
     setEndPlace({ description: place.description, place_id: place.place_id });
     setEndPredictions([]);
+
     // If start is already chosen, compute routes
     if (startPlace) computeRoutes(startPlace.place_id, place.place_id);
   };
@@ -97,38 +83,25 @@ export default function Destination() {
   /**
    * We call Directions API with place_id-based origin/destination
    * and ask for alternatives. Then:
-   *  - Quick  = shortest duration (ETA)
-   *  - Affordable = lowest fare (proxy: shortest distance → simple fare model)
+   * - Quick = shortest duration (ETA)
+   * - Affordable = lowest fare (proxy: shortest distance → simple fare model)
    */
   const computeRoutes = async (startPid, endPid) => {
     setLoadingRoutes(true);
     setQuickRoute(null);
     setAffordableRoute(null);
-
     try {
-<<<<<<< HEAD
       // Using place_id improves accuracy vs plain text
       const origin = `place_id:${startPid}`;
       const destination = `place_id:${endPid}`;
-
       const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(
         origin
       )}&destination=${encodeURIComponent(
         destination
       )}&alternatives=true&region=ph&key=${GOOGLE_MAPS_API_KEY}`;
-
       const res = await fetch(url);
-=======
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(
-          start
-        )}&destination=${encodeURIComponent(
-          endAddress
-        )}&key=${GOOGLE_MAPS_API_KEY}`
-      );
->>>>>>> 6752f8438caef01b7bd768fcb6a6d04cd882ec4d
-      const data = await res.json();
 
+      const data = await res.json();
       if (!data.routes || data.routes.length === 0) {
         setLoadingRoutes(false);
         return;
@@ -186,7 +159,6 @@ export default function Destination() {
   const htmlContent = `
     <!DOCTYPE html>
     <html>
-<<<<<<< HEAD
       <head>
         <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
         <style>
@@ -198,30 +170,6 @@ export default function Destination() {
         <div id="map"></div>
         <script>
           let map, polyline;
-=======
-    <head>
-      <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
-      <style>html, body, #map { height: 105%; margin: 0; padding: 0; }</style>
-      <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&map_ids=${MAP_ID}"></script>
-    </head>
-    <body>
-      <div id="map"></div>
-      <script>
-        let map;
-        let polyline;
-        function initMap() {
-          const center = { lat: 14.607835931257247, lng: 120.99465234818744 };
-          map = new google.maps.Map(document.getElementById("map"), {
-            center: center,
-            zoom: 14.5,
-            mapId: "${MAP_ID}",
-            disableDefaultUI: true,
-            clickableIcons: false,
-            gestureHandling: 'greedy',
-          });
-        }
->>>>>>> 6752f8438caef01b7bd768fcb6a6d04cd882ec4d
-
           function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
               center: { lat: 14.5995, lng: 120.9842 },
@@ -230,7 +178,6 @@ export default function Destination() {
             });
           }
 
-<<<<<<< HEAD
           // Draw a polyline from encoded points
           window.drawRoute = function(polylinePoints) {
             try {
@@ -257,32 +204,6 @@ export default function Destination() {
           initMap();
         </script>
       </body>
-=======
-        window.drawRoute = function(polylinePoints) {
-          if (polyline) polyline.setMap(null);
-          const decodedPath = decodePolyline(polylinePoints);
-          polyline = new google.maps.Polyline({
-            path: decodedPath,
-            geodesic: true,
-            strokeColor: "#4285F4",
-            strokeOpacity: 1.0,
-            strokeWeight: 5,
-          });
-          polyline.setMap(map);
-
-          // 🔹 ayusin ang bounds gamit lahat ng points
-          const bounds = new google.maps.LatLngBounds();
-          decodedPath.forEach(p => bounds.extend(p));
-
-          // 🔹 apply padding para hindi sobrang lapit o layo
-          map.fitBounds(bounds, { top: 80, right: 80, bottom: 80, left: 80 });
-        };
-
-
-        initMap();
-      </script>
-    </body>
->>>>>>> 6752f8438caef01b7bd768fcb6a6d04cd882ec4d
     </html>
   `;
 
@@ -308,8 +229,8 @@ export default function Destination() {
             value={start}
             onChangeText={(text) => {
               setStart(text);
-              setStartPlace(null);     // reset
-              setQuickRoute(null);     // clear old routes on change
+              setStartPlace(null); // reset
+              setQuickRoute(null); // clear old routes on change
               setAffordableRoute(null);
               fetchPredictions(text, "start");
             }}
@@ -339,11 +260,9 @@ export default function Destination() {
               </TouchableOpacity>
             )}
           />
-
         )}
 
         {/* End */}
-<<<<<<< HEAD
         <View style={styles.inputBox}>
           <Ionicons name="flag-outline" size={20} color="#fff" />
           <TextInput
@@ -353,7 +272,7 @@ export default function Destination() {
             value={end}
             onChangeText={(text) => {
               setEnd(text);
-              setEndPlace(null);       // reset
+              setEndPlace(null); // reset
               setQuickRoute(null);
               setAffordableRoute(null);
               fetchPredictions(text, "end");
@@ -387,20 +306,10 @@ export default function Destination() {
           <FlatList
             style={styles.suggestionList}
             data={endPredictions}
-=======
-        <TextInput
-          style={[styles.input, { backgroundColor: "#eaeaea" }]}
-          value={end}
-          editable={false}
-        />
-        {endPredictions.length > 0 && (
-          <FlatList
-            data={startPredictions}
->>>>>>> 6752f8438caef01b7bd768fcb6a6d04cd882ec4d
             keyExtractor={(item) => item.place_id}
             keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => selectStart(item)}>
+              <TouchableOpacity onPress={() => selectEnd(item)}>
                 <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
                   {item.structured_formatting?.main_text}
                 </Text>
@@ -410,7 +319,6 @@ export default function Destination() {
               </TouchableOpacity>
             )}
           />
-
         )}
       </View>
 
