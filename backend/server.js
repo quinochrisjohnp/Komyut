@@ -4,6 +4,8 @@ import { sql } from "./config/db.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 import saved_routesPath from './path/saved_routesPath.js'
 
+import job from "./config/cron.js";
+
 dotenv.config();
 
 const app = express();

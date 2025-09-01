@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 
-const API_URL = "http://10.0.2.2:5001/api";
+const API_URL = "https://komyut-we5n.onrender.com/api";
 
 export const useSavedRoutes = (user_id) => {
   const [savedRoutes, setSavedRoutes] = useState([]);
