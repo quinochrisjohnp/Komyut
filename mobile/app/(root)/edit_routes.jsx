@@ -4,7 +4,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSavedRoutes } from "../../hooks/useSavedRoutes";
 
 export default function EditRouteScreen() {
+  // ✅ only declare once
   const { id, type: initialType, start_location: initialStart, destination: initialDest, description: initialDesc } = useLocalSearchParams();
+  
   const router = useRouter();
   const user_id = 1; // replace with real auth
   const { updateSavedRoute } = useSavedRoutes(user_id);

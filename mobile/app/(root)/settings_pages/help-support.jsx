@@ -1,10 +1,16 @@
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import Colors from '../../Constant_Design';
+import PrivacyPolicyModal from '../../../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../../../components/TermsOfServiceModal';
+
 
 export default function HelpSupport() {
   const router = useRouter();
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -30,17 +36,16 @@ export default function HelpSupport() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Need more help?</Text>
         <TouchableOpacity style={styles.contactBtn}>
-          <Text style={styles.contactText}>Contact Support</Text>
+          <Text style={styles.contactText} onPress={() => router.push("/settings_pages/contact-support")}>Contact Support</Text>
         </TouchableOpacity>
       </View>
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Privacy Policy</Text>
-        <Text style={styles.footerDivider}>|</Text>
-        <Text style={styles.footerText}>Terms of Service</Text>
-        <Text style={styles.footerDivider}>|</Text>
-        <Text style={styles.footerText}>v1.0.0</Text>
+        <Text style={styles.footerText} onPress={() => setShowPrivacy(true)} >Privacy Policy</Text>
+        <Text style={styles.footerText} onPress={() => setShowTerms(true)}>Terms of Service</Text>
+        <PrivacyPolicyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
+        <TermsOfServiceModal visible={showTerms} onClose={() => setShowTerms(false)} />
       </View>
     </SafeAreaView>
   );
@@ -84,6 +89,7 @@ const styles = StyleSheet.create({
   faqBtn: { 
     borderWidth: 1, 
     borderColor: Colors.primary, 
+    backgroundColor: Colors.lighter,
     borderRadius: 20, 
     padding: 12, 
     marginTop: 10 
@@ -91,7 +97,8 @@ const styles = StyleSheet.create({
   faqText: { 
     color: Colors.primary, 
     textAlign: "center", 
-    fontWeight: "500" 
+    fontWeight: "500",
+    color: 'black'
 },
   contactBtn: { 
     backgroundColor: Colors.primary, 
@@ -104,18 +111,21 @@ const styles = StyleSheet.create({
     textAlign: "center", 
     fontWeight: "600" 
 },
-  footer: { 
-    flexDirection: "row", 
-    justifyContent: "center", 
-    marginTop: "auto", 
-    marginBottom: 20 
-},
-  footerText: { 
-    color: "#666", 
-    fontSize: 12 
-},
   footerDivider: { 
     marginHorizontal: 8, 
     color: "#999" 
-}
+},
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 20,
+    paddingHorizontal: 25,
+    marginBottom: 9,
+    marginTop: 'auto'
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#888',
+    textDecorationLine: 'underline',
+  },
 });

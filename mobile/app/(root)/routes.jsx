@@ -101,14 +101,19 @@ export default function SavedRoutesScreen() {
                 <TouchableOpacity
                   style={[styles.updateButton, { marginTop: 10 }]}
                   onPress={() =>
-                    updateSavedRoute(item.id, {
-                      type: "Updated Route", // 👈 replace with your UI/input values
-                      start_location: item.start_location,
-                      destination: item.destination,
+                    router.push({
+                      pathname: "/(root)/edit_routes", // 👈 matches your file name
+                      params: {
+                        id: item.id,
+                        type: item.type,
+                        start_location: item.start_location,
+                        destination: item.destination,
+                        description: item.description,
+                      },
                     })
                   }
                 >
-                  <Text style={styles.addButtonText}>Update</Text>
+                  <Text style={styles.updateButtonText}>Update</Text>
                 </TouchableOpacity>
 
                 {/* Delete Button */}

@@ -72,8 +72,8 @@ export default function SettingsScreen() {
           style={styles.logoutButton}
           onPress={() => setShowLogoutModal(true)}
         >
-          <MaterialIcons name="logout" size={22} color="#DC2626" />
-          <Text style={styles.logoutText}>Log Out</Text>
+          <MaterialIcons name="logout" size={25} color = {Colors.primary} />
+          <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>
 
@@ -173,20 +173,21 @@ const styles = StyleSheet.create({
   // Logout
   logoutWrapper: { 
     marginTop: "auto", 
-    marginBottom: 40 
+    marginBottom: 40 ,
+    alignItems: "center",
   },
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "#FEF2F2",
     padding: 16,
     borderRadius: 16,
   },
   logoutText: { 
-    fontSize: 16, 
+    fontSize: 23, 
     fontWeight: "500", 
-    color: "#DC2626" 
+    color: Colors.primary,
+    fontWeight: 'bold'
   },
 
   // Back button
