@@ -1,0 +1,88 @@
+<div class="content-body">
+    <h1>Activity Logs</h1>
+    <div class="activity-container">
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="dateRange">Date Range</label>
+                <select id="dateRange" class="filter-select">
+                    <option value="30">Last 30 days</option>
+                    <option value="7">Last 7 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="all">All time</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="actionType">Action Type</label>
+                <select id="actionType" class="filter-select">
+                    <option value="all">All Actions</option>
+                    <option value="login">Login</option>
+                    <option value="user">User Action</option>
+                    <option value="route">Route Change</option>
+                </select>
+            </div>
+            <div class="filter-group" style="padding-top: 30px;">
+                <form>
+                <div class="search-route">
+                    <input class="search-input-route" type="search" placeholder=" Search">
+                    <button type="submit" class="search-submit-route"><span
+                            class="search-icon-route material-symbols-outlined">search</span></button>
+                </div>
+            </form>
+            </div>
+                
+        </div>
+        <div class="activity-table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Admin Name</th>
+                        <th>Action Type</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTable">
+                    <tr>
+                        <td>April 21, 2025</td>
+                        <td>John Smith</td>
+                        <td>Login</td>
+                        <td>Logged in</td>
+                    </tr>
+                    <tr>
+                        <td>February 12, 2025</td>
+                        <td>Jane Doe</td>
+                        <td>User Action</td>
+                        <td>Reset password for…</td>
+                    </tr>
+                    <tr>
+                        <td>March 4, 2025</td>
+                        <td>Jon Smith</td>
+                        <td>Route Change</td>
+                        <td>Update route on…</td>
+                    </tr>
+                    <tr>
+                        <td>January 28, 2025</td>
+                        <td>Emily Johnson</td>
+                        <td>Login</td>
+                        <td>Logged in</td>
+                    </tr>
+                    <tr>
+                        <td>May 12, 2025</td>
+                        <td>Michael Brown</td>
+                        <td>Route Change</td>
+                        <td>Updated vehicle info…</td>
+                    </tr>
+                    <tr>
+                        <td>June 14, 2025</td>
+                        <td>Jane Doe</td>
+                        <td>User Action</td>
+                        <td>Banned user for…</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

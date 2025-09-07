@@ -1,0 +1,93 @@
+<div class="content-body">
+    <h1>Notifications Manager</h1>
+    <div class="notif-bg">
+        <h2>Compose Alert</h2>
+        <form>
+            <div class="container-grid">
+                <div class="column-grid">
+                    <label for="alert-title">Title</label><br>
+                    <input type="text" id="alert-title" name="alert-title" required placeholder="Enter Title">
+                </div>
+                <div class="column-grid">
+                    <label for="alert-category">Category</label><br>
+                    <select id="alert-category" name="alert-category" required>
+                        <option value="">Please select an option</option>
+                        <option value="cat1">cat1</option>
+                        <option value="cat2">cat2</option>
+                        <option value="cat3">cat3</option>
+                        <option value="cat4">cat4</option>
+                    </select>
+                </div>
+                <div class="column-grid">
+                    <label for="alert-sched">Schedule Send (optional)</label><br>
+                    <input type="datetime-local" id="alert-sched" name="alert-sched">
+                </div>
+            </div>
+            <textarea id="msg-box" name="msg-box" placeholder="Message" rows="5" cols="50" required></textarea>
+            <br>
+            <div class="center-submit">
+                <input type="submit" id="submit-btn" name="submit-btn" value="Send">
+            </div>
+
+        </form>
+    </div>
+    <br>
+    <div class="notif-bg">
+        <h2>Notifications History</h2>
+        <div class="table-container1">
+            <table class="scrollable-table5">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Sent To</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Important Update</td>
+                        <td>All Users</td>
+                        <td>July 11, 2025</td>
+                    </tr>
+                    <tr>
+                        <td>App Update</td>
+                        <td>All Users</td>
+                        <td>July 09, 2025</td>
+                    </tr>
+                    <tr>
+                        <td>Important Update</td>
+                        <td>All Users</td>
+                        <td>July 01, 2025</td>
+                    </tr>
+                    <tr>
+                        <td>Important Update</td>
+                        <td>All Users</td>
+                        <td>June 29, 2025</td>
+                    </tr>
+                    <!-- Add more rows if needed -->
+                    <tr>
+                        <td>Important Update</td>
+                        <td>All Users</td>
+                        <td>June 25, 2025</td>
+                    </tr>
+                    <tr>
+                        <td>Important Update</td>
+                        <td>All Users</td>
+                        <td>June 20, 2025</td>
+                    </tr>
+                    <tr>
+                        <td>Important Update</td>
+                        <td>All Users</td>
+                        <td>June 15, 2025</td>
+                    </tr>
+                    <tr>
+                        <td>Important Update</td>
+                        <td>All Users</td>
+                        <td>June 01, 2025</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>

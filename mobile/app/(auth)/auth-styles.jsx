@@ -22,7 +22,7 @@ const authStyles = StyleSheet.create({
   },
   logoSection: {
     alignItems: 'center',
-    marginTop: 160,
+    marginTop: 150,
   },
   logo: {
     width: 200,
@@ -42,7 +42,7 @@ const authStyles = StyleSheet.create({
     color: '#888',
     textDecorationLine: 'underline',
   },
-  iconRow: {
+  signRow: {
     flexDirection: 'row',
     gap: 20,
     marginBottom: 20,
@@ -78,6 +78,34 @@ const authStyles = StyleSheet.create({
     borderRadius: 30,
     fontSize: 14,
     marginBottom: 15,
+  },
+  inputWrapper: {
+    position: 'relative',
+    width: '100%',
+  },
+  singleClearBtn: {
+    position: 'absolute',
+    right: 10,
+    top: '50%',
+    transform: [{ translateY: -23 }],
+    padding: 5,
+  },
+  iconRow: {
+    position: 'absolute',
+    flexDirection: 'row',
+    alignItems: 'center',
+    right: 14,
+    top: '50%',
+    transform: [{ translateY: -20 }],
+    gap: 10,
+  },
+  clearIcon: {
+    fontSize: 16,
+    color: '#666',
+    marginRight: 7,
+  },
+  eyeIcon: {
+    fontSize: 18,
   },
 });
 

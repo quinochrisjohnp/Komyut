@@ -1,0 +1,44 @@
+<div class="content-body">
+    <h1>System Settings</h1>
+    <div class="settings-container">
+        
+    <!-- App-Wide Settings -->
+    <div class="settings-box">
+        <h2>App-Wide Settings</h2>
+        <div class="setting-item">
+        <span>Maintenance Mode</span>
+        <label class="switch">
+            <input type="checkbox" id="maintenanceMode">
+            <span class="slider round"></span>
+        </label>
+        </div>
+        <div class="setting-item">
+        <span>Update Mode</span>
+        <label class="switch">
+            <input type="checkbox" id="updateMode">
+            <span class="slider round"></span>
+        </label>
+        </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="settings-box">
+        <h2>Security Settings</h2>
+        <div class="setting-item">
+        <span>Login Attempt Limit</span>
+        <select id="loginAttemptLimit">
+            <option value="1">1</option>
+            <option value="3" selected>3</option>
+            <option value="5">5</option>
+            <option value="unlimited">Unlimited</option>
+        </select>
+        </div>
+        <div class="setting-item">
+        <span>Password Policy Settings</span>
+        <button id="editPasswordPolicy">Edit</button>
+        <!-- TODO: Modal will be added here later -->
+        </div>
+    </div>
+
+    </div>
+</div>

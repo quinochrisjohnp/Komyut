@@ -1,7 +1,6 @@
 import { useSignIn } from '@clerk/clerk-expo';
-import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
-import React from 'react';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -27,15 +26,15 @@ export default function Page() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
 
-  const [identifier, setIdentifier] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [error, setError] = React.useState('');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const { setLoading } = useLoading();
 
   const [showPassword, setShowPassword] = useState(false);
 
   // --------> validation helper
-  const isValidLength = (text) => text.length >= 8 && text.length <= 15;
+  const isValidLength = (text) => text.length >= 6 && text.length <= 15;
   const hasNoSpaces = (text) => !/\s/.test(text);
 
   // --------> handle input change with space restriction
@@ -62,7 +61,7 @@ export default function Page() {
     if (!isLoaded) return;
 
     if (!isValidLength(identifier) || !isValidLength(password)) {
-      setError("Both email/username and password must be 8–15 characters.");
+      setError("Both email/username and password must be 6–15 characters.");
       return;
     }
     if (!hasNoSpaces(identifier) || !hasNoSpaces(password)) {
@@ -82,16 +81,8 @@ export default function Page() {
         console.error(JSON.stringify(signInAttempt, null, 2));
       }
     } catch (err) {
-      if (err.errors?.[0]?.code === "form_password_incorrect") {
-        setError("Invalid email or password. Please try again.");
-      } else if (err.errors?.[0]?.code === "form_identifier_not_found") {
-        setError("Account not found. Please check your email/username.");
-      } else {
-        setError("Something went wrong. Please try again.");
-        console.error("Sign in error:", err);
-      }
+      setError("Invalid email or password. Please try again.");
     }
-
   };
 
   const { startOAuthFlow: googleAuth } = useOAuth({ strategy: 'oauth_google' });
@@ -144,7 +135,7 @@ export default function Page() {
           <Text style={styles.title}>Welcome back!</Text>
 
           {/* identifier input */}
-          <View style={authStyles.inputWrapper}>
+          <View style={styles.inputWrapper}>
             <TextInput
               autoCapitalize="none"
               style={[authStyles.input, { paddingRight: 40 }]}
@@ -155,14 +146,14 @@ export default function Page() {
               maxLength={15}
             />
             {identifier.length > 0 && (
-              <TouchableOpacity onPress={() => setIdentifier('')} style={authStyles.singleClearBtn}>
-                <Text style={authStyles.clearIcon}>✕</Text>
+              <TouchableOpacity onPress={() => setIdentifier('')} style={styles.singleClearBtn}>
+                <Text style={styles.clearIcon}>✕</Text>
               </TouchableOpacity>
             )}
           </View>
 
           {/* password input */}
-          <View style={authStyles.inputWrapper}>
+          <View style={styles.inputWrapper}>
             <TextInput
               style={[authStyles.input, { paddingRight: 80 }]}
               value={password}
@@ -172,14 +163,14 @@ export default function Page() {
               onChangeText={handlePasswordChange}
               maxLength={15}
             />
-            <View style={authStyles.iconRow}>
+            <View style={styles.iconRow}>
               {password.length > 0 && (
                 <TouchableOpacity onPress={() => setPassword('')}>
-                  <Text style={authStyles.clearIcon}>✕</Text>
+                  <Text style={styles.clearIcon}>✕</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Text style={authStyles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
+                <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -198,7 +189,7 @@ export default function Page() {
 
           <Text style={styles.signInWithText}>Or log in with</Text>
 
-          <View style={authStyles.signRow}>
+          <View style={authStyles.iconRow}>
             <TouchableOpacity style={authStyles.iconBtn} onPress={handleGoogleSignIn}>
               <Image source={require('../../assets/images/google_icon.png')} style={authStyles.icon} />
             </TouchableOpacity>
@@ -227,6 +218,34 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 20,
     color: '#333',
+  },
+  inputWrapper: {
+    position: 'relative',
+    width: '100%',
+  },
+  singleClearBtn: {
+    position: 'absolute',
+    right: 10,
+    top: '50%',
+    transform: [{ translateY: -23 }],
+    padding: 5,
+  },
+  iconRow: {
+    position: 'absolute',
+    flexDirection: 'row',
+    alignItems: 'center',
+    right: 14,
+    top: '50%',
+    transform: [{ translateY: -20 }],
+    gap: 10,
+  },
+  clearIcon: {
+    fontSize: 16,
+    color: '#666',
+    marginRight: 7,
+  },
+  eyeIcon: {
+    fontSize: 18,
   },
   forgotPassword: {
     alignSelf: 'flex-end',

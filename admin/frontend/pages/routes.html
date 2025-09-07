@@ -1,0 +1,344 @@
+<div class="content-body">
+    <h1>Route Management</h1>
+    <div class="row1">
+        <div class="column1">
+            <h2>Fare</h2>
+        </div>
+        <div class="column1">
+            <form>
+                <div class="search-route">
+                    <input class="search-input-route" type="search" placeholder=" Search">
+                    <button type="submit" class="search-submit-route"><span
+                            class="search-icon-route material-symbols-outlined">Search</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row2">
+        <div class="column2"><button class="buttonz" data-table="JeepTable">Jeepney Fare</button></div>
+        <div class="column2"><button class="buttonz" data-table="TricTable">Tricycle Fare</button></div>
+        <div class="column2"><button class="buttonz" data-table="UVTable">UV Express Fare</button></div>
+        <div class="column2"><button class="buttonz" data-table="BusTable">Bus Fare</button></div>
+    </div>
+    <br>
+    <div class="table-container active" id="JeepTable">
+        <table class="scrollable-table">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Estimated Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>UST</td>
+                    <td>Lacson Avenue</td>
+                    <td>₱13–₱15</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Lacson Avenue</td>
+                    <td>Legarda</td>
+                    <td>₱13–₱15</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Blumentritt</td>
+                    <td>Dapitan/UST</td>
+                    <td>₱13–₱16</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>University Belt</td>
+                    <td>UST</td>
+                    <td>₱13–₱15</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>UST</td>
+                    <td>Lacson Avenue</td>
+                    <td>₱13–₱15</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Lacson Avenue</td>
+                    <td>Legarda</td>
+                    <td>₱13–₱15</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Blumentritt</td>
+                    <td>Dapitan/UST</td>
+                    <td>₱13–₱16</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>University Belt</td>
+                    <td>UST</td>
+                    <td>₱13–₱15</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="table-container" id="TricTable">
+        <table class="scrollable-table">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Estimated Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>UST</td>
+                    <td>Lacson Avenue</td>
+                    <td>₱30-₱40</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Lacson Avenue</td>
+                    <td>Legarda</td>
+                    <td>₱30–₱40</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Blumentritt</td>
+                    <td>Dapitan/UST</td>
+                    <td>₱30–₱35</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>University Belt</td>
+                    <td>UST</td>
+                    <td>₱30–₱35</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <!-- Add more rows if needed -->
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="table-container" id="UVTable">
+        <table class="scrollable-table">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Estimated Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>UST</td>
+                    <td>Lacson Avenue</td>
+                    <td>₱15-₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Lacson Avenue</td>
+                    <td>Legarda</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Blumentritt</td>
+                    <td>Dapitan/UST</td>
+                    <td>₱15–₱21</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>University Belt</td>
+                    <td>UST</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>UST</td>
+                    <td>Lacson Avenue</td>
+                    <td>₱15-₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Lacson Avenue</td>
+                    <td>Legarda</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Blumentritt</td>
+                    <td>Dapitan/UST</td>
+                    <td>₱15–₱21</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>University Belt</td>
+                    <td>UST</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-container" id="BusTable">
+        <table class="scrollable-table">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Estimated Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>UST</td>
+                    <td>Lacson Avenue</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Lacson Avenue</td>
+                    <td>Legarda</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Blumentritt</td>
+                    <td>Dapitan/UST</td>
+                    <td>₱15–₱21</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>University Belt</td>
+                    <td>UST</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <!-- Add more rows if needed -->
+                <tr>
+                    <td>UST</td>
+                    <td>Lacson Avenue</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Lacson Avenue</td>
+                    <td>Legarda</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Blumentritt</td>
+                    <td>Dapitan/UST</td>
+                    <td>₱15–₱21</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>University Belt</td>
+                    <td>UST</td>
+                    <td>₱15–₱20</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+<div class="AddButton">
+    <button><span class="material-symbols-outlined">location_on</span>Add Route</button>
+</div>
+<br>
+</div>

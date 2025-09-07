@@ -1,0 +1,74 @@
+<div class="content-body">
+    <!-- Users Management (drop-in section; no <body> needed if you load into #content-area) -->
+    <h1>User Management</h1>
+    <section class="users-page" data-page="users">
+        <div class="users-header">
+            <form>
+                <div class="search-route">
+                    <input class="search-input-route" type="search" placeholder="Search">
+                    <button type="submit" class="search-submit-route"><span
+                            class="search-icon-route material-symbols-outlined">search</span></button>
+                </div>
+            </form>
+        </div>
+
+
+
+        <div class="users-card">
+            <table class="users-table">
+            <thead>
+                <tr>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th style="width:180px">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTbody">
+                <!-- Sample placeholder rows (replace with real data later) -->
+                <tr>
+                <td class="col-name">Liam Carter</td>
+                <td class="col-email"><a href="mailto:LiamCarter@gmail.com">LiamCarter@gmail.com</a></td>
+                <td class="col-status"><span class="status active">Active</span></td>
+                <td class="col-actions">
+                    <button class="btn-link danger" data-action="delete">Delete Account</button>
+                </td>
+                </tr>
+                <tr>
+                <td class="col-name">Sophia Ramirez</td>
+                <td class="col-email"><a href="mailto:Sophirez@gmail.com">Sophirez@gmail.com</a></td>
+                <td class="col-status"><span class="status active">Active</span></td>
+                <td class="col-actions">
+                    <button class="btn-link danger" data-action="delete">Delete Account</button>
+                </td>
+                </tr>
+                <tr>
+                <td class="col-name">Ethan Nakamura</td>
+                <td class="col-email"><a href="mailto:ENakamura@gmail.com">ENakamura@gmail.com</a></td>
+                <td class="col-status"><span class="status active">Active</span></td>
+                <td class="col-actions">
+                    <button class="btn-link danger" data-action="delete">Delete Account</button>
+                </td>
+                </tr>
+                <tr>
+                <td class="col-name">Isabella Chen</td>
+                <td class="col-email"><a href="mailto:Chanbella@gmail.com">Chanbella@gmail.com</a></td>
+                <td class="col-status"><span class="status banned">Banned</span></td>
+                <td class="col-actions">
+                    <button class="btn-link primary" data-action="unban">Unban User</button>
+                </td>
+                </tr>
+                <tr>
+                <td class="col-name">Noah Thompson</td>
+                <td class="col-email"><a href="mailto:NoahThompson@gmail.com">NoahThompson@gmail.com</a></td>
+                <td class="col-status"><span class="status banned">Banned</span></td>
+                <td class="col-actions">
+                    <button class="btn-link primary" data-action="unban">Unban User</button>
+                </td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>

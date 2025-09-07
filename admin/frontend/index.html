@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="admin-name">Super Admin</span>
+      </div>
+      <nav class="sidebar-menu">
+        <ul>
+          <li><a href="#" onclick="loadPage('pages/dashboard.html', this)">Dashboard</a></li>
+          <li><a href="#" onclick="loadPage('pages/users.html', this)">User Management</a></li>
+          <li><a href="#" onclick="loadPage('pages/routes.html', this)">Route Management</a></li>
+          <li><a href="#" onclick="loadPage('pages/notifications.html', this)">Notifications Manager</a></li>
+          <li><a href="#" onclick="loadPage('pages/feedback.html', this)">Feedback & Reports</a></li>
+          <li><a href="#" onclick="loadPage('pages/admins.html', this)">Admin Management</a></li>
+          <li><a href="#" onclick="loadPage('pages/logs.html', this)">Activity Logs</a></li>
+          <li><a href="#" onclick="loadPage('pages/settings.html', this)">System Settings</a></li>
+          <li><a href="login.html">Logout</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div id="content-area">
+        <!-- Dynamic content will load here -->
+      </div>
+    </main>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+
+</html>
