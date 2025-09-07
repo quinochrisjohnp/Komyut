@@ -1,22 +1,36 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Alert 
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSavedRoutes } from "../../hooks/useSavedRoutes";
 
 export default function EditRouteScreen() {
-  // ✅ only declare once
-  const { id, type: initialType, start_location: initialStart, destination: initialDest, description: initialDesc } = useLocalSearchParams();
-  
-  const router = useRouter();
-  const user_id = 1; // replace with real auth
-  const { updateSavedRoute } = useSavedRoutes(user_id);
+  // ✅ Get params from navigation
+  const { id, type: initialType, start_location: initialStart, destination: initialDest, description: initialDesc } =
+    useLocalSearchParams();
 
-  const [type, setType] = useState(initialType);
-  const [start, setStart] = useState(initialStart);
-  const [dest, setDest] = useState(initialDest);
-  const [desc, setDesc] = useState(initialDesc);
+  const router = useRouter();
+  const user_id = 1; // 🔑 replace with real user later
+  const { updateSavedRoute, loadData } = useSavedRoutes(user_id); // ✅ also pull loadData
+
+  // ✅ Local state (safe fallback to empty string in case param is undefined)
+  const [type, setType] = useState(initialType || "");
+  const [start, setStart] = useState(initialStart || "");
+  const [dest, setDest] = useState(initialDest || "");
+  const [desc, setDesc] = useState(initialDesc || "");
 
   const handleSave = async () => {
+    if (!type || !start || !dest) {
+      Alert.alert("Error", "Type, Start, and Destination are required.");
+      return;
+    }
+
     try {
       await updateSavedRoute(id, {
         type,
@@ -24,9 +38,14 @@ export default function EditRouteScreen() {
         destination: dest,
         description: desc,
       });
+
+      // ✅ Force refresh after update
+      await loadData();
+
       Alert.alert("Success", "Route updated!");
       router.back();
     } catch (error) {
+      console.error("Update failed:", error);
       Alert.alert("Error", "Failed to update route");
     }
   };
@@ -35,10 +54,30 @@ export default function EditRouteScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Edit Route</Text>
 
-      <TextInput style={styles.input} value={type} onChangeText={setType} placeholder="Type" />
-      <TextInput style={styles.input} value={start} onChangeText={setStart} placeholder="Start Location" />
-      <TextInput style={styles.input} value={dest} onChangeText={setDest} placeholder="Destination" />
-      <TextInput style={styles.input} value={desc} onChangeText={setDesc} placeholder="Description" />
+      <TextInput
+        style={styles.input}
+        value={type}
+        onChangeText={setType}
+        placeholder="Type"
+      />
+      <TextInput
+        style={styles.input}
+        value={start}
+        onChangeText={setStart}
+        placeholder="Start Location"
+      />
+      <TextInput
+        style={styles.input}
+        value={dest}
+        onChangeText={setDest}
+        placeholder="Destination"
+      />
+      <TextInput
+        style={styles.input}
+        value={desc}
+        onChangeText={setDesc}
+        placeholder="Description"
+      />
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Save</Text>
@@ -50,7 +89,18 @@ export default function EditRouteScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff" },
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
-  input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 12, marginBottom: 12 },
-  saveButton: { backgroundColor: "#4CAFE8", padding: 15, borderRadius: 8, alignItems: "center" },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  saveButton: {
+    backgroundColor: "#4CAFE8",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+  },
   saveButtonText: { color: "#fff", fontWeight: "bold" },
 });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,29 +10,30 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router"; // ✅ add useFocusEffect
 import BottomNav from "../../components/BottomNav";
-import { useSavedRoutes } from "../../hooks/useSavedRoutes"; // <-- import your hook
+import { useSavedRoutes } from "../../hooks/useSavedRoutes";
 
 export default function SavedRoutesScreen() {
   const router = useRouter();
 
   // 🔑 Use hook
-  const user_id = 1; // 👈 example (replace with real logged-in user id)
+  const user_id = 1; // 👈 replace with real logged-in user id
   const {
     savedRoutes,
     isLoading,
     deleteSavedRoute,
     loadData,
-    updateSavedRoute, // <-- ✅ make sure your hook exposes this
   } = useSavedRoutes(user_id);
 
   const [search, setSearch] = useState("");
 
-  // Run when screen loads
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  // ✅ Run when screen comes into focus (not just once)
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   // Filter routes based on search
   const filteredRoutes = savedRoutes.filter((r) =>
