@@ -11,8 +11,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import BottomNav from "../../components/BottomNav";
+import { useUser } from "@clerk/clerk-expo";
 
-const API_URL = "http://10.0.2.2:5001/api"; // ✅ Android emulator fix
+const API_URL = "https://komyut-we5n.onrender.com"; // ✅ Android emulator fix
 
 export default function AddRoutes() {
   const [place, setPlace] = useState("");
@@ -20,6 +21,7 @@ export default function AddRoutes() {
   const [routeName, setRouteName] = useState("");
   const [description, setDescription] = useState("");
   const router = useRouter();
+  const { user } = useUser(); // ✅ get logged-in Clerk user
 
   const handleSave = async () => {
     if (!place || !destination || !routeName) {
@@ -28,19 +30,21 @@ export default function AddRoutes() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/saved_routes`, {
+      const response = await fetch(`${API_URL}/api/saved_routes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           start_location: place,
           destination,
           type: routeName,
-          description,
-          user_id: 1,
+          description: description || "No description",
+          user_id: user.id,
         }),
       });
-
-      if (!response.ok) throw new Error("Failed to save route");
+      console.log("Response status:", response.status);
+      const text = await response.text();
+      console.log("Response body:", text);
+      if (!response.ok) throw new Error("Failed to save route.");
 
       Alert.alert("Success", "Route saved!");
       router.push("/(root)/routes");

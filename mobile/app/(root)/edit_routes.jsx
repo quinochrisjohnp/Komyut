@@ -1,33 +1,41 @@
 import React, { useState } from "react";
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSavedRoutes } from "../../hooks/useSavedRoutes";
+import { useUser } from "@clerk/clerk-expo";
+import BottomNav from "../../components/BottomNav";
 
 export default function EditRouteScreen() {
-  // ✅ Get params from navigation
-  const { id, type: initialType, start_location: initialStart, destination: initialDest, description: initialDesc } =
-    useLocalSearchParams();
+  const {
+    id,
+    type: initialType,
+    start_location: initialStart,
+    destination: initialDest,
+    description: initialDesc,
+  } = useLocalSearchParams();
 
   const router = useRouter();
-  const user_id = 1; // 🔑 replace with real user later
-  const { updateSavedRoute, loadData } = useSavedRoutes(user_id); // ✅ also pull loadData
+  const { user } = useUser(); // replace later with Clerk user id
+  const { updateSavedRoute, loadData } = useSavedRoutes(user?.id);
 
-  // ✅ Local state (safe fallback to empty string in case param is undefined)
+
   const [type, setType] = useState(initialType || "");
   const [start, setStart] = useState(initialStart || "");
   const [dest, setDest] = useState(initialDest || "");
   const [desc, setDesc] = useState(initialDesc || "");
 
   const handleSave = async () => {
-    if (!type || !start || !dest) {
-      Alert.alert("Error", "Type, Start, and Destination are required.");
+    if (!user) {
+      Alert.alert("Error", "User not logged in.");
       return;
     }
 
@@ -39,9 +47,7 @@ export default function EditRouteScreen() {
         description: desc,
       });
 
-      // ✅ Force refresh after update
       await loadData();
-
       Alert.alert("Success", "Route updated!");
       router.back();
     } catch (error) {
@@ -51,56 +57,122 @@ export default function EditRouteScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Edit Route</Text>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Image
+            source={require("../../assets/images/back_icon.png")}
+            resizeMode="contain"
+            style={styles.backIcon}
+          />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>
+          {type ? `${type}` : "Edit Route"}
+        </Text>
+      </View>
 
-      <TextInput
-        style={styles.input}
-        value={type}
-        onChangeText={setType}
-        placeholder="Type"
-      />
-      <TextInput
-        style={styles.input}
-        value={start}
-        onChangeText={setStart}
-        placeholder="Start Location"
-      />
-      <TextInput
-        style={styles.input}
-        value={dest}
-        onChangeText={setDest}
-        placeholder="Destination"
-      />
-      <TextInput
-        style={styles.input}
-        value={desc}
-        onChangeText={setDesc}
-        placeholder="Description"
-      />
+      {/* Blue Card for start/destination */}
+      <View style={styles.card}>
+        <TextInput
+          style={styles.input}
+          placeholder="Start Location"
+          value={start}
+          onChangeText={setStart}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Destination"
+          value={dest}
+          onChangeText={setDest}
+        />
+      </View>
 
+      {/* Name + Description */}
+      <View style={styles.form}>
+        <TextInput
+          style={styles.input}
+          placeholder="Name of Route"
+          value={type}
+          onChangeText={setType}
+        />
+        <TextInput
+          style={styles.textArea}
+          placeholder="Add a description"
+          value={desc}
+          onChangeText={setDesc}
+          multiline
+          numberOfLines={4}
+        />
+      </View>
+
+      {/* Save Button */}
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save</Text>
+        <Text style={styles.saveText}>Save</Text>
       </TouchableOpacity>
-    </View>
+
+      {/* Bottom Nav */}
+      <View style={styles.navOverlay}>
+        <BottomNav />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
+  container: {
+    flex: 1,
+    backgroundColor: "#F9F9F9",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  backButton: { padding: 5 },
+  backIcon: { width: 24, height: 24, marginRight: 10 },
+  headerTitle: { fontSize: 20, fontWeight: "bold" },
+
+  card: {
+    backgroundColor: "#A6D8F5",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+  },
   input: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
   },
+  form: { marginBottom: 20 },
+  textArea: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    textAlignVertical: "top",
+  },
+
   saveButton: {
+    alignSelf: "center",
     backgroundColor: "#4CAFE8",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 20,
+    marginBottom: 70,
   },
-  saveButtonText: { color: "#fff", fontWeight: "bold" },
+  saveText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+
+  navOverlay: { position: "absolute", bottom: 0, width: "100%" },
 });

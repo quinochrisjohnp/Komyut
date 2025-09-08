@@ -9,148 +9,188 @@ import {
   FlatList,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from "react-native";
-import { useRouter, useFocusEffect } from "expo-router"; // ✅ add useFocusEffect
+import { useRouter, useFocusEffect } from "expo-router";
 import BottomNav from "../../components/BottomNav";
 import { useSavedRoutes } from "../../hooks/useSavedRoutes";
+import { useUser } from "@clerk/clerk-expo";
+import { Swipeable, GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function SavedRoutesScreen() {
   const router = useRouter();
+  const { user } = useUser();
 
-  // 🔑 Use hook
-  const user_id = 1; // 👈 replace with real logged-in user id
-  const {
-    savedRoutes,
-    isLoading,
-    deleteSavedRoute,
-    loadData,
-  } = useSavedRoutes(user_id);
+  const { savedRoutes, isLoading, deleteSavedRoute, loadData } =
+    useSavedRoutes(user?.id);
 
   const [search, setSearch] = useState("");
 
-  // ✅ Run when screen comes into focus (not just once)
   useFocusEffect(
     useCallback(() => {
-      loadData();
-    }, [loadData])
+      if (user?.id) {
+        loadData();
+      }
+    }, [loadData, user?.id])
   );
 
-  // Filter routes based on search
   const filteredRoutes = savedRoutes.filter((r) =>
     r.type?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const confirmUpdate = (item) => {
+    Alert.alert("Update Route", "Do you want to update?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Update",
+        style: "default",
+        onPress: () =>
+          router.push({
+            pathname: "/(root)/edit_routes",
+            params: {
+              id: item.id,
+              type: item.type,
+              start_location: item.start_location,
+              destination: item.destination,
+              description: item.description,
+            },
+          }),
+      },
+    ]);
+  };
+
+  const confirmDelete = (item) => {
+    Alert.alert("Delete Route", "Are you sure you want to delete?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteSavedRoute(item.id),
+      },
+    ]);
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Saved Routes</Text>
-      </View>
-
-      {isLoading ? (
-        <ActivityIndicator size="large" style={{ marginTop: 50 }} />
-      ) : savedRoutes.length === 0 ? (
-        // ---------------- Empty State ----------------
-        <>
-          <View style={styles.middleSection}>
-            <Image
-              source={require("../../assets/images/app_logo.png")}
-              style={styles.illustration}
-              resizeMode="contain"
-            />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={{ flex: 1 }}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>Saved Routes</Text>
           </View>
 
-          <View style={styles.middleSection}>
-            <Text style={styles.subtitle}>Hey, Chris!</Text>
-            <Text style={styles.message}>
-              You have no saved routes{"\n"}Ready to plan your trip?
-            </Text>
-          </View>
-
-          <View style={styles.middleSection}>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => router.push("/(root)/add_routes")}
-            >
-              <Text style={styles.addButtonText}>Add Route</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      ) : (
-        // ---------------- Saved Routes List ----------------
-        <View style={styles.listContainer}>
-          {/* Search Bar */}
           <TextInput
+            style={styles.search}
             placeholder="Search"
             value={search}
             onChangeText={setSearch}
-            style={styles.search}
           />
 
-          {/* List of routes with Footer */}
-          <FlatList
-            data={filteredRoutes}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={styles.routeCard}>
-                <Text style={styles.routeName}>{item.type}</Text>
-                <Text style={styles.routeDescription}>
-                  {item.start_location} - {item.destination}
-                </Text>
+          {isLoading ? (
+            <ActivityIndicator size="large" style={{ marginTop: 50 }} />
+          ) : savedRoutes.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Image
+                source={require("../../assets/images/komyut-logo.png")}
+                style={styles.illustration}
+                resizeMode="contain"
+              />
 
-                {/* Update Button */}
-                <TouchableOpacity
-                  style={[styles.updateButton, { marginTop: 10 }]}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(root)/edit_routes", // 👈 matches your file name
-                      params: {
-                        id: item.id,
-                        type: item.type,
-                        start_location: item.start_location,
-                        destination: item.destination,
-                        description: item.description,
-                      },
-                    })
-                  }
-                >
-                  <Text style={styles.updateButtonText}>Update</Text>
-                </TouchableOpacity>
+              <Text style={styles.subtitle}>
+                Hey, {user?.firstName || "Traveler"}!
+              </Text>
+              <Text style={styles.message}>
+                You have no saved routes{"\n"}Ready to plan your trip?
+              </Text>
 
-                {/* Delete Button */}
-                <TouchableOpacity
-                  style={[styles.deleteButton, { marginTop: 10 }]}
-                  onPress={() => deleteSavedRoute(item.id)}
-                >
-                  <Text style={styles.addButtonText}>Delete</Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
-            )}
-            ListFooterComponent={
-              <View
-                style={{
-                  alignItems: "center",
-                  marginTop: 20,
-                  marginBottom: 100,
-                }}
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => router.push("/(root)/add_routes")}
               >
-                <TouchableOpacity
-                  style={styles.addButton}
-                  onPress={() => router.push("/(root)/add_routes")}
-                >
-                  <Text style={styles.addButtonText}>Add Route</Text>
-                </TouchableOpacity>
-              </View>
-            }
-          />
-        </View>
-      )}
+                <Text style={styles.addButtonText}>Add Route</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <FlatList
+              contentContainerStyle={{ paddingBottom: 120 }}
+              data={filteredRoutes}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <Swipeable
+                  renderRightActions={() => (
+                    <View style={styles.swipeActions}>
+                      {/* Update Icon (no background) */}
+                      <TouchableOpacity onPress={() => confirmUpdate(item)}>
+                        <Image
+                          source={require("../../assets/images/edit-icon.png")}
+                          style={styles.plainIcon}
+                          resizeMode="contain"
+                        />
+                      </TouchableOpacity>
 
-      {/* Bottom Navigation */}
-      <View style={styles.navOverlay}>
-        <BottomNav />
-      </View>
-    </SafeAreaView>
+                      {/* Delete Icon (no background) */}
+                      <TouchableOpacity onPress={() => confirmDelete(item)}>
+                        <Image
+                          source={require("../../assets/images/delete-icon.png")}
+                          style={styles.plainIcon}
+                          resizeMode="contain"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                >
+                  {/* Card content */}
+                  <View style={styles.routeCard}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.routeName}>{item.type}</Text>
+                        <Text style={styles.routeDescription}>
+                          {item.start_location}
+                        </Text>
+                        <Text style={styles.routeDescription}>
+                          {item.destination}
+                        </Text>
+                      </View>
+                      <Image
+                        source={require("../../assets/images/slide-icon.png")}
+                        style={styles.slideHint}
+                        resizeMode="contain"
+                      />
+                    </View>
+                  </View>
+                </Swipeable>
+              )}
+              ListFooterComponent={
+                <View
+                  style={{
+                    alignItems: "center",
+                    marginTop: 20,
+                    marginBottom: 100,
+                  }}
+                >
+                  <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={() => router.push("/(root)/add_routes")}
+                  >
+                    <Text style={styles.addButtonText}>Add Route</Text>
+                  </TouchableOpacity>
+                </View>
+              }
+            />
+          )}
+        </View>
+
+        {/* Bottom Navigation */}
+        <View style={styles.navOverlay}>
+          <BottomNav />
+        </View>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -163,20 +203,23 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 0,
   },
   title: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#333",
   },
-  middleSection: {
+  emptyContainer: {
+    flex: 1,
     alignItems: "center",
-    marginBottom: 20,
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
   illustration: {
     width: 200,
     height: 200,
+    marginBottom: 20,
   },
   subtitle: {
     fontSize: 18,
@@ -187,33 +230,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     textAlign: "center",
+    marginBottom: 20,
   },
   addButton: {
-    backgroundColor: "#4CAFE8",
+    backgroundColor: "#3e99c6",
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 20,
-  },
-  updateButton: {
-    backgroundColor: "orange",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 20,
-  },
-  deleteButton: {
-    backgroundColor: "red",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 20,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  listContainer: {
-    flex: 1,
+    borderWidth: 2.5,
+    borderColor: "#71c1e8",
   },
   search: {
     backgroundColor: "#fff",
@@ -222,14 +247,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: "#ddd",
-    marginBottom: 10,
+    marginBottom: 20,
   },
   routeCard: {
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 30,
     padding: 15,
     marginBottom: 10,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: "#eee",
   },
   routeName: {
@@ -246,4 +271,25 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
   },
+  swipeActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingVertical: 10,
+    paddingRight: 10,
+    gap: 5, // spacing between icons
+  },
+  plainIcon: {
+    width: 50,
+    height: 50,
+  },
+  slideHint: {
+    width: 16,
+    height: 16,
+    tintColor: "#bbb",
+    marginTop: 5,
+  },
+  addButtonText: {
+    color: "white",
+  }
 });
