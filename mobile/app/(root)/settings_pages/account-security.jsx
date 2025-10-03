@@ -5,11 +5,13 @@ import { useState } from "react";
 import Colors from '../../Constant_Design';
 import PrivacyPolicyModal from '../../../components/PrivacyPolicyModal';
 import TermsOfServiceModal from '../../../components/TermsOfServiceModal';
+import { useUser } from "@clerk/clerk-expo";
 
 export default function AccountSecurity() {
   const router = useRouter();
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const { user, isLoaded } = useUser();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -28,11 +30,11 @@ export default function AccountSecurity() {
         <Text style={styles.sectionTitle}>Account Information</Text>
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Username</Text>
-          <TextInput style={styles.input} value="Chris_lebron" editable={false} />
+          <TextInput style={styles.input} value={isLoaded ? user.username : ""} editable={false} />
         </View>
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Email</Text>
-          <TextInput style={styles.input} value="lebron_chris@gmail.com" editable={false} />
+          <TextInput style={styles.input} value={isLoaded ? user.emailAddresses[0]?.emailAddress : ""} editable={false} />
         </View>
       </View>
 
