@@ -25,25 +25,6 @@
     <!-- Main grid: left = panels/tables, right = sticky actions -->
     <div class="content-grid">
       <!-- ===== Modals (hidden by default) ===== -->
-      <!-- View Feedback -->
-      <div class="modal" id="modal-feedback" role="dialog" aria-modal="true" aria-labelledby="feedback-title" hidden>
-        <div class="modal-card">
-          <button class="modal-close" data-close aria-label="Close">×</button>
-          <h3 id="feedback-title" class="modal-title">View Feedback</h3>
-
-          <div class="modal-body">
-            <p class="muted">Feedback list placeholder. (Hook this to your data later.)</p>
-            <ul class="list">
-              <li><b>09:02 AM</b> — “Great route coverage!” — <span class="link-like">user_223</span></li>
-              <li><b>Yesterday</b> — “May bug sa login” — <span class="link-like">mike__user</span></li>
-            </ul>
-          </div>
-
-          <div class="modal-actions">
-            <button class="btn btn--primary" data-close>Close</button>
-          </div>
-        </div>
-      </div>
 
       <!-- Add Route -->
       <div class="modal" id="modal-add-route" role="dialog" aria-modal="true" aria-labelledby="add-route-title" hidden>
@@ -88,68 +69,74 @@
         <div class="modal-card">
           <button class="modal-close" data-close aria-label="Close">×</button>
           <h3 id="send-title" class="modal-title">Compose Alert</h3>
-
-          <form class="send-form" autocomplete="off">
-            <div class="row row-mid">
-              <input type="text" class="pill" placeholder="Enter title" aria-label="Title">
-              <select class="pill" aria-label="Category">
-                <option selected>Select Category</option>
-                <option>System</option>
-                <option>Route Update</option>
-                <option>Maintenance</option>
-              </select>
-              <input type="time" class="pill" aria-label="Schedule Send (optional)">
+          
+          <form autocomplete="off">
+            <div class="container-grid">
+              <div class="column-grid">
+                <label for="alert-title">Title : </label>
+                <input type="text" class="pill" id="alert-title" name="alert-title" required placeholder="Enter Title">
+              </div>
+              <div class="column-grid">
+                <label for="alert-category">Category : </label>
+                <select id="alert-category" class="pill" name="alert-category" required>
+                  <option selected>Select Category</option>
+                  <option>System</option>
+                  <option>Route Update</option>
+                  <option>Maintenance</option>
+                </select>
+              </div>
             </div>
-
-            <textarea rows="6" class="area" placeholder="Message" aria-label="Message"></textarea>
-
-            <div class="modal-actions center">
-              <button type="button" class="btn btn--primary" data-demo="send-alert">Send</button>
-            </div>
+              <textarea id="msg-box" name="msg-box" placeholder="Message" rows="5" cols="50" required></textarea>
+              <br>
+              <div class="center-submit">
+                  <input type="submit" id="submit-btn" name="submit-btn" value="Send">
+              </div>
           </form>
+
+        
         </div>
       </div>
 
       <!-- Recent User Activity -->
       <section class="panel">
         <header class="panel__hd">
-          <h2>Recent User Activity</h2>
+          <h2>System Reports</h2>
         </header>
         <div class="panel__bd">
           <div class="table-wrap">
             <table class="tbl tbl--activity" aria-label="Recent User Activity">
               <colgroup>
-                <col style="width:140px">
-                <col style="width:220px">
+                <col style="width:440px">
+                <col style="width:180px">
                 <col>
               </colgroup>
               <thead>
                 <tr>
-                  <th>Time</th>
-                  <th>Activity Type</th>
-                  <th>Details</th>
+                  <th>Reports</th>
+                  <th>Date Generated</th>
+                  <th>Document</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>09:42 AM</td>
-                  <td>New User Registered</td>
-                  <td><span class="link-like">jose_dela</span> joined</td>
+                  <td>Peak Hour Usage Report</td>
+                  <td>03/03/2025</td>
+                  <td><a href="#" class="tbl-link">Print</a></td>
                 </tr>
                 <tr>
-                  <td>08:50 AM</td>
-                  <td>Feedback Submitted</td>
-                  <td>“The app was helpful for…”</td>
+                  <td>Weekly Travel Demand Report</td>
+                  <td>03/26/2025</td>
+                  <td><a href="#" class="tbl-link">Print</a></td>
                 </tr>
                 <tr>
-                  <td>08:23 AM</td>
-                  <td>Login Alert</td>
-                  <td>3 failed login attempts — <span class="warn">mike__user</span></td>
+                  <td>Most Common Trip Origins Report</td>
+                  <td>02/12/2025</td>
+                  <td><a href="#" class="tbl-link">Print</a></td>
                 </tr>
                 <tr>
-                  <td>08:10 AM</td>
-                  <td>New User Registered</td>
-                  <td><span class="link-like">claire_11</span> joined</td>
+                  <td>Most Common Trip Destination Report</td>
+                  <td>05/25/2025</td>
+                  <td><a href="#" class="tbl-link">Print</a></td>
                 </tr>
               </tbody>
             </table>
@@ -159,57 +146,10 @@
 
       <!-- Sticky quick actions (right column) -->
       <aside class="actions" aria-label="Quick Actions">
-        <button class="btn btn--primary" data-action="view-feedback">View Feedback</button>
         <button class="btn btn--primary" data-action="add-route">Add Route</button>
         <button class="btn btn--primary" data-action="send-system">Send System Notifications</button>
       </aside>
 
-      <!-- Recent Admin Activity -->
-      <section class="panel">
-        <header class="panel__hd">
-          <h2>Recent Admin Activity</h2>
-        </header>
-        <div class="panel__bd">
-          <div class="table-wrap">
-            <table class="tbl tbl--admin" aria-label="Recent Admin Activity">
-              <colgroup>
-                <col style="width:140px">
-                <col style="width:220px">
-                <col>
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>Activity Type</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>09:45 AM</td>
-                  <td>Route Edited</td>
-                  <td><span class="ok">Updated:</span> España to Morayta</td>
-                </tr>
-                <tr>
-                  <td>08:00 AM</td>
-                  <td>Admin Added</td>
-                  <td><span class="link-like">jen_admin1</span> added by SuperAdmin</td>
-                </tr>
-                <tr>
-                  <td>07:30 AM</td>
-                  <td>Route Deleted</td>
-                  <td><span class="danger">Removed:</span> Lacson to UST</td>
-                </tr>
-                <tr>
-                  <td>07:15 AM</td>
-                  <td>User Suspended</td>
-                  <td><span class="danger">mark_user</span> suspended for violations</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
     </div>
   </section>
 </div>
