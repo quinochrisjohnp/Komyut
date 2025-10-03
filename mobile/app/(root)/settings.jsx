@@ -3,17 +3,72 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { SignOutButton } from '@/components/SignOutButton';
-import Colors from '../Constant_Design';
-import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
-import TermsOfServiceModal from '../../components/TermsOfServiceModal';
 
+import { useUser } from "@clerk/clerk-expo";
+import { SignOutButton } from "@/components/SignOutButton";
+import Colors from "../Constant_Design";
+import PrivacyPolicyModal from "../../components/PrivacyPolicyModal";
+import TermsOfServiceModal from "../../components/TermsOfServiceModal";
+import * as ImagePicker from "expo-image-picker";
+import { Platform } from "react-native";
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { user, isLoaded } = useUser();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [profileUri, setProfileUri] = useState(user.imageUrl || null);
+  
+  const pickImage = async () => {
+    // Request permissions
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permission to access media library is required!");
+      return;
+    }
+
+    // Launch picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    // Check if user actually picked an image
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const localUri = result.assets[0].uri;
+      const filename = localUri.split("/").pop();
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image`;
+
+      const formData = new FormData();
+      formData.append("file", {
+        uri: localUri,
+        name: filename,
+        type,
+      });
+
+      try {
+        // Upload to Clerk
+        await user.setProfileImage({ file: formData.get("file") });
+        await user.reload();
+
+        // Update local UI immediately
+        setProfileUri(localUri);
+
+        alert("Profile image updated!");
+      } catch (err) {
+        console.error(err);
+        alert("Failed to upload profile image. Check your network.");
+      }
+    }
+  };
+
+
+
+  if (!isLoaded) return null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,21 +84,27 @@ export default function SettingsScreen() {
       <View style={styles.profileSection}>
         <View style={styles.profileWrapper}>
           <Image
-            source={{ uri: "https://via.placeholder.com/150" }}
+            source={
+              profileUri
+                ? { uri: profileUri }       
+                : require("../../assets/images/profile_placeholder.png") // fallback
+            }
             style={styles.profilePic}
           />
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity style={styles.editButton} onPress={pickImage}>
             <Ionicons name="add" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.userName}>User Name</Text>
+        <Text style={styles.userName}>
+          {user.username || user.firstName || user.lastName || "User Name"}
+        </Text>
       </View>
 
       {/* Middle Section */}
       <View style={styles.middleSection}>
         {/* Account & Security */}
-        <TouchableOpacity 
-          style={styles.menuItem} 
+        <TouchableOpacity
+          style={styles.menuItem}
           onPress={() => router.push("/settings_pages/account-security")}
         >
           <View style={styles.menuRow}>
@@ -54,8 +115,8 @@ export default function SettingsScreen() {
         </TouchableOpacity>
 
         {/* Help & Support */}
-        <TouchableOpacity 
-          style={styles.menuItem} 
+        <TouchableOpacity
+          style={styles.menuItem}
           onPress={() => router.push("/settings_pages/help-support")}
         >
           <View style={styles.menuRow}>
@@ -68,11 +129,11 @@ export default function SettingsScreen() {
 
       {/* Logout Section */}
       <View style={styles.logoutWrapper}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.logoutButton}
           onPress={() => setShowLogoutModal(true)}
         >
-          <MaterialIcons name="logout" size={25} color = {Colors.primary} />
+          <MaterialIcons name="logout" size={25} color={Colors.primary} />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>
@@ -97,15 +158,19 @@ export default function SettingsScreen() {
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
 
-              {/* Actual Log Out using your <SignOutButton /> */}
-                <SignOutButton />
+              <SignOutButton />
             </View>
           </View>
         </View>
       </Modal>
+
       <View style={styles.footer}>
-        <Text style={styles.footerText} onPress={() => setShowPrivacy(true)} >Privacy Policy</Text>
-        <Text style={styles.footerText} onPress={() => setShowTerms(true)}>Terms of Service</Text>
+        <Text style={styles.footerText} onPress={() => setShowPrivacy(true)}>
+          Privacy Policy
+        </Text>
+        <Text style={styles.footerText} onPress={() => setShowTerms(true)}>
+          Terms of Service
+        </Text>
         <PrivacyPolicyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
         <TermsOfServiceModal visible={showTerms} onClose={() => setShowTerms(false)} />
       </View>
@@ -114,20 +179,20 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "#FFFFFF", 
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
     padding: 20,
     paddingTop: 75,
   },
 
   // Profile
-  profileSection: { 
-    alignItems: "center", 
-    marginTop: 24 
+  profileSection: {
+    alignItems: "center",
+    marginTop: 24,
   },
-  profileWrapper: { 
-    position: "relative" 
+  profileWrapper: {
+    position: "relative",
   },
   profilePic: {
     width: 112,
@@ -152,28 +217,29 @@ const styles = StyleSheet.create({
   },
 
   // Middle section
-  middleSection: { 
-    marginTop: 40, 
-    gap: 24 },
-    menuItem: {
+  middleSection: {
+    marginTop: 40,
+    gap: 24,
+  },
+  menuItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  menuRow: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    gap: 12 
+  menuRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
-  menuText: { 
-    fontSize: 16, 
-    color: "#374151" 
+  menuText: {
+    fontSize: 16,
+    color: "#374151",
   },
 
   // Logout
-  logoutWrapper: { 
-    marginTop: "auto", 
-    marginBottom: 40 ,
+  logoutWrapper: {
+    marginTop: "auto",
+    marginBottom: 40,
     alignItems: "center",
   },
   logoutButton: {
@@ -183,24 +249,23 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
   },
-  logoutText: { 
-    fontSize: 23, 
-    fontWeight: "500", 
+  logoutText: {
+    fontSize: 23,
+    fontWeight: "bold",
     color: Colors.primary,
-    fontWeight: 'bold'
   },
 
   // Back button
-  backBtn: { 
-    position: "absolute", 
-    top: 50, 
-    left: 0, 
-    padding: 10, 
-    zIndex: 1 
+  backBtn: {
+    position: "absolute",
+    top: 50,
+    left: 0,
+    padding: 10,
+    zIndex: 1,
   },
-  backIcon: { 
-    width: 20, 
-    height: 20 
+  backIcon: {
+    width: 20,
+    height: 20,
   },
 
   // Modal
@@ -217,47 +282,47 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
   },
-  modalTitle: { 
-    fontSize: 20, 
-    fontWeight: "700", 
-    marginBottom: 8 
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 8,
   },
-  modalMessage: { 
-    fontSize: 16, 
-    color: "#555", 
-    marginBottom: 20, 
-    textAlign: "center" 
+  modalMessage: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 20,
+    textAlign: "center",
   },
- modalButtons: { 
-  flexDirection: "row", 
-  justifyContent: "space-between", 
-  width: "100%",
-},
-modalButton: {
-  flex: 1,
-  paddingVertical: 12,
-  borderRadius: 8,
-  alignItems: "center",
-  justifyContent: "center", 
-},
-cancelButton: { 
-  backgroundColor: "#E5E7EB", 
-  marginRight: 8, 
-},
-cancelText: { 
-  color: "#374151", 
-  fontWeight: "600", 
-  fontSize: 16,
-},
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#E5E7EB",
+    marginRight: 8,
+  },
+  cancelText: {
+    color: "#374151",
+    fontWeight: "600",
+    fontSize: 16,
+  },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingBottom: 20,
     paddingHorizontal: 25,
   },
   footerText: {
     fontSize: 12,
-    color: '#888',
-    textDecorationLine: 'underline',
+    color: "#888",
+    textDecorationLine: "underline",
   },
 });
