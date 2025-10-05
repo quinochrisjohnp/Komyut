@@ -28,8 +28,7 @@
           <li><a href="#" onclick="loadPage('pages/feedback.html', this)">Feedback & Reports</a></li>
           <li><a href="#" onclick="loadPage('pages/admins.html', this)">Admin Management</a></li>
           <li><a href="#" onclick="loadPage('pages/logs.html', this)">Activity Logs</a></li>
-          <li><a href="#" onclick="loadPage('pages/settings.html', this)">System Settings</a></li>
-          <li><a href="login.html">Logout</a></li>
+          <li><a href="login.html" onclick="return confirmLogout();">Logout</a></li>
         </ul>
       </nav>
     </aside>
@@ -42,7 +41,7 @@
     </main>
   </div>
 
+
   <script src="js/script.js"></script>
 </body>
-
 </html>

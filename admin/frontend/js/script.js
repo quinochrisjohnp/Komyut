@@ -153,62 +153,47 @@ document.addEventListener("keydown", (e) => {
 
 
 
+// Set default password icons for hidden passwords
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".password-wrapper").forEach(wrapper => {
+    const passwordSpan = wrapper.querySelector(".password-text");
+    const icon = wrapper.querySelector(".material-symbols-outlined");
 
-
-/* ===== USERS PAGE logic (delegated; works after dynamic load) ===== */
-(function(){
-  // Filter rows by search (delegated)
-  document.addEventListener("input", (e) => {
-    const field = e.target;
-    if (!(field instanceof HTMLInputElement)) return;
-    if (field.id !== "userSearch") return;
-    const root = field.closest(".users-page");
-    if (!root) return;
-
-    const q = field.value.trim().toLowerCase();
-    const rows = root.querySelectorAll("tbody tr");
-    rows.forEach(tr => {
-      const text = tr.textContent.toLowerCase();
-      tr.hidden = q && !text.includes(q);
-    });
-  });
-
-  // Actions: delete / unban (delegated)
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".users-page button[data-action]");
-    if (!btn) return;
-
-    const tr = btn.closest("tr");
-    if (!tr) return;
-
-    if (btn.dataset.action === "delete") {
-      if (confirm("Delete this account?")) {
-        tr.style.transition = "opacity .2s ease";
-        tr.style.opacity = "0";
-        setTimeout(() => tr.remove(), 220);
-      }
-    }
-
-    if (btn.dataset.action === "unban") {
-      const s = tr.querySelector(".status");
-      if (s) {
-        s.textContent = "Active";
-        s.classList.remove("banned");
-        s.classList.add("active");
-      }
-      const del = document.createElement("button");
-      del.className = "btn-link danger";
-      del.dataset.action = "delete";
-      del.textContent = "Delete Account";
-      btn.replaceWith(del);
+    // Only set icon if password is hidden (•)
+    if (passwordSpan.textContent.includes("•")) {
+      icon.textContent = "visibility_off"; // eye with slash
     }
   });
-})();
+});
 
-// 🟢 Add these two helper functions:
+
+/* ===== USERS PAGE: Password toggle logic ===== */
+document.addEventListener("click", (e) => {
+  const button = e.target.closest(".toggle-password");
+  if (!button) return;
+
+  const wrapper = button.closest(".password-wrapper");
+  const passwordSpan = wrapper.querySelector(".password-text");
+  const icon = button.querySelector(".material-symbols-outlined");
+
+  const isHidden = passwordSpan.textContent.includes("•"); // check actual content
+
+  if (isHidden) {
+    // Show password → eye icon
+    passwordSpan.textContent = passwordSpan.dataset.password;
+    icon.textContent = "visibility"; // plain eye
+  } else {
+    // Hide password → eye with slash icon
+    passwordSpan.textContent = "•".repeat(passwordSpan.dataset.password.length);
+    icon.textContent = "visibility_off"; // eye with slash
+  }
+});
+
+
+
+/* ===== Table switcher buttons ===== */
 function initTableButtons() {
   const buttonContainer = document.querySelector('.row2'); // parent of all .buttonz
-
   if (!buttonContainer) return;
 
   buttonContainer.addEventListener('click', (event) => {
@@ -245,6 +230,7 @@ function activateFirstTableButton() {
   const tableToShow = document.getElementById(tableId);
   if (tableToShow) tableToShow.classList.add('active');
 }
+
 
 
 // System Settings
@@ -294,3 +280,21 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Action filter:", actionType.value);
   });
 });
+
+
+function confirmLogout() {
+  const ok = confirm("Are you sure you want to logout?");
+  if (ok) {
+    // Proceed to logout page
+    window.location.href = "login.html";
+    return true;
+  } else {
+    // Cancel logout
+    return false;
+  }
+}
+
+
+
+
+

@@ -5,22 +5,17 @@
         <form>
             <div class="container-grid">
                 <div class="column-grid">
-                    <label for="alert-title">Title</label><br>
+                    <label for="alert-title">Title : </label>
                     <input type="text" id="alert-title" name="alert-title" required placeholder="Enter Title">
                 </div>
                 <div class="column-grid">
-                    <label for="alert-category">Category</label><br>
-                    <select id="alert-category" name="alert-category" required>
-                        <option value="">Please select an option</option>
-                        <option value="cat1">cat1</option>
-                        <option value="cat2">cat2</option>
-                        <option value="cat3">cat3</option>
-                        <option value="cat4">cat4</option>
+                    <label for="alert-category">Category : </label>
+                    <select id="alert-category" class="pill" name="alert-category" required>
+                    <option selected>Select Category</option>
+                    <option>System</option>
+                    <option>Route Update</option>
+                    <option>Maintenance</option>
                     </select>
-                </div>
-                <div class="column-grid">
-                    <label for="alert-sched">Schedule Send (optional)</label><br>
-                    <input type="datetime-local" id="alert-sched" name="alert-sched">
                 </div>
             </div>
             <textarea id="msg-box" name="msg-box" placeholder="Message" rows="5" cols="50" required></textarea>
