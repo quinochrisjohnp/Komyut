@@ -149,7 +149,7 @@ export default function Page() {
               autoCapitalize="none"
               style={[authStyles.input, { paddingRight: 40 }]}
               value={identifier}
-              placeholder="Enter email or username"
+              placeholder="Enter username"
               placeholderTextColor="#999"
               onChangeText={handleIdentifierChange}
               maxLength={15}

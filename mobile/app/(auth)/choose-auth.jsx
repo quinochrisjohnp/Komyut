@@ -21,23 +21,32 @@ const Welcome = () => {
   const [agreed, setAgreed] = useState(null);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
 
   useEffect(() => {
     const checkAgreement = async () => {
       const value = await AsyncStorage.getItem('userAgreed');
+      if (value !== 'true') {
+        setShowTermsModal(true); // show modal only if user hasn't agreed
+      }
       setAgreed(value === 'true');
     };
     checkAgreement();
   }, []);
 
-  if (agreed === null) return null;
 
-  if (!agreed) {
-    return <TermsModal onAgreed={() => setAgreed(true)} />;
-  }
+  if (agreed === null) return null;
 
   return (
     <SafeAreaView style={authStyles.safeArea}>
+      <TermsModal
+        visible={showTermsModal}
+        onAgreed={() => {
+          setShowTermsModal(false);
+          setAgreed(true);
+        }}
+      />
       <View style={authStyles.container}>
         {/* Top: Logo */}
         <View style={authStyles.logoSection}>

@@ -27,9 +27,9 @@ export default function HelpSupport() {
       {/* FAQs */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
-        <TouchableOpacity style={styles.faqBtn}><Text style={styles.faqText}>How to reset my password?</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.faqBtn}><Text style={styles.faqText}>How do I plan a route?</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.faqBtn}><Text style={styles.faqText}>How to save a route?</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.faqBtn}><Text style={styles.faqText} onPress={() => router.push("/settings_pages/how-to-reset-pass")}>How to reset my password?</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.faqBtn}><Text style={styles.faqText} onPress={() => router.push("/settings_pages/how-to-plan-route")}>How do I plan a route?</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.faqBtn}><Text style={styles.faqText} onPress={() => router.push("/settings_pages/how-to-save-route")}>How to save a route?</Text></TouchableOpacity>
       </View>
 
       {/* Support */}
