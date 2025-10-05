@@ -1,0 +1,759 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.993211,
+          14.6097955,
+          0
+        ]
+      },
+      "properties": {
+        "name": "JARIV TRANSPORT COOPERATIVE SAMPALOC TERMINAL",
+        "description": "Tricycle Terminal",
+        "styleUrl": "#icon-1899-FFD600",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-1.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0163664,
+          14.6041437,
+          0
+        ]
+      },
+      "properties": {
+        "name": "SOTATODA (Sociego Tomas Arguelles TODA) Tricycle Terminal",
+        "description": "Tricycle Terminal",
+        "styleUrl": "#icon-1899-FFEA00",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-2.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0059052,
+          14.6093264,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Johnny Tricycle Optr",
+        "description": "Tricycle Terminal",
+        "styleUrl": "#icon-1899-FFD600",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-1.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9972382,
+          14.6178007,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Erlinda Junao-As Tricycle Optr",
+        "description": "Tricycle Terminal",
+        "styleUrl": "#icon-1899-FFD600",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-1.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0102341,
+          14.609582,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal na di q alam name",
+        "styleUrl": "#icon-1899-FFEA00-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-2.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9994544,
+          14.6152718,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 1",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0031887,
+          14.6067998,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 2",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0038167,
+          14.6086917,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 4",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0043045,
+          14.610121,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 5",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0053863,
+          14.6110682,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 7",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0088076,
+          14.6101922,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 8",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0101358,
+          14.60293,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 10",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0090571,
+          14.6081838,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 11",
+        "styleUrl": "#icon-1899-673AB7-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-4.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0136147,
+          14.6029149,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 12",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9873982,
+          14.6088005,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 13",
+        "styleUrl": "#icon-1899-673AB7-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-4.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.993951,
+          14.6188365,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 14",
+        "styleUrl": "#icon-1899-673AB7-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-4.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9914108,
+          14.6145668,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 15",
+        "styleUrl": "#icon-1899-673AB7-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-4.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9981713,
+          14.6104986,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 16",
+        "styleUrl": "#icon-1899-673AB7-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-4.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0018405,
+          14.6031633,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 17",
+        "styleUrl": "#icon-1899-673AB7-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-4.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.990328,
+          14.6027648,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 18",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9960143,
+          14.6016227,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 19",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9973447,
+          14.6076651,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 20",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9885041,
+          14.6119425,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 21",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9916279,
+          14.6226463,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 22",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9894178,
+          14.6186698,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 23",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.006521,
+          14.6049715,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 24",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0119284,
+          14.6059682,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 25",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.0005428,
+          14.6123803,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 26",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9927966,
+          14.6084144,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 27",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.9953697,
+          14.6146262,
+          0
+        ]
+      },
+      "properties": {
+        "name": "Tricycle Terminal 28",
+        "styleUrl": "#icon-1899-0288D1-nodesc",
+        "icon-scale": 1,
+        "icon-offset": [
+          32,
+          64
+        ],
+        "icon-offset-units": [
+          "pixels",
+          "insetPixels"
+        ],
+        "icon": "images/icon-3.png"
+      }
+    }
+  ]
+}

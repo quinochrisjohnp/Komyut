@@ -21,7 +21,7 @@ export default function SavedRoutesScreen() {
   const router = useRouter();
   const { user } = useUser();
 
-  const { savedRoutes, isLoading, deleteSavedRoute, loadData } =
+  const { savedRoutes = [], isLoading, deleteSavedRoute, loadData } =
     useSavedRoutes(user?.id);
 
   const [search, setSearch] = useState("");
@@ -34,9 +34,11 @@ export default function SavedRoutesScreen() {
     }, [loadData, user?.id])
   );
 
-  const filteredRoutes = savedRoutes.filter((r) =>
-    r.type?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredRoutes = Array.isArray(savedRoutes)
+    ? savedRoutes.filter((r) =>
+        r.type?.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
 
   const confirmUpdate = (item) => {
     Alert.alert("Update Route", "Do you want to update?", [
@@ -88,7 +90,7 @@ export default function SavedRoutesScreen() {
 
           {isLoading ? (
             <ActivityIndicator size="large" style={{ marginTop: 50 }} />
-          ) : savedRoutes.length === 0 ? (
+          ) : !Array.isArray(savedRoutes) || savedRoutes.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Image
                 source={require("../../assets/images/komyut-logo.png")}
@@ -97,7 +99,7 @@ export default function SavedRoutesScreen() {
               />
 
               <Text style={styles.subtitle}>
-                Hey, {user?.firstName || "Traveler"}!
+                Hey, {user?.username || "Traveler"}!
               </Text>
               <Text style={styles.message}>
                 You have no saved routes{"\n"}Ready to plan your trip?

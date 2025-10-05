@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect,  useCallback } from "react";
 import {
   View,
   Text,
@@ -8,95 +8,188 @@ import {
   ScrollView,
   TextInput,
   FlatList,
-  Keyboard,
   Alert,
+  Keyboard,
 } from "react-native";
 import BottomNav from "../../components/BottomNav";
 import { WebView } from "react-native-webview";
-import debounce from "lodash.debounce";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSearchRoutes } from "../../hooks/useSearchRoutes";
+import { useAuth } from "@clerk/clerk-expo"; // if you're using Clerk
+import { useRouter } from "expo-router";
+import { useUser } from "@clerk/clerk-expo";
+const API_URL = "http://10.0.2.2:5001";  // Note trailing slash
 
+
+// GeoJSON routes
+import tricycleRoutesGeoJSON from "../../assets/routeData/tricycle_terminals.json";
+import jeepneyRoutesGeoJSON from "../../assets/routeData/jeepney_routes.json";
+import suvRoutesGeoJSON from "../../assets/routeData/suv_routes.json";
+import busRoutesGeoJSON from "../../assets/routeData/bus_routes.json";
+
+// ---- CONFIG ----
 const GOOGLE_MAPS_API_KEY = 'AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI';
 const MAP_ID = 'c189603921f4de17a7419bb7';
+
+
+// ---- FARE CONFIGURATION ----
+const TRANSPORT_CONFIG = {
+  walking: {
+    speed: 5, // km/h
+    fare: 0,
+    color: "#28a745"
+  },
+  jeepney: {
+    baseFare: 13,
+    additionalPerKm: 2,
+    speed: 20, // km/h
+    color: "#ffc107"
+  },
+  tricycle: {
+    baseFare: 15,
+    additionalPerKm: 8,
+    speed: 25, // km/h
+    color: "#007bff"
+  },
+  bus: {
+    baseFare: 15,
+    additionalPerKm: 1.5,
+    speed: 30, // km/h
+    color: "#dc3545"
+  }
+};
 
 // ---- HTML MAP ----
 const htmlContent = `
 <!DOCTYPE html>
 <html>
   <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
     <style>
-      html, body, #map { height: 100%; margin: 0; padding: 0; }
+      html, body, #map {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=geometry"></script>
+  </head>
+  <body>
+    <div id="map"></div>
     <script>
-      let map;
-      let currentMarker = null;
-      let polyline = null;
+      let map, polylines = [];
+      let geoJsonLayers = [];
 
       function initMap() {
         const center = { lat: 14.6078, lng: 120.9946 };
         map = new google.maps.Map(document.getElementById('map'), {
-          center: center,
+          center,
           zoom: 14.5,
-          mapId: '${MAP_ID}',
           disableDefaultUI: true,
           clickableIcons: false,
           gestureHandling: 'greedy',
         });
       }
 
-      function moveTo(lat, lng) {
-        const newPos = new google.maps.LatLng(lat, lng);
-        map.panTo(newPos);
-        if (currentMarker) currentMarker.setMap(null);
-        currentMarker = new google.maps.Marker({ position: newPos, map: map });
+      // ✅ load GeoJSON with default styling
+      function loadGeoJSON(data) {
+        const layer = new google.maps.Data({ map: map });
+        layer.addGeoJson(data);
+        // No custom style → default neutral styling
+        geoJsonLayers.push(layer);
       }
 
-      function drawPolyline(encoded) {
-        try {
-          if (polyline) polyline.setMap(null);
-          const decoded = google.maps.geometry.encoding.decodePath(encoded);
-          polyline = new google.maps.Polyline({
-            path: decoded,
-            geodesic: true,
-            strokeColor: "#007AFF",
-            strokeOpacity: 0.8,
-            strokeWeight: 5,
-          });
-          polyline.setMap(map);
-          const bounds = new google.maps.LatLngBounds();
-          decoded.forEach(p => bounds.extend(p));
-          map.fitBounds(bounds);
-        } catch(e) { 
-          console.error("Polyline error", e); 
-        }
+      function clearGeoJSON() {
+        geoJsonLayers.forEach(l => l.setMap(null));
+        geoJsonLayers = [];
       }
 
+      // ✅ draw decoded steps as plain neutral lines
+      function drawRouteSteps(steps) {
+        polylines.forEach(p => p.setMap(null));
+        polylines = [];
+
+        steps.forEach(step => {
+          if (step.polyline && step.polyline.points) {
+            const decoded = google.maps.geometry.encoding.decodePath(step.polyline.points);
+
+            const polyline = new google.maps.Polyline({
+              path: decoded,
+              geodesic: true,
+              strokeOpacity: 1.0,
+              strokeWeight: 3,
+            });
+
+            polyline.setMap(map);
+            polylines.push(polyline);
+          }
+        });
+      }
+
+      // ✅ handle messages
       function handleMessage(event) {
         try {
-          const data = JSON.parse(event.data);
-          if (data.lat && data.lng) {
-            moveTo(data.lat, data.lng);
+          const payload = JSON.parse(event.data);
+
+          if (payload.steps) {
+            drawRouteSteps(payload.steps);
           }
-          if (data.polyline) {
-            drawPolyline(data.polyline);
+
+          if (payload.geojson) {
+            clearGeoJSON();
+            if (payload.geojson.jeepney) loadGeoJSON(payload.geojson.jeepney);
+            if (payload.geojson.tricycle) loadGeoJSON(payload.geojson.tricycle);
+            if (payload.geojson.bus) loadGeoJSON(payload.geojson.bus);
+            if (payload.geojson.suv) loadGeoJSON(payload.geojson.suv);
           }
         } catch (e) {
-          console.error('Failed to parse message', e);
+          console.error("GeoJSON message error:", e);
         }
       }
 
       window.addEventListener('message', handleMessage);
       document.addEventListener('message', handleMessage);
+
+      // Initialize map
+      window.onload = initMap;
     </script>
-  </head>
-  <body onload="initMap()">
-    <div id="map"></div>
   </body>
 </html>
 `;
 
+
+// ---- UTILITY FUNCTIONS ----
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function calculateFare(mode, distance) {
+  const config = TRANSPORT_CONFIG[mode];
+  if (!config) return 0;
+  
+  if (mode === 'walking') return 0;
+  
+  const additionalDistance = Math.max(0, distance - 4); // First 4km covered by base fare
+  return Math.ceil(config.baseFare + (additionalDistance * config.additionalPerKm));
+}
+
+function calculateDuration(mode, distance) {
+  const config = TRANSPORT_CONFIG[mode];
+  if (!config) return 0;
+  
+  const hours = distance / config.speed;
+  return Math.ceil(hours * 60); // Convert to minutes
+}
+
+// ---- SCREEN ----
 export default function RoutesScreen() {
   const [loadingRoutes, setLoadingRoutes] = useState(false);
   const [quickRoute, setQuickRoute] = useState(null);
@@ -105,420 +198,473 @@ export default function RoutesScreen() {
 
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
+  const [startCoords, setStartCoords] = useState(null);
+  const [endCoords, setEndCoords] = useState(null);
+  const { userId } = useAuth(); // Clerk gives you the authenticated user id
+  const router = useRouter();
 
+  // 🔎 Autocomplete states
   const [startPredictions, setStartPredictions] = useState([]);
   const [endPredictions, setEndPredictions] = useState([]);
-  const [startSuggestion, setStartSuggestion] = useState("");
-  const [endSuggestion, setEndSuggestion] = useState("");
   const [showStartDropdown, setShowStartDropdown] = useState(false);
   const [showEndDropdown, setShowEndDropdown] = useState(false);
 
-  const [isStudent, setIsStudent] = useState(false);
-
   const webviewRef = useRef(null);
 
-  // ---- HELPERS ----
-  const kmFromMeters = (m) => Math.ceil(m / 1000);
+  const saveRoute = useCallback(
+    async ({ starting_loc, destination_loc, event_date, event_time }) => {
+      if (!userId || !starting_loc || !destination_loc) {
+        Alert.alert("Error", "All fields are required.");
+        return;
+      }
 
-  // Simplified Sampaloc Fare Calculator
-  const fareCalculator = (mode, km) => {
-    const roundedKm = Math.ceil(km);
-    if (mode === "walking") return 0;
-    if (mode === "jeep") return 13;
-    if (mode === "ejeep") return 15;
-    if (mode === "tricycle") return roundedKm < 1 ? 30 : 30 + (roundedKm - 1) * 50;
-    return 0; // fallback
-  };
+      try {
+        const response = await fetch(`${API_URL}/api/search_routes`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            starting_loc,
+            destination_loc,
+            event_time,
+            event_date,
+            user_id: userId,
+          }),
+        });
 
-  // For Sampaloc, prioritize short-distance modes
-  const chooseLocalModeByKm = (km) => {
-    if (km <= 1) return "tricycle";
-    if (km <= 3) return "jeep";
-    if (km <= 4) return "ejeep";
-    return "walking"; // anything beyond 4km usually leaves Sampaloc
-  };
+        if (!response.ok) throw new Error("Failed to save route");
+        const newRoute = await response.json();
+        setRoutes((prev) => [newRoute, ...prev]);
+        return newRoute;
+      } catch (error) {
+        console.error("Error saving route:", error);
+        Alert.alert("Error", "Could not save route.");
+      }
+    },
+    [userId]
+  );
 
 
-  const mapGoogleStepToMode = (step, kmForStep = 0) => {
-    if (step.travel_mode === "WALKING") return "walking";  
-
-    if (step.travel_mode === "TRANSIT") {
-      const vehicle = step.transit_details?.line?.vehicle?.type || "";
-      if (vehicle === "BUS" || vehicle === "MINIBUS") return "ejeep";  // treat bus/minibus as e-jeep
-      if (vehicle === "SHARED_TAXI") return "jeep";                    // treat shared taxi as jeep
-      return "jeep"; // fallback
+  // ---- Send GeoJSON to WebView when map loads ----
+  const sendGeoJSON = () => {
+    if (webviewRef.current) {
+      try {
+        webviewRef.current.postMessage(JSON.stringify({
+          geojson: {
+            jeepney: jeepneyRoutesGeoJSON,
+            tricycle: tricycleRoutesGeoJSON,
+            bus: busRoutesGeoJSON,
+            suv: suvRoutesGeoJSON,
+          }
+        }));
+      } catch (e) {
+        console.error("Failed to send geojson to webview:", e);
+      }
     }
-
-    if (step.travel_mode === "DRIVING") {
-      return chooseLocalModeByKm(kmForStep); // estimate based on distance
-    }
-
-    return "walking"; // default
   };
 
+  // optional: send on mount too (in case webview.load event fired very quickly)
+  useEffect(() => {
+    // small delay may help if webview not ready immediately
+    const t = setTimeout(() => {
+      sendGeoJSON();
+    }, 600);
+    return () => clearTimeout(t);
+  }, []);
 
-  const enrichStepsWithFare = (steps) => {
-    return steps.map((s) => {
-      const km = kmFromMeters(s.distance?.value || 0);
-      const mode = mapGoogleStepToMode(s, km);
-      const fare = fareCalculator(mode, km, isStudent);
-      return { ...s, localMode: mode, localFare: fare };
+  // ---- Get coordinates from place_id ----
+  const getPlaceDetails = async (placeId) => {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data.status === 'OK' && data.result?.geometry?.location) {
+        return {
+          lat: data.result.geometry.location.lat,
+          lng: data.result.geometry.location.lng
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting place details:', error);
+      return null;
+    }
+  };
+
+  // ---- Get directions from Google ----
+  const getGoogleDirections = async (origin, destination, mode = 'transit') => {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data.status === 'OK' && data.routes.length > 0) {
+        return data.routes[0];
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting directions:', error);
+      return null;
+    }
+  };
+
+  // ---- Find nearest public transport ----
+  const findNearestTransport = (coords, transportType) => {
+    const routes = transportType === 'jeepney' ? jeepneyRoutesGeoJSON : tricycleRoutesGeoJSON;
+    let nearest = null;
+    let minDistance = Infinity;
+    
+    routes.features?.forEach(feature => {
+      if (feature.geometry.type === 'LineString') {
+        const coordinates = feature.geometry.coordinates;
+        coordinates.forEach(coord => {
+          const distance = calculateDistance(
+            coords.lat, coords.lng,
+            coord[1], coord[0] // GeoJSON uses [lng, lat]
+          );
+          if (distance < minDistance) {
+            minDistance = distance;
+            nearest = {
+              coords: { lat: coord[1], lng: coord[0] },
+              distance,
+              properties: feature.properties
+            };
+          }
+        });
+      }
     });
+    
+    return nearest;
   };
 
-  const modeLabel = (mode) => {
-    switch (mode) {
-      case "jeep": return "Jeepney";
-      case "ejeep": return "E-Jeep";
-      case "uv_traditional": return "UV (Traditional)";
-      case "uv_modern": return "UV (Modern)";
-      case "tricycle": return "Tricycle";
-      case "walking": return "Walking";
-      default: return mode;
+  // ---- Generate route steps ----
+  const generateRouteSteps = async (origin, destination, prioritizeTime = false) => {
+    const steps = [];
+    let totalFare = 0;
+    let totalDuration = 0;
+    let totalDistance = 0;
+
+    // Get walking route as fallback
+    const walkingRoute = await getGoogleDirections(origin, destination, 'walking');
+    
+    if (!walkingRoute) {
+      throw new Error('Unable to find route');
     }
+
+    // Check if walking distance is reasonable (< 2km for affordable, < 1km for fastest)
+    const walkingDistance = walkingRoute.legs[0].distance.value / 1000; // Convert to km
+    const maxWalkingDistance = prioritizeTime ? 1 : 2;
+    
+    if (walkingDistance <= maxWalkingDistance) {
+      // Pure walking route
+      const duration = calculateDuration('walking', walkingDistance);
+      steps.push({
+        mode: 'walking',
+        instructions: `Walk to destination (${walkingDistance.toFixed(1)} km)`,
+        duration: `${duration} mins`,
+        distance: `${walkingDistance.toFixed(1)} km`,
+        fare: 0,
+        polyline: {
+          points: walkingRoute.overview_polyline.points
+        },
+        color: TRANSPORT_CONFIG.walking.color
+      });
+      
+      totalDuration = duration;
+      totalDistance = walkingDistance;
+    } else {
+      // Multi-modal route
+      if (prioritizeTime) {
+        // Fastest route: Try tricycle first, then jeepney
+        const nearestTricycle = findNearestTransport(origin, 'tricycle');
+        const nearestJeepney = findNearestTransport(origin, 'jeepney');
+        
+        if (nearestTricycle && nearestTricycle.distance < 0.5) {
+          // Use tricycle
+          const walkToTricycle = nearestTricycle.distance;
+          const tricycleDistance = calculateDistance(
+            nearestTricycle.coords.lat, nearestTricycle.coords.lng,
+            destination.lat, destination.lng
+          );
+          const walkToDestination = 0.2; // Assume 200m walk from drop-off
+          
+          // Walking to tricycle
+          if (walkToTricycle > 0.1) {
+            const walkDuration = calculateDuration('walking', walkToTricycle);
+            steps.push({
+              mode: 'walking',
+              instructions: `Walk to tricycle terminal (${(walkToTricycle * 1000).toFixed(0)}m)`,
+              duration: `${walkDuration} mins`,
+              distance: `${(walkToTricycle * 1000).toFixed(0)}m`,
+              fare: 0,
+              color: TRANSPORT_CONFIG.walking.color
+            });
+            totalDuration += walkDuration;
+            totalDistance += walkToTricycle;
+          }
+          
+          // Tricycle ride
+          const tricycleFare = calculateFare('tricycle', tricycleDistance);
+          const tricycleDuration = calculateDuration('tricycle', tricycleDistance);
+          steps.push({
+            mode: 'tricycle',
+            instructions: `Ride tricycle to near destination`,
+            duration: `${tricycleDuration} mins`,
+            distance: `${tricycleDistance.toFixed(1)} km`,
+            fare: tricycleFare,
+            color: TRANSPORT_CONFIG.tricycle.color
+          });
+          totalFare += tricycleFare;
+          totalDuration += tricycleDuration;
+          totalDistance += tricycleDistance;
+          
+          // Walk to final destination
+          const finalWalkDuration = calculateDuration('walking', walkToDestination);
+          steps.push({
+            mode: 'walking',
+            instructions: `Walk to destination (${(walkToDestination * 1000).toFixed(0)}m)`,
+            duration: `${finalWalkDuration} mins`,
+            distance: `${(walkToDestination * 1000).toFixed(0)}m`,
+            fare: 0,
+            color: TRANSPORT_CONFIG.walking.color
+          });
+          totalDuration += finalWalkDuration;
+          totalDistance += walkToDestination;
+          
+        } else {
+          // Fallback to mixed jeepney route
+          return generateJeepneyRoute(origin, destination, steps, false);
+        }
+      } else {
+        // Affordable route: Prioritize jeepney
+        return generateJeepneyRoute(origin, destination, steps, true);
+      }
+    }
+
+    return {
+      steps,
+      totalFare,
+      totalDuration,
+      totalDistance,
+      summary: {
+        duration: `${totalDuration} mins`,
+        distance: `${totalDistance.toFixed(1)} km`,
+        fare: totalFare
+      }
+    };
   };
 
-  // ---- SEARCH ----
+  const generateJeepneyRoute = async (origin, destination, steps, affordable = true) => {
+    let totalFare = 0;
+    let totalDuration = 0;
+    let totalDistance = 0;
+
+    const nearestJeepney = findNearestTransport(origin, 'jeepney');
+    
+    if (nearestJeepney && nearestJeepney.distance < 1) {
+      const walkToJeepney = nearestJeepney.distance;
+      const jeepneyDistance = calculateDistance(
+        nearestJeepney.coords.lat, nearestJeepney.coords.lng,
+        destination.lat, destination.lng
+      );
+      const walkToDestination = 0.3; // Assume 300m walk from jeepney stop
+      
+      // Walking to jeepney
+      if (walkToJeepney > 0.1) {
+        const walkDuration = calculateDuration('walking', walkToJeepney);
+        steps.push({
+          mode: 'walking',
+          instructions: `Walk to jeepney stop (${(walkToJeepney * 1000).toFixed(0)}m)`,
+          duration: `${walkDuration} mins`,
+          distance: `${(walkToJeepney * 1000).toFixed(0)}m`,
+          fare: 0,
+          color: TRANSPORT_CONFIG.walking.color
+        });
+        totalDuration += walkDuration;
+        totalDistance += walkToJeepney;
+      }
+      
+      // Jeepney ride
+      const jeepneyFare = calculateFare('jeepney', jeepneyDistance);
+      const jeepneyDuration = calculateDuration('jeepney', jeepneyDistance);
+      const routeName = nearestJeepney.properties?.name || 'Jeepney Route';
+      
+      steps.push({
+        mode: 'jeepney',
+        instructions: `Ride ${routeName} jeepney`,
+        duration: `${jeepneyDuration} mins`,
+        distance: `${jeepneyDistance.toFixed(1)} km`,
+        fare: jeepneyFare,
+        color: TRANSPORT_CONFIG.jeepney.color
+      });
+      totalFare += jeepneyFare;
+      totalDuration += jeepneyDuration;
+      totalDistance += jeepneyDistance;
+      
+      // Walk to final destination
+      const finalWalkDuration = calculateDuration('walking', walkToDestination);
+      steps.push({
+        mode: 'walking',
+        instructions: `Walk to destination (${(walkToDestination * 1000).toFixed(0)}m)`,
+        duration: `${finalWalkDuration} mins`,
+        distance: `${(walkToDestination * 1000).toFixed(0)}m`,
+        fare: 0,
+        color: TRANSPORT_CONFIG.walking.color
+      });
+      totalDuration += finalWalkDuration;
+      totalDistance += walkToDestination;
+    } else {
+      // No nearby public transport, suggest walking or tricycle
+      const walkingDistance = calculateDistance(origin.lat, origin.lng, destination.lat, destination.lng);
+      
+      if (!affordable && walkingDistance > 1) {
+        // Suggest tricycle for faster route
+        const tricycleFare = calculateFare('tricycle', walkingDistance);
+        const tricycleDuration = calculateDuration('tricycle', walkingDistance);
+        
+        steps.push({
+          mode: 'tricycle',
+          instructions: `Take tricycle directly to destination (no nearby jeepney routes)`,
+          duration: `${tricycleDuration} mins`,
+          distance: `${walkingDistance.toFixed(1)} km`,
+          fare: tricycleFare,
+          color: TRANSPORT_CONFIG.tricycle.color
+        });
+        totalFare = tricycleFare;
+        totalDuration = tricycleDuration;
+        totalDistance = walkingDistance;
+      } else {
+        // Walking route
+        const walkingDuration = calculateDuration('walking', walkingDistance);
+        steps.push({
+          mode: 'walking',
+          instructions: `Walk to destination (no nearby public transport)`,
+          duration: `${walkingDuration} mins`,
+          distance: `${walkingDistance.toFixed(1)} km`,
+          fare: 0,
+          color: TRANSPORT_CONFIG.walking.color
+        });
+        totalDuration = walkingDuration;
+        totalDistance = walkingDistance;
+      }
+    }
+
+    return {
+      steps,
+      totalFare,
+      totalDuration,
+      totalDistance,
+      summary: {
+        duration: `${totalDuration} mins`,
+        distance: `${totalDistance.toFixed(1)} km`,
+        fare: totalFare
+      }
+    };
+  };
+
+  // ---- Autocomplete ----
   const searchPlaces = async (text, setPredictions, setShowDropdown) => {
     if (text.length < 2) {
       setPredictions([]);
       setShowDropdown(false);
       return;
     }
+
     try {
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
-          text
-        )}&key=${GOOGLE_MAPS_API_KEY}&components=country:ph&location=14.6078,120.9946&radius=30000`
-      );
+      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+        text
+      )}&key=${GOOGLE_MAPS_API_KEY}&components=country:ph&location=14.6078,120.9946&radius=30000`;
+
+      const res = await fetch(url);
       const data = await res.json();
 
-      if (data.status === 'OK') {
-        // Filter results containing Sampaloc
-        const filtered = (data.predictions || []).filter(p =>
-          p.description.toLowerCase().includes("sampaloc")
-        );
-        setPredictions(filtered);
-        setShowDropdown(filtered.length > 0);
+      if (data.status === "OK") {
+        setPredictions(data.predictions);
+        setShowDropdown(true);
       } else {
-        console.error("Places API error:", data.status);
         setPredictions([]);
         setShowDropdown(false);
       }
     } catch (err) {
-      console.error("Search error:", err);
+      console.error("Places API error:", err);
       setPredictions([]);
       setShowDropdown(false);
     }
   };
 
-  const debouncedSearchStart = useRef(
-    debounce(async (t) => {
-      await searchPlaces(t, (results) => {
-        setStartPredictions(results);
-        setStartSuggestion(results.length > 0 ? results[0].description : "");
-      }, setShowStartDropdown);
-    }, 300)
-  ).current;
-
-  const debouncedSearchEnd = useRef(
-    debounce(async (t) => {
-      await searchPlaces(t, (results) => {
-        setEndPredictions(results);
-        setEndSuggestion(results.length > 0 ? results[0].description : "");
-      }, setShowEndDropdown);
-    }, 300)
-  ).current;
-
-  const handleSearchStart = (text) => {
+  const handleStartChange = (text) => {
     setStart(text);
-    debouncedSearchStart(text);
+    searchPlaces(text, setStartPredictions, setShowStartDropdown);
   };
 
-  const handleSearchEnd = (text) => {
+  const handleEndChange = (text) => {
     setEnd(text);
-    debouncedSearchEnd(text);
+    searchPlaces(text, setEndPredictions, setShowEndDropdown);
   };
 
-  const getPlaceId = async (address) => {
-    try {
-      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-        address
-      )}&key=${GOOGLE_MAPS_API_KEY}&components=country:PH&bounds=14.5500,120.9200|14.6600,121.0700`;
-      
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (data.status === 'OK' && data.results.length > 0) {
-        // Prefer Sampaloc results
-        const sampalocResult = data.results.find(r =>
-          r.formatted_address.toLowerCase().includes("sampaloc")
-        );
-        return sampalocResult ? sampalocResult.place_id : data.results[0].place_id;
-      }
-      return null;
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      return null;
-    }
-  };
-
-  // ---- Distance Helper ----
-  const haversineDistanceKm = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Earth radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-
-  const computeRoutes = async () => {
-    if (!start.trim() || !end.trim()) {
-      Alert.alert("Error", "Please enter both start and destination");
-      return;
-    }
-    
-    Keyboard.dismiss();
+  const handleStartSelection = async (item) => {
+    setStart(item.description);
+    setStartPredictions([]);
     setShowStartDropdown(false);
+    Keyboard.dismiss();
+    
+    // Get coordinates
+    const coords = await getPlaceDetails(item.place_id);
+    setStartCoords(coords);
+  };
+
+  const handleEndSelection = async (item) => {
+    setEnd(item.description);
+    setEndPredictions([]);
     setShowEndDropdown(false);
+    Keyboard.dismiss();
+    
+    // Get coordinates
+    const coords = await getPlaceDetails(item.place_id);
+    setEndCoords(coords);
+  };
+
+  // ---- MAIN computeRoutes ----
+  const computeRoutes = async () => {
+    if (!start || !end) {
+      return Alert.alert("Error", "Enter start and destination");
+    }
+
+    if (!startCoords || !endCoords) {
+      return Alert.alert("Error", "Please select locations from the dropdown");
+    }
+
     setLoadingRoutes(true);
     setQuickRoute(null);
     setAffordableRoute(null);
     setSelectedRoute(null);
 
     try {
-      const startPid = await getPlaceId(start);
-      const endPid = await getPlaceId(end);
-      
-      if (!startPid || !endPid) {
-        Alert.alert("Error", "Could not find one of the locations. Please try different search terms.");
-        setLoadingRoutes(false);
-        return;
-      }
-
-      // Get coordinates for distance calculation
-      const geoUrl = (pid) =>
-        `https://maps.googleapis.com/maps/api/geocode/json?place_id=${pid}&key=${GOOGLE_MAPS_API_KEY}`;
-      
-      const [sRes, eRes] = await Promise.all([
-        fetch(geoUrl(startPid)),
-        fetch(geoUrl(endPid)),
+      // Generate both routes
+      const [affordableRouteData, quickRouteData] = await Promise.all([
+        generateRouteSteps(startCoords, endCoords, false), // Affordable
+        generateRouteSteps(startCoords, endCoords, true)   // Quick
       ]);
-      
-      const sData = await sRes.json();
-      const eData = await eRes.json();
-      
-      if (sData.status !== 'OK' || eData.status !== 'OK') {
-        throw new Error("Failed to get location coordinates");
-      }
-      
-      const sLoc = sData.results[0].geometry.location;
-      const eLoc = eData.results[0].geometry.location;
-
-      const straightKm = haversineDistanceKm(
-        sLoc.lat,
-        sLoc.lng,
-        eLoc.lat,
-        eLoc.lng
-      );
-
-      // Short-distance fallback (≤1.5km)
-      if (straightKm <= 1.5) {
-        // For short distances, still call Google Directions API to get actual routes and polylines
-        const origin = `place_id:${startPid}`;
-        const destination = `place_id:${endPid}`;
-
-        try {
-          // Get walking route
-          const walkingUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(
-            origin
-          )}&destination=${encodeURIComponent(
-            destination
-          )}&mode=walking&key=${GOOGLE_MAPS_API_KEY}`;
-
-          // Get transit route (if available)
-          const transitUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(
-            origin
-          )}&destination=${encodeURIComponent(
-            destination
-          )}&mode=transit&departure_time=now&key=${GOOGLE_MAPS_API_KEY}`;
-
-          const [walkRes, transitRes] = await Promise.all([
-            fetch(walkingUrl),
-            fetch(transitUrl)
-          ]);
-
-          const walkData = await walkRes.json();
-          const transitData = await transitRes.json();
-
-          // Process walking route
-          if (walkData.status === 'OK' && walkData.routes.length > 0) {
-            const walkRoute = walkData.routes[0];
-            const walkSteps = enrichStepsWithFare(walkRoute.legs[0].steps);
-            
-            setAffordableRoute({
-              mode: "Cheapest Route",
-              duration: walkRoute.legs[0].duration.text,
-              distance: walkRoute.legs[0].distance.text,
-              fare: "0.00",
-              steps: walkSteps,
-              polyline: walkRoute.overview_polyline.points,
-            });
-          } else {
-            // Fallback to estimated walking
-            setAffordableRoute({
-              mode: "Cheapest Route",
-              duration: `${Math.max(1, Math.round(straightKm / 0.07))} mins (walking est)`,
-              distance: `${straightKm.toFixed(2)} km`,
-              fare: "0.00",
-              steps: [{ localMode: "walking", localFare: 0, html_instructions: "Walk to destination" }],
-              polyline: null,
-            });
-          }
-
-          // Process transit route or use tricycle fallback
-          if (transitData.status === 'OK' && transitData.routes.length > 0) {
-            const transitRoute = transitData.routes[0];
-            const transitSteps = enrichStepsWithFare(transitRoute.legs[0].steps);
-            const totalFare = transitSteps.reduce((sum, s) => sum + s.localFare, 0);
-            
-            setQuickRoute({
-              mode: "Fastest Route",
-              duration: transitRoute.legs[0].duration.text,
-              distance: transitRoute.legs[0].distance.text,
-              fare: totalFare.toFixed(2),
-              steps: transitSteps,
-              polyline: transitRoute.overview_polyline.points,
-            });
-          } else {
-            // Fallback to tricycle option
-            const tricycleFare = fareCalculator("tricycle", straightKm, isStudent);
-            setQuickRoute({
-              mode: "Fastest Route",
-              duration: `${Math.max(1, Math.round(straightKm / 0.25))} mins (tricycle est)`,
-              distance: `${straightKm.toFixed(2)} km`,
-              fare: tricycleFare.toFixed(2),
-              steps: [{
-                localMode: "tricycle",
-                localFare: tricycleFare,
-                html_instructions: "Take tricycle to destination"
-              }],
-              polyline: null,
-            });
-          }
-
-        } catch (error) {
-          console.error("Short distance route error:", error);
-          // Fallback to original simple routes
-          const walkTime = Math.max(1, Math.round(straightKm / 0.07));
-          const tricycleTime = Math.max(1, Math.round(straightKm / 0.25));
-          const tricycleFare = fareCalculator("tricycle", straightKm, isStudent);
-          
-          setAffordableRoute({
-            mode: "Cheapest Route",
-            duration: `${walkTime} mins (walking est)`,
-            distance: `${straightKm.toFixed(2)} km`,
-            fare: "0.00",
-            steps: [{ localMode: "walking", localFare: 0, html_instructions: "Walk to destination" }],
-            polyline: null,
-          });
-
-          setQuickRoute({
-            mode: "Fastest Route",
-            duration: `${tricycleTime} mins (tricycle est)`,
-            distance: `${straightKm.toFixed(2)} km`,
-            fare: tricycleFare.toFixed(2),
-            steps: [{
-              localMode: "tricycle",
-              localFare: tricycleFare,
-              html_instructions: "Take tricycle to destination"
-            }],
-            polyline: null,
-          });
-        }
-
-        setLoadingRoutes(false);
-        return;
-      }
-
-      // For longer distances, use Google Directions API
-      const origin = `place_id:${startPid}`;
-      const destination = `place_id:${endPid}`;
-
-      const baseUrl = (pref) =>
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(
-          origin
-        )}&destination=${encodeURIComponent(
-          destination
-        )}&alternatives=true&region=ph&mode=transit&departure_time=now&transit_routing_preference=${pref}&key=${GOOGLE_MAPS_API_KEY}`;
-
-      const [res1, res2] = await Promise.all([
-        fetch(baseUrl("less_walking")),
-        fetch(baseUrl("fewer_transfers")),
-      ]);
-      
-      const data1 = await res1.json();
-      const data2 = await res2.json();
-
-      const allRoutes = [...(data1.routes || []), ...(data2.routes || [])];
-      
-      if (allRoutes.length === 0) {
-        Alert.alert("No Routes", "No available routes found. Try different locations or check your internet connection.");
-        setLoadingRoutes(false);
-        return;
-      }
-
-      // Process routes with fares
-      const routesWithFares = allRoutes.map((route) => {
-        const steps = enrichStepsWithFare(route.legs[0].steps);
-        const totalFare = steps.reduce((sum, s) => sum + s.localFare, 0);
-        return {
-          route,
-          steps,
-          totalFare,
-          duration: route.legs[0].duration.value, // seconds
-        };
-      });
-
-      // Find cheapest route
-      const cheapest = routesWithFares.reduce((a, b) =>
-        a.totalFare < b.totalFare ? a : b
-      );
-
-      // Find fastest route
-      const fastest = routesWithFares.reduce((a, b) =>
-        a.duration < b.duration ? a : b
-      );
-
-      // Set routes
-      setQuickRoute({
-        mode: "Fastest Route",
-        duration: fastest.route.legs[0].duration.text,
-        distance: fastest.route.legs[0].distance.text,
-        fare: fastest.totalFare.toFixed(2),
-        steps: fastest.steps,
-        polyline: fastest.route.overview_polyline.points,
-      });
 
       setAffordableRoute({
-        mode: "Cheapest Route",
-        duration: cheapest.route.legs[0].duration.text,
-        distance: cheapest.route.legs[0].distance.text,
-        fare: cheapest.totalFare.toFixed(2),
-        steps: cheapest.steps,
-        polyline: cheapest.route.overview_polyline.points,
+        type: 'affordable',
+        title: '💰 Most Affordable',
+        ...affordableRouteData.summary,
+        steps: affordableRouteData.steps,
+        routeData: affordableRouteData
       });
 
-      
-    } catch (err) {
-      console.error("Directions error:", err);
-      Alert.alert("Error", "Something went wrong while fetching routes. Please check your internet connection and try again.");
+      setQuickRoute({
+        type: 'fastest',
+        title: '⚡ Fastest',
+        ...quickRouteData.summary,
+        steps: quickRouteData.steps,
+        routeData: quickRouteData
+      });
+
+    } catch (error) {
+      console.error('Route calculation error:', error);
+      Alert.alert("Error", error.message || "Unable to calculate routes");
     } finally {
       setLoadingRoutes(false);
     }
@@ -526,134 +672,120 @@ export default function RoutesScreen() {
 
   const showRouteOnMap = (route) => {
     setSelectedRoute(route);
-    if (webviewRef.current && route.polyline) {
-      const message = JSON.stringify({ polyline: route.polyline });
-      webviewRef.current.postMessage(message);
+    if (webviewRef.current && route.steps) {
+      try {
+        webviewRef.current.postMessage(JSON.stringify({ 
+          steps: route.steps.filter(step => step.polyline) 
+        }));
+      } catch (e) {
+        console.error("Failed to post steps to webview:", e);
+      }
     }
   };
 
-  const handleStartSelection = (item) => {
-    setStart(item.description);
-    setStartPredictions([]);
-    setShowStartDropdown(false);
-    Keyboard.dismiss();
-  };
-
-  const handleEndSelection = (item) => {
-    setEnd(item.description);
-    setEndPredictions([]);
-    setShowEndDropdown(false);
-    Keyboard.dismiss();
-  };
-
+  // ---- UI ----
   return (
     <SafeAreaView style={styles.container}>
-      {/* Search Section */}
+      {/* 🔎 Search */}
       <View style={styles.searchContainer}>
-        {/* Start Location Input */}
-        <View style={styles.inputContainer}>
+        {/* Start Location */}
+        <View style={styles.inputWrapper}>
           <TextInput
             style={styles.input}
             placeholder="Enter start location"
             value={start}
-            onChangeText={handleSearchStart}
+            onChangeText={handleStartChange}
             onFocus={() => setShowStartDropdown(startPredictions.length > 0)}
-            onSubmitEditing={() => {
-              if (startSuggestion) {
-                setStart(startSuggestion);
-                setStartPredictions([]);
-                setShowStartDropdown(false);
-              }
-            }}
           />
+          {showStartDropdown && (
+            <View style={styles.dropdownContainer}>
+              <FlatList
+                data={startPredictions}
+                keyExtractor={(item) => item.place_id}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => handleStartSelection(item)}
+                  >
+                    <Text style={styles.dropdownText}>{item.description}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          )}
         </View>
 
-        {/* Start Predictions Dropdown */}
-        {showStartDropdown && startPredictions.length > 0 && (
-          <View style={styles.dropdownContainer}>
-            <FlatList
-              keyboardShouldPersistTaps="handled"
-              data={startPredictions}
-              keyExtractor={(item) => item.place_id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => handleStartSelection(item)}
-                >
-                  <Text style={styles.dropdownText}>{item.description}</Text>
-                </TouchableOpacity>
-              )}
-              nestedScrollEnabled={true}
-              maxHeight={150}
-            />
-          </View>
-        )}
-
-        {/* End Location Input */}
-        <View style={styles.inputContainer}>
+        {/* End Location */}
+        <View style={styles.inputWrapper}>
           <TextInput
             style={styles.input}
             placeholder="Enter destination"
             value={end}
-            onChangeText={handleSearchEnd}
+            onChangeText={handleEndChange}
             onFocus={() => setShowEndDropdown(endPredictions.length > 0)}
-            onSubmitEditing={() => {
-              if (endSuggestion) {
-                setEnd(endSuggestion);
-                setEndPredictions([]);
-                setShowEndDropdown(false);
-              }
-            }}
           />
+          {showEndDropdown && (
+            <View style={styles.dropdownContainer}>
+              <FlatList
+                data={endPredictions}
+                keyExtractor={(item) => item.place_id}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => handleEndSelection(item)}
+                  >
+                    <Text style={styles.dropdownText}>{item.description}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          )}
         </View>
 
-        {/* End Predictions Dropdown */}
-        {showEndDropdown && endPredictions.length > 0 && (
-          <View style={styles.dropdownContainer}>
-            <FlatList
-              keyboardShouldPersistTaps="handled"
-              data={endPredictions}
-              keyExtractor={(item) => item.place_id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => handleEndSelection(item)}
-                >
-                  <Text style={styles.dropdownText}>{item.description}</Text>
-                </TouchableOpacity>
-              )}
-              nestedScrollEnabled={true}
-              maxHeight={150}
-            />
-          </View>
-        )}
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={async () => {
+            try {
+              // Step 1: Compute possible routes
+              await computeRoutes();
 
-        {/* Search Button */}
-        <TouchableOpacity 
-          style={[styles.searchButton, loadingRoutes && styles.searchButtonDisabled]} 
-          onPress={computeRoutes}
-          disabled={loadingRoutes}
+              // Step 2: Save the searched route to DB
+              await saveRoute({
+                starting_loc: start,
+                destination_loc: end,
+                event_time: new Date().toTimeString().split(" ")[0], // ✅
+                event_date: new Date().toISOString().split("T")[0],
+              });
+
+              Alert.alert("Success", "Route calculated and saved!");
+            } catch (error) {
+              console.error("Find/Save error:", error);
+              Alert.alert("Error", "Could not calculate or save route.");
+            }
+          }}
         >
           <Text style={styles.searchButtonText}>
-            {loadingRoutes ? "Finding Routes..." : "Find Routes"}
+            {loadingRoutes ? "Calculating Routes..." : "Find Routes"}
           </Text>
         </TouchableOpacity>
+
+
+
       </View>
 
-      {/* Map Section */}
+      {/* Map */}
       <View style={styles.mapContainer}>
         <WebView
           ref={webviewRef}
           originWhitelist={["*"]}
           source={{ html: htmlContent }}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          onError={(error) => console.error("WebView error:", error)}
-          onHttpError={(error) => console.error("WebView HTTP error:", error)}
+          javaScriptEnabled
+          style={{ flex: 1 }}
+          onLoad={() => sendGeoJSON()}
         />
       </View>
 
-      {/* Routes Section */}
+      {/* Results */}
       <View style={styles.routesContainer}>
         {loadingRoutes && (
           <View style={styles.loadingContainer}>
@@ -664,59 +796,72 @@ export default function RoutesScreen() {
         
         {!selectedRoute ? (
           <ScrollView showsVerticalScrollIndicator={false}>
-            {quickRoute && (
-              <TouchableOpacity
-                style={styles.routeCard}
-                onPress={() => showRouteOnMap(quickRoute)}
-              >
-                <Text style={styles.routeTitle}>⚡ Quick Route</Text>
-                <Text style={styles.routeDetail}>
-                  {quickRoute.duration} • {quickRoute.distance}
-                </Text>
-                <Text style={styles.routeFare}>₱ {quickRoute.fare}</Text>
-              </TouchableOpacity>
-            )}
             {affordableRoute && (
               <TouchableOpacity
-                style={styles.routeCard}
+                style={[styles.routeCard, styles.affordableCard]}
                 onPress={() => showRouteOnMap(affordableRoute)}
               >
-                <Text style={styles.routeTitle}>💰 Affordable Route</Text>
-                <Text style={styles.routeDetail}>
+                <View style={styles.routeHeader}>
+                  <Text style={styles.routeTitle}>{affordableRoute.title}</Text>
+                  <Text style={styles.routeFare}>₱{affordableRoute.fare}</Text>
+                </View>
+                <Text style={styles.routeInfo}>
                   {affordableRoute.duration} • {affordableRoute.distance}
                 </Text>
-                <Text style={styles.routeFare}>₱ {affordableRoute.fare}</Text>
+                <Text style={styles.routePreview}>
+                  {affordableRoute.steps.length} steps • Tap to view details
+                </Text>
+              </TouchableOpacity>
+            )}
+            
+            {quickRoute && (
+              <TouchableOpacity
+                style={[styles.routeCard, styles.fastestCard]}
+                onPress={() => showRouteOnMap(quickRoute)}
+              >
+                <View style={styles.routeHeader}>
+                  <Text style={styles.routeTitle}>{quickRoute.title}</Text>
+                  <Text style={styles.routeFare}>₱{quickRoute.fare}</Text>
+                </View>
+                <Text style={styles.routeInfo}>
+                  {quickRoute.duration} • {quickRoute.distance}
+                </Text>
+                <Text style={styles.routePreview}>
+                  {quickRoute.steps.length} steps • Tap to view details
+                </Text>
               </TouchableOpacity>
             )}
           </ScrollView>
         ) : (
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.detailCard}>
-              <Text style={styles.detailTitle}>{selectedRoute.mode}</Text>
-              <Text style={styles.detailFare}>₱ {selectedRoute.fare}</Text>
+              <View style={styles.detailHeader}>
+                <Text style={styles.detailTitle}>{selectedRoute.title}</Text>
+                <Text style={styles.detailFare}>₱{selectedRoute.fare}</Text>
+              </View>
               <Text style={styles.detailInfo}>
                 {selectedRoute.duration} • {selectedRoute.distance}
               </Text>
               
-              <View style={styles.stepBox}>
-                {selectedRoute.steps.map((step, idx) => (
-                  <View key={idx} style={styles.stepItem}>
-                    <Text style={styles.stepText}>
-                      {step.html_instructions?.replace(/<[^>]+>/g, "") || "Continue"}
-                    </Text>
-                    {step.distance?.text && (
-                      <Text style={styles.stepDistance}>({step.distance.text})</Text>
-                    )}
-                    {step.localFare > 0 && (
-                      <Text style={styles.stepFare}>
-                        {modeLabel(step.localMode)} - ₱{step.localFare.toFixed(2)}
+              <View style={styles.stepsContainer}>
+                <Text style={styles.stepsTitle}>Step-by-step directions:</Text>
+                {selectedRoute.steps.map((step, index) => (
+                  <View key={index} style={styles.stepItem}>
+                    <View style={[styles.stepIcon, { backgroundColor: step.color }]}>
+                      <Text style={styles.stepNumber}>{index + 1}</Text>
+                    </View>
+                    <View style={styles.stepContent}>
+                      <Text style={styles.stepInstruction}>{step.instructions}</Text>
+                      <Text style={styles.stepDetails}>
+                        {step.duration} • {step.distance}
+                        {step.fare > 0 && ` • ₱${step.fare}`}
                       </Text>
-                    )}
+                    </View>
                   </View>
                 ))}
               </View>
               
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.backButton}
                 onPress={() => setSelectedRoute(null)}
               >
@@ -727,183 +872,269 @@ export default function RoutesScreen() {
         )}
       </View>
 
-      {/* Bottom Navigation */}
-      <View style={styles.navOverlay}>
-        <BottomNav />
-      </View>
+      <BottomNav />
     </SafeAreaView>
   );
-}
+};
 
-// ---- STYLES ----
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  searchContainer: {
-    padding: 12,
     backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
   },
-  inputContainer: {
-    position: "relative",
-    marginBottom: 8,
-    zIndex: 1,
+  searchContainer: { 
+    padding: 12, 
+    backgroundColor: "#fff", 
+    borderBottomWidth: 1, 
+    borderBottomColor: "#eee", 
+    elevation: 3,
   },
-  input: {
-    backgroundColor: "#f9f9f9",
+  searchBox: {
+    height: 44,
+    borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    backgroundColor: "#fafafa",
+  },
+  dropdown: {
+    marginBottom: 10,
+  },
+  picker: {
+    height: 44,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    backgroundColor: "#fafafa",
+  },
+  map: {
+    flex: 1,
+  },
+  routesList: {
+    maxHeight: 250,
     padding: 12,
+    backgroundColor: "#f9f9f9",
+    borderTopWidth: 1,
+    borderColor: "#eee",
+  },
+  routeCard: {
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: "#ddd",
-    fontSize: 16,
-  },
-
-  dropdownContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    marginBottom: 8,
-    elevation: 3,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
-    maxHeight: 150,
+    elevation: 2,
   },
-  dropdownItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+  affordableCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: "#28a745",
   },
-  dropdownText: {
-    fontSize: 14,
+  fastestCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: "#007AFF",
+  },
+  routeTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
     color: "#333",
+    marginBottom: 6,
   },
-  searchButton: {
+  routeDetails: {
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 10,
+  },
+  step: {
+    fontSize: 13,
+    color: "#444",
+    marginBottom: 4,
+    paddingLeft: 6,
+    borderLeftWidth: 2,
+    borderLeftColor: "#ddd",
+  },
+  viewDetailsBtn: {
+    marginTop: 6,
+    padding: 10,
+    borderRadius: 6,
     backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 14,
     alignItems: "center",
   },
-  searchButtonDisabled: {
-    backgroundColor: "#ccc",
-  },
-  searchButtonText: {
+  viewDetailsText: {
     color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: "600",
   },
   mapContainer: {
     flex: 1,
   },
-  routesContainer: {
-    flex: 1,
-    padding: 12,
+  inputWrapper: {
+    position: 'relative',
+    zIndex: 1000,
   },
-  loadingContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  loadingText: {
-    marginTop: 8,
-    color: "#666",
-  },
-  routeCard: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  routeTitle: {
-    fontWeight: "bold",
-    fontSize: 16,
-    marginBottom: 4,
-    color: "#333",
-  },
-  routeDetail: {
-    color: "#666",
-    fontSize: 14,
-  },
-  routeFare: {
-    fontWeight: "bold",
-    marginTop: 4,
-    fontSize: 16,
-    color: "#007AFF",
-  },
-  detailCard: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  detailTitle: {
-    fontWeight: "bold",
-    fontSize: 18,
-    marginBottom: 6,
-    color: "#333",
-  },
-  detailFare: {
-    fontWeight: "bold",
-    fontSize: 16,
-    marginBottom: 6,
-    color: "#007AFF",
-  },
-  detailInfo: {
-    color: "#555",
-    marginBottom: 10,
-    fontSize: 14,
-  },
-  stepBox: {
-    backgroundColor: "#f9f9f9",
-    padding: 12,
-    borderRadius: 6,
-    marginBottom: 12,
-  },
-  stepItem: {
-    marginBottom: 8,
-  },
-  stepText: {
-    fontSize: 14,
-    color: "#333",
-    marginBottom: 2,
-  },
-  stepDistance: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 2,
-  },
-  stepFare: {
-    fontSize: 12,
-    color: "#007AFF",
-    fontWeight: "bold",
-  },
-  backButton: {
-    backgroundColor: "#f0f0f0",
+  input: {
+    height: 44,
+    borderWidth: 1,
+    borderColor: "#ddd",
     borderRadius: 8,
-    padding: 12,
-    alignItems: "center",
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+    marginBottom: 6
   },
-  backButtonText: {
-    color: "#007AFF",
-    fontWeight: "bold",
-  },
-  navOverlay: {
-    position: "absolute",
-    bottom: 0,
+  dropdownContainer: {
+    position: 'absolute',
+    top: 50,
     left: 0,
     right: 0,
+    maxHeight: 160,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#eee",
+    borderRadius: 8,
+    marginTop: 4,
+    zIndex: 1001,
+    elevation: 5,
   },
+  dropdownItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f1f1"
+  },
+  dropdownText: { 
+    color: "#333",
+    fontSize: 14,
+  },
+  searchButton: {
+    marginTop: 6,
+    backgroundColor: "#007AFF",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center"
+  },
+  searchButtonText: { 
+    color: "#fff", 
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  routesContainer: { 
+    flex: 1, 
+    padding: 12,
+    backgroundColor: "#f9f9f9",
+  },
+  loadingContainer: { 
+    alignItems: "center", 
+    padding: 20 
+  },
+  loadingText: { 
+    marginTop: 8, 
+    color: "#666",
+    fontSize: 16,
+  },
+  routeHeader: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    alignItems: "center" 
+  },
+  routeFare: { 
+    fontWeight: "700",
+    fontSize: 18,
+    color: "#28a745",
+  },
+  routeInfo: { 
+    color: "#666", 
+    marginBottom: 6,
+    fontSize: 14,
+  },
+  routePreview: { 
+    color: "#999",
+    fontSize: 12,
+  },
+  detailCard: { 
+    padding: 16, 
+    backgroundColor: "#fff", 
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  detailHeader: { 
+    flexDirection: "row", 
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  detailTitle: { 
+    fontSize: 20, 
+    fontWeight: "700",
+    color: "#333",
+  },
+  detailFare: { 
+    fontSize: 18, 
+    fontWeight: "700",
+    color: "#28a745",
+  },
+  detailInfo: { 
+    color: "#666", 
+    marginVertical: 8,
+    fontSize: 16,
+  },
+  stepsContainer: { 
+    marginTop: 16 
+  },
+  stepsTitle: { 
+    fontWeight: "700", 
+    marginBottom: 12,
+    fontSize: 16,
+    color: "#333",
+  },
+  stepItem: { 
+    flexDirection: "row", 
+    marginBottom: 12,
+    alignItems: "flex-start",
+  },
+  stepIcon: { 
+    width: 32, 
+    height: 32, 
+    borderRadius: 16, 
+    alignItems: "center", 
+    justifyContent: "center", 
+    marginRight: 12,
+    marginTop: 2,
+  },
+  stepNumber: { 
+    color: "#fff", 
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  stepContent: { 
+    flex: 1 
+  },
+  stepInstruction: { 
+    fontWeight: "600",
+    fontSize: 15,
+    color: "#333",
+    marginBottom: 4,
+  },
+  stepDetails: { 
+    color: "#666",
+    fontSize: 13,
+  },
+  backButton: { 
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  backButtonText: { 
+    color: "#007AFF",
+    fontWeight: "600",
+    fontSize: 16,
+  }
 });

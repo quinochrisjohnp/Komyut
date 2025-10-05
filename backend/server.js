@@ -2,7 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import { sql } from "./config/db.js";
 import rateLimiter from "./middleware/rateLimiter.js";
-import saved_routesPath from './path/saved_routesPath.js'
+import saved_routesPath from './path/saved_routesPath.js';
+import search_routesPath from './path/search_routesPath.js';
 
 import job from "./config/cron.js";
 
@@ -35,6 +36,18 @@ async function initDB() {
       );
     `;
 
+    await sql`
+      CREATE TABLE IF NOT EXISTS search_routes (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        starting_loc VARCHAR(255) NOT NULL,
+        destination_loc VARCHAR(255) NOT NULL,
+        event_time TIME NOT NULL,
+        event_date DATE NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `;
+
     console.log("Database tables ready.");
   } catch (error) {
     console.error("Error creating tables:", error.message);
@@ -43,6 +56,7 @@ async function initDB() {
 };
 
 app.use("/api/saved_routes", saved_routesPath);
+app.use("/api/search_routes", search_routesPath);
 
 app.get("/", (req,res) => {
   res.send("It's working")

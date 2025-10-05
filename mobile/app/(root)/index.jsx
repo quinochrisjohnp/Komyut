@@ -8,6 +8,7 @@ import Animated, { SlideInUp } from 'react-native-reanimated';
 import { router } from 'expo-router';
 
 
+
 const GOOGLE_MAPS_API_KEY = 'AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI';
 const MAP_ID = 'c189603921f4de17a7419bb7';
 
