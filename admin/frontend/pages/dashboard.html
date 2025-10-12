@@ -1,4 +1,12 @@
-<div class="content-body">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div class="content-body">
   <h1 class="dash-title">Dashboard</h1>
   <section class="dash-page" aria-label="Dashboard">
 
@@ -6,41 +14,37 @@
     <div class="kpis">
       <article class="kpi">
         <p class="kpi__label">System Status</p>
-        <p class="kpi__value ok">ACTIVE</p>
+        <p class="kpi__value" id="system-status">Loading...</p>
       </article>
       <article class="kpi">
         <p class="kpi__label">Total Users</p>
-        <p class="kpi__value">1,540</p>
+        <p class="kpi__value" id="total-users">0</p>
       </article>
       <article class="kpi">
         <p class="kpi__label">Active Routes</p>
-        <p class="kpi__value">320</p>
+        <p class="kpi__value" id="active-routes">0</p>
       </article>
       <article class="kpi">
         <p class="kpi__label">Unread Feedback</p>
-        <p class="kpi__value">20</p>
+        <p class="kpi__value" id="unread-feedback">0</p>
       </article>
     </div>
 
-    <!-- Main grid: left = panels/tables, right = sticky actions -->
+    <!-- Main grid -->
     <div class="content-grid">
-      <!-- ===== Modals (hidden by default) ===== -->
-
-      <!-- Add Route -->
+      <!-- Add Route Modal -->
       <div class="modal" id="modal-add-route" role="dialog" aria-modal="true" aria-labelledby="add-route-title" hidden>
         <div class="modal-card wide">
           <button class="modal-close" data-close aria-label="Close">×</button>
           <h3 id="add-route-title" class="modal-title">New Route</h3>
 
           <form class="route-form" autocomplete="off">
-            <!-- Row: Start / Swap / Destination -->
             <div class="row row-top">
               <input type="text" class="pill" name="start" placeholder="Start location" aria-label="Start location">
               <button type="button" class="swap" title="Swap"><span>⇄</span></button>
               <input type="text" class="pill" name="destination" placeholder="Destination" aria-label="Destination">
             </div>
 
-            <!-- Row: Vehicle / Price / Description -->
             <div class="row row-mid">
               <select class="pill" name="vehicle" aria-label="Vehicle Type">
                 <option value="" selected>Vehicle Type</option>
@@ -54,7 +58,6 @@
               <input type="text" class="pill" name="desc" placeholder="Description" aria-label="Description">
             </div>
 
-            <!-- Map Placeholder -->
             <div class="map-box" aria-label="Map preview">Map preview</div>
 
             <div class="modal-actions end">
@@ -69,7 +72,6 @@
         <div class="modal-card">
           <button class="modal-close" data-close aria-label="Close">×</button>
           <h3 id="send-title" class="modal-title">Compose Alert</h3>
-          
           <form autocomplete="off">
             <div class="container-grid">
               <div class="column-grid">
@@ -86,18 +88,16 @@
                 </select>
               </div>
             </div>
-              <textarea id="msg-box" name="msg-box" placeholder="Message" rows="5" cols="50" required></textarea>
-              <br>
-              <div class="center-submit">
-                  <input type="submit" id="submit-btn" name="submit-btn" value="Send">
-              </div>
+            <textarea id="msg-box" name="msg-box" placeholder="Message" rows="5" cols="50" required></textarea>
+            <br>
+            <div class="center-submit">
+              <input type="submit" id="submit-btn" name="submit-btn" value="Send">
+            </div>
           </form>
-
-        
         </div>
       </div>
 
-      <!-- Recent User Activity -->
+      <!-- Reports -->
       <section class="panel">
         <header class="panel__hd">
           <h2>System Reports</h2>
@@ -144,7 +144,6 @@
         </div>
       </section>
 
-      <!-- Sticky quick actions (right column) -->
       <aside class="actions" aria-label="Quick Actions">
         <button class="btn btn--primary" data-action="add-route">Add Route</button>
         <button class="btn btn--primary" data-action="send-system">Send System Notifications</button>
@@ -153,3 +152,6 @@
     </div>
   </section>
 </div>
+<script src="../js/dashboard.js"></script>
+</body>
+</html>

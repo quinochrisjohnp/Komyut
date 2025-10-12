@@ -18,7 +18,7 @@ import { useSearchRoutes } from "../../hooks/useSearchRoutes";
 import { useAuth } from "@clerk/clerk-expo"; // if you're using Clerk
 import { useRouter } from "expo-router";
 import { useUser } from "@clerk/clerk-expo";
-const API_URL = "http://10.0.2.2:5001";  // Note trailing slash
+const API_URL = "https://komyut-we5n.onrender.com";  // Note trailing slash
 
 
 // GeoJSON routes
@@ -94,10 +94,7 @@ const htmlContent = `
 
       // ✅ load GeoJSON with default styling
       function loadGeoJSON(data) {
-        const layer = new google.maps.Data({ map: map });
-        layer.addGeoJson(data);
-        // No custom style → default neutral styling
-        geoJsonLayers.push(layer);
+        // Skip drawing GeoJSON completely
       }
 
       function clearGeoJSON() {
@@ -107,24 +104,10 @@ const htmlContent = `
 
       // ✅ draw decoded steps as plain neutral lines
       function drawRouteSteps(steps) {
+        // Remove existing polylines
         polylines.forEach(p => p.setMap(null));
         polylines = [];
-
-        steps.forEach(step => {
-          if (step.polyline && step.polyline.points) {
-            const decoded = google.maps.geometry.encoding.decodePath(step.polyline.points);
-
-            const polyline = new google.maps.Polyline({
-              path: decoded,
-              geodesic: true,
-              strokeOpacity: 1.0,
-              strokeWeight: 3,
-            });
-
-            polyline.setMap(map);
-            polylines.push(polyline);
-          }
-        });
+        // Do not draw anything — lines removed
       }
 
       // ✅ handle messages

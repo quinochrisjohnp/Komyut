@@ -7,12 +7,16 @@ import {
   Image,
   StyleSheet,
   Alert,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSavedRoutes } from "../../hooks/useSavedRoutes";
 import { useUser } from "@clerk/clerk-expo";
 import BottomNav from "../../components/BottomNav";
+
+// 🔑 Make sure to set your Google Maps API Key here
+const GOOGLE_MAPS_API_KEY = "AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI";
 
 export default function EditRouteScreen() {
   const {
@@ -24,15 +28,54 @@ export default function EditRouteScreen() {
   } = useLocalSearchParams();
 
   const router = useRouter();
-  const { user } = useUser(); // replace later with Clerk user id
+  const { user } = useUser();
   const { updateSavedRoute, loadData } = useSavedRoutes(user?.id);
 
-
+  // 🧠 Separate states
   const [type, setType] = useState(initialType || "");
   const [start, setStart] = useState(initialStart || "");
   const [dest, setDest] = useState(initialDest || "");
   const [desc, setDesc] = useState(initialDesc || "");
 
+  // Autocomplete states
+  const [placePredictions, setPlacePredictions] = useState([]);
+  const [destPredictions, setDestPredictions] = useState([]);
+  const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
+  const [showDestDropdown, setShowDestDropdown] = useState(false);
+
+  // 🔍 Google Places Autocomplete Function
+  const searchPlaces = async (text, setField, setPredictions, setShowDropdown) => {
+    setField(text);
+
+    if (text.length < 2) {
+      setPredictions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    try {
+      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+        text
+      )}&key=${GOOGLE_MAPS_API_KEY}&components=country:ph&location=14.6078,120.9946&radius=30000`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.status === "OK") {
+        setPredictions(data.predictions);
+        setShowDropdown(true);
+      } else {
+        setPredictions([]);
+        setShowDropdown(false);
+      }
+    } catch (err) {
+      console.error("Places API error:", err);
+      setPredictions([]);
+      setShowDropdown(false);
+    }
+  };
+
+  // 🧩 Save Handler
   const handleSave = async () => {
     if (!user) {
       Alert.alert("Error", "User not logged in.");
@@ -49,7 +92,8 @@ export default function EditRouteScreen() {
 
       await loadData();
       Alert.alert("Success", "Route updated!");
-      router.back();
+      if (router.canGoBack()) router.back();
+      else router.replace("/saved_routes"); // ✅ fallback if no history
     } catch (error) {
       console.error("Update failed:", error);
       Alert.alert("Error", "Failed to update route");
@@ -62,7 +106,10 @@ export default function EditRouteScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => {
+            if (router.canGoBack()) router.back();
+            else router.replace("/saved_routes");
+          }}
         >
           <Image
             source={require("../../assets/images/back_icon.png")}
@@ -75,20 +122,61 @@ export default function EditRouteScreen() {
         </Text>
       </View>
 
-      {/* Blue Card for start/destination */}
+      {/* Blue Card for Start/Destination */}
       <View style={styles.card}>
+        {/* Start Input */}
         <TextInput
           style={styles.input}
           placeholder="Start Location"
           value={start}
-          onChangeText={setStart}
+          onChangeText={(text) =>
+            searchPlaces(text, setStart, setPlacePredictions, setShowPlaceDropdown)
+          }
         />
+        {showPlaceDropdown && (
+          <FlatList
+            data={placePredictions}
+            keyExtractor={(item) => item.place_id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={() => {
+                  setStart(item.description);
+                  setShowPlaceDropdown(false);
+                }}
+              >
+                <Text>{item.description}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+
+        {/* Destination Input */}
         <TextInput
           style={styles.input}
           placeholder="Destination"
           value={dest}
-          onChangeText={setDest}
+          onChangeText={(text) =>
+            searchPlaces(text, setDest, setDestPredictions, setShowDestDropdown)
+          }
         />
+        {showDestDropdown && (
+          <FlatList
+            data={destPredictions}
+            keyExtractor={(item) => item.place_id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={() => {
+                  setDest(item.description);
+                  setShowDestDropdown(false);
+                }}
+              >
+                <Text>{item.description}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
       </View>
 
       {/* Name + Description */}
@@ -122,6 +210,7 @@ export default function EditRouteScreen() {
   );
 }
 
+// 🎨 Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -153,6 +242,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
   },
+  dropdownItem: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
   form: { marginBottom: 20 },
   textArea: {
     backgroundColor: "#fff",
@@ -163,7 +258,6 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     textAlignVertical: "top",
   },
-
   saveButton: {
     alignSelf: "center",
     backgroundColor: "#4CAFE8",
@@ -173,6 +267,5 @@ const styles = StyleSheet.create({
     marginBottom: 70,
   },
   saveText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-
   navOverlay: { position: "absolute", bottom: 0, width: "100%" },
 });

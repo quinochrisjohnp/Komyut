@@ -268,18 +268,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const dateRange = document.getElementById("dateRange");
   const actionType = document.getElementById("actionType");
 
-  searchInput.addEventListener("input", () => {
-    console.log("Searching:", searchInput.value);
-  });
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      console.log("Searching:", searchInput.value);
+    });
+  }
 
-  dateRange.addEventListener("change", () => {
-    console.log("Date filter:", dateRange.value);
-  });
+  if (dateRange) {
+    dateRange.addEventListener("change", () => {
+      console.log("Date filter:", dateRange.value);
+    });
+  }
 
-  actionType.addEventListener("change", () => {
-    console.log("Action filter:", actionType.value);
-  });
+  if (actionType) {
+    actionType.addEventListener("change", () => {
+      console.log("Action filter:", actionType.value);
+    });
+  }
 });
+
 
 
 function confirmLogout() {

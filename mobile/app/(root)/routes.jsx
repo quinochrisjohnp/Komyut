@@ -20,10 +20,7 @@ import { Swipeable, GestureHandlerRootView } from "react-native-gesture-handler"
 export default function SavedRoutesScreen() {
   const router = useRouter();
   const { user } = useUser();
-
-  const { savedRoutes = [], isLoading, deleteSavedRoute, loadData } =
-    useSavedRoutes(user?.id);
-
+  const { savedRoutes = [], isLoading, deleteSavedRoute, loadData } = useSavedRoutes(user?.id);
   const [search, setSearch] = useState("");
 
   useFocusEffect(
@@ -34,11 +31,9 @@ export default function SavedRoutesScreen() {
     }, [loadData, user?.id])
   );
 
-  const filteredRoutes = Array.isArray(savedRoutes)
-    ? savedRoutes.filter((r) =>
-        r.type?.toLowerCase().includes(search.toLowerCase())
-      )
-    : [];
+  const filteredRoutes = savedRoutes.filter((r) =>
+    r.type?.toLowerCase().includes(search.toLowerCase())
+  );
 
   const confirmUpdate = (item) => {
     Alert.alert("Update Route", "Do you want to update?", [
@@ -90,21 +85,17 @@ export default function SavedRoutesScreen() {
 
           {isLoading ? (
             <ActivityIndicator size="large" style={{ marginTop: 50 }} />
-          ) : !Array.isArray(savedRoutes) || savedRoutes.length === 0 ? (
+          ) : savedRoutes.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Image
                 source={require("../../assets/images/komyut-logo.png")}
                 style={styles.illustration}
                 resizeMode="contain"
               />
-
-              <Text style={styles.subtitle}>
-                Hey, {user?.username || "Traveler"}!
-              </Text>
+              <Text style={styles.subtitle}>Hey, {user?.username || "Traveler"}!</Text>
               <Text style={styles.message}>
                 You have no saved routes{"\n"}Ready to plan your trip?
               </Text>
-
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() => router.push("/(root)/add_routes")}
@@ -293,5 +284,5 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: "white",
-  }
+  },
 });
