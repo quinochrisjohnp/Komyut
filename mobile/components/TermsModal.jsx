@@ -11,18 +11,18 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const TermsModal = ({ onAgreed }) => {
+const TermsModal = ({ visible, onAgreed }) => {
   const [checked, setChecked] = useState(false);
 
   const handleAgree = async () => {
     if (checked) {
-      await AsyncStorage.setItem('hasAgreedToTerms', 'true'); // ← updated key
+      await AsyncStorage.setItem('userAgreed', 'true');
       onAgreed();
     }
   };
 
   return (
-    <Modal transparent animationType="slide" visible>
+    <Modal transparent animationType="slide" visible={visible}>   
       <View style={styles.overlay}>
         <View style={styles.card}>
           {/* Logo */}
