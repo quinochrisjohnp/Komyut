@@ -105,8 +105,10 @@ const authStyles = StyleSheet.create({
     marginRight: 7,
   },
   eyeIcon: {
-    fontSize: 18,
-  },
+  width: 25,
+  height: 25,
+  marginRight: 5,
+ }
 });
 
 export default authStyles;

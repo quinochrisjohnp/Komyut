@@ -204,7 +204,7 @@ export default function Index() {
         {/* Floating Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
-            <Image source={require('../../assets/images/search_icon.png')} style={styles.searchIcon} />
+            <Image source={require('../../assets/images/search-icon.png')} style={styles.searchIcon} />
             <TextInput
               style={styles.input}
               placeholder="Search location..."
@@ -347,8 +347,8 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   searchIcon: {
-    width: 20,
-    height: 20,
+    width: 30,
+    height: 30,
     marginRight: 10,
   },
   input: {

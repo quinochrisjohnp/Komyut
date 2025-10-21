@@ -108,7 +108,10 @@ export default function SettingsScreen() {
           onPress={() => router.push("/settings_pages/account-security")}
         >
           <View style={styles.menuRow}>
-            <Ionicons name="shield-checkmark-outline" size={22} color="#2563EB" />
+            <Image
+              source={require("../../assets/images/security-icon.png")}
+              style={styles.icon}
+            />
             <Text style={styles.menuText}>Account & Security</Text>
           </View>
           <MaterialIcons name="chevron-right" size={22} color="#9CA3AF" />
@@ -120,7 +123,10 @@ export default function SettingsScreen() {
           onPress={() => router.push("/settings_pages/help-support")}
         >
           <View style={styles.menuRow}>
-            <Ionicons name="help-circle-outline" size={22} color="#2563EB" />
+            <Image
+              source={require("../../assets/images/service-icon.png")}
+              style={styles.icon}
+            />
             <Text style={styles.menuText}>Help & Support</Text>
           </View>
           <MaterialIcons name="chevron-right" size={22} color="#9CA3AF" />
@@ -133,7 +139,10 @@ export default function SettingsScreen() {
           style={styles.logoutButton}
           onPress={() => setShowLogoutModal(true)}
         >
-          <MaterialIcons name="logout" size={25} color={Colors.primary} />
+            <Image
+              source={require("../../assets/images/logout-icon.png")}
+              style={styles.LogOutIcon}
+            />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>
@@ -185,7 +194,14 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 75,
   },
-
+  icon: {
+    width: 25,
+    height: 25,
+  },
+  LogOutIcon: {
+    width: 30,
+    height: 30,
+  },
   // Profile
   profileSection: {
     alignItems: "center",
