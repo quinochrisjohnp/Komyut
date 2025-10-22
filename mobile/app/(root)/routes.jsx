@@ -16,6 +16,7 @@ import BottomNav from "../../components/BottomNav";
 import { useSavedRoutes } from "../../hooks/useSavedRoutes";
 import { useUser } from "@clerk/clerk-expo";
 import { Swipeable, GestureHandlerRootView } from "react-native-gesture-handler";
+import Colors from "../Constant_Design";
 
 export default function SavedRoutesScreen() {
   const router = useRouter();
@@ -88,7 +89,7 @@ export default function SavedRoutesScreen() {
           ) : savedRoutes.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Image
-                source={require("../../assets/images/komyut-logo.png")}
+                source={require("../../assets/images/route-icon.png")}
                 style={styles.illustration}
                 resizeMode="contain"
               />
@@ -202,17 +203,20 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#333",
+    marginTop: 80,
+    marginBottom: 20,
   },
   emptyContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   illustration: {
     width: 200,
     height: 200,
     marginBottom: 20,
+    marginTop: -150,
   },
   subtitle: {
     fontSize: 18,
@@ -226,12 +230,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   addButton: {
-    backgroundColor: "#3e99c6",
+    backgroundColor: Colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 20,
-    borderWidth: 2.5,
-    borderColor: "#71c1e8",
   },
   search: {
     backgroundColor: "#fff",
@@ -240,7 +242,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: "#ddd",
-    marginBottom: 20,
   },
   routeCard: {
     backgroundColor: "#fff",

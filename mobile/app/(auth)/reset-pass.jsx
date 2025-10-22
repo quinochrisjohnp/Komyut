@@ -214,11 +214,17 @@ export default function ResetPasswordScreen() {
                       <Text style={authStyles.clearIcon}>✕</Text>
                     </TouchableOpacity>
                   )}
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <Text style={authStyles.eyeIcon}>
-                      {showPassword ? "🙈" : "👁️"}
-                    </Text>
-                  </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Image
+                    source={
+                      showPassword
+                        ? require('../../assets/images/eye_open.png') 
+                        : require('../../assets/images/eye_close.png')  
+                    }
+                    style={authStyles.eyeIcon} // reuse your styling
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
                 </View>
               </View>
 
