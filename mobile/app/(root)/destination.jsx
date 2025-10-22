@@ -168,32 +168,29 @@ const htmlContent = `<!DOCTYPE html>
 
 // ---- UTILITY FUNCTIONS ----
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // km
+  const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+      Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function calculateFare(mode, distance) {
   const config = TRANSPORT_CONFIG[mode];
   if (!config) return 0;
-
-  if (mode === 'walking') return 0;
-
+  if (mode === "walking") return 0;
   const additionalDistance = Math.max(0, distance - 4);
-  return Math.ceil(config.baseFare + (additionalDistance * config.additionalPerKm));
+  return Math.ceil(config.baseFare + additionalDistance * config.additionalPerKm);
 }
 
 function calculateDuration(mode, distance) {
   const config = TRANSPORT_CONFIG[mode];
   if (!config) return 0;
-
-  const hours = distance / config.speed;
-  return Math.ceil(hours * 60);
+  return Math.ceil((distance / config.speed) * 60);
 }
 
 // ---- SCREEN ----
@@ -391,6 +388,22 @@ export default function RoutesScreen() {
     return nearest;
   };
 
+  const findNearestAvailableTransport = (origin) => {
+    const transportTypes = ['tricycle', 'jeepney', 'bus', 'suv'];
+    let nearest = null;
+    let nearestType = null;
+
+    for (const type of transportTypes) {
+      const candidate = findNearestTransport(origin, type);
+      if (candidate && (!nearest || candidate.distance < nearest.distance)) {
+        nearest = candidate;
+        nearestType = type;
+      }
+    }
+
+    return { nearest, nearestType };
+  };
+
   const generateTransportRoute = async (origin, destination, transportType, steps) => {
     let totalFare = 0;
     let totalDuration = 0;
@@ -517,36 +530,63 @@ export default function RoutesScreen() {
     } else {
       let routeFound = false;
 
-      if (prioritizeTime) {
-        const transportPriority = ['tricycle', 'suv', 'jeepney', 'bus'];
+      // 🔍 Find nearest available transport type dynamically
+      const transportTypes = ['tricycle', 'jeepney', 'bus', 'suv'];
+      let nearest = null;
+      let nearestType = null;
 
-        for (const transportType of transportPriority) {
-          const result = await generateTransportRoute(origin, destination, transportType, []);
-          if (result) {
-            steps.push(...result.steps);
-            totalFare = result.totalFare;
-            totalDuration = result.totalDuration;
-            totalDistance = result.totalDistance;
-            routeFound = true;
-            break;
-          }
+      for (const type of transportTypes) {
+        const candidate = findNearestTransport(origin, type);
+        if (candidate && (!nearest || candidate.distance < nearest.distance)) {
+          nearest = candidate;
+          nearestType = type;
+        }
+      }
+
+      if (nearest && nearestType) {
+        // 🚗 Generate route for the nearest available transport
+        const result = await generateTransportRoute(origin, destination, nearestType, []);
+        if (result) {
+          steps.push(...result.steps);
+          totalFare = result.totalFare;
+          totalDuration = result.totalDuration;
+          totalDistance = result.totalDistance;
+          routeFound = true;
         }
       } else {
-        const transportPriority = ['jeepney', 'bus', 'tricycle', 'suv'];
+        // 🕒 If no nearby transport found, use fallback by priority
+        if (prioritizeTime) {
+          const transportPriority = ['tricycle', 'suv', 'jeepney', 'bus'];
 
-        for (const transportType of transportPriority) {
-          const result = await generateTransportRoute(origin, destination, transportType, []);
-          if (result) {
-            steps.push(...result.steps);
-            totalFare = result.totalFare;
-            totalDuration = result.totalDuration;
-            totalDistance = result.totalDistance;
-            routeFound = true;
-            break;
+          for (const transportType of transportPriority) {
+            const result = await generateTransportRoute(origin, destination, transportType, []);
+            if (result) {
+              steps.push(...result.steps);
+              totalFare = result.totalFare;
+              totalDuration = result.totalDuration;
+              totalDistance = result.totalDistance;
+              routeFound = true;
+              break;
+            }
+          }
+        } else {
+          const transportPriority = ['jeepney', 'bus', 'tricycle', 'suv'];
+
+          for (const transportType of transportPriority) {
+            const result = await generateTransportRoute(origin, destination, transportType, []);
+            if (result) {
+              steps.push(...result.steps);
+              totalFare = result.totalFare;
+              totalDuration = result.totalDuration;
+              totalDistance = result.totalDistance;
+              routeFound = true;
+              break;
+            }
           }
         }
       }
 
+      // 🚶 If still no route found, fallback to walking or tricycle direct route
       if (!routeFound) {
         const directDistance = calculateDistance(origin.lat, origin.lng, destination.lat, destination.lng);
 
@@ -588,6 +628,7 @@ export default function RoutesScreen() {
       }
     }
 
+    // ✅ Return the full route summary and steps
     return {
       steps,
       totalFare,
@@ -600,6 +641,7 @@ export default function RoutesScreen() {
       }
     };
   };
+
 
   const searchPlaces = async (text, setPredictions, setShowDropdown) => {
     if (text.length < 2) {
@@ -640,6 +682,23 @@ export default function RoutesScreen() {
     searchPlaces(text, setEndPredictions, setShowEndDropdown);
   };
 
+  const checkIfInSampaloc = async (coords) => {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.lat},${coords.lng}&key=${GOOGLE_MAPS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.status === "OK") {
+        const address = data.results[0].formatted_address.toLowerCase();
+        return address.includes("sampaloc") && address.includes("manila");
+      }
+      return false;
+    } catch (err) {
+      console.error("Geocoding error:", err);
+      return false;
+    }
+  };
+
   const handleStartSelection = async (item) => {
     setStart(item.description);
     setStartPredictions([]);
@@ -647,7 +706,15 @@ export default function RoutesScreen() {
     Keyboard.dismiss();
 
     const coords = await getPlaceDetails(item.place_id);
-    setStartCoords(coords);
+    if (coords) {
+      const isInSampaloc = await checkIfInSampaloc(coords);
+      if (!isInSampaloc) {
+        Alert.alert("Invalid Area", "Please select a location within Sampaloc, Manila only.");
+        setStart("");
+        return;
+      }
+      setStartCoords(coords);
+    }
   };
 
   const handleEndSelection = async (item) => {
@@ -657,7 +724,15 @@ export default function RoutesScreen() {
     Keyboard.dismiss();
 
     const coords = await getPlaceDetails(item.place_id);
-    setEndCoords(coords);
+    if (coords) {
+      const isInSampaloc = await checkIfInSampaloc(coords);
+      if (!isInSampaloc) {
+        Alert.alert("Invalid Area", "Please select a location within Sampaloc, Manila only.");
+        setEnd("");
+        return;
+      }
+      setEndCoords(coords);
+    }
   };
 
   const computeRoutes = async () => {
@@ -780,8 +855,7 @@ export default function RoutesScreen() {
                 event_time: new Date().toTimeString().split(" ")[0],
                 event_date: new Date().toISOString().split("T")[0],
               });
-
-              Alert.alert("Success", "Route calculated and saved!");
+              
             } catch (error) {
               console.error("Find/Save error:", error);
               Alert.alert("Error", "Could not calculate or save route.");
@@ -870,7 +944,9 @@ export default function RoutesScreen() {
                       <Text style={styles.stepNumber}>{index + 1}</Text>
                     </View>
                     <View style={styles.stepContent}>
-                      <Text style={styles.stepInstruction}>{step.instructions}</Text>
+                      <Text style={[styles.stepInstruction, { color: step.color || "#000" }]}>
+                      {step.instructions}
+                      </Text>
                       <Text style={styles.stepDetails}>
                         {step.duration} • {step.distance}
                         {step.fare > 0 && ` • ₱${step.fare}`}
