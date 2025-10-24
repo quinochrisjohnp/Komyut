@@ -1,88 +1,166 @@
 <div class="content-body">
-    <h1>Notifications Manager</h1>
-    <div class="notif-bg">
-        <h2>Compose Alert</h2>
-        <form>
-            <div class="container-grid">
-                <div class="column-grid">
-                    <label for="alert-title">Title : </label>
-                    <input type="text" id="alert-title" name="alert-title" required placeholder="Enter Title">
-                </div>
-                <div class="column-grid">
-                    <label for="alert-category">Category : </label>
-                    <select id="alert-category" class="pill" name="alert-category" required>
-                    <option selected>Select Category</option>
-                    <option>System</option>
-                    <option>Route Update</option>
-                    <option>Maintenance</option>
-                    </select>
-                </div>
-            </div>
-            <textarea id="msg-box" name="msg-box" placeholder="Message" rows="5" cols="50" required></textarea>
-            <br>
-            <div class="center-submit">
-                <input type="submit" id="submit-btn" name="submit-btn" value="Send">
-            </div>
+  <h1>Notifications Manager</h1>
 
-        </form>
-    </div>
-    <br>
-    <div class="notif-bg">
-        <h2>Notifications History</h2>
-        <div class="table-container1">
-            <table class="scrollable-table5">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Sent To</th>
-                        <th>Timestamp</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Important Update</td>
-                        <td>All Users</td>
-                        <td>July 11, 2025</td>
-                    </tr>
-                    <tr>
-                        <td>App Update</td>
-                        <td>All Users</td>
-                        <td>July 09, 2025</td>
-                    </tr>
-                    <tr>
-                        <td>Important Update</td>
-                        <td>All Users</td>
-                        <td>July 01, 2025</td>
-                    </tr>
-                    <tr>
-                        <td>Important Update</td>
-                        <td>All Users</td>
-                        <td>June 29, 2025</td>
-                    </tr>
-                    <!-- Add more rows if needed -->
-                    <tr>
-                        <td>Important Update</td>
-                        <td>All Users</td>
-                        <td>June 25, 2025</td>
-                    </tr>
-                    <tr>
-                        <td>Important Update</td>
-                        <td>All Users</td>
-                        <td>June 20, 2025</td>
-                    </tr>
-                    <tr>
-                        <td>Important Update</td>
-                        <td>All Users</td>
-                        <td>June 15, 2025</td>
-                    </tr>
-                    <tr>
-                        <td>Important Update</td>
-                        <td>All Users</td>
-                        <td>June 01, 2025</td>
-                    </tr>
-                </tbody>
-            </table>
+  <!-- 📨 Compose Notification -->
+  <div class="notif-bg">
+    <h2>Compose Alert</h2>
+    <form id="notifForm">
+      <div class="container-grid">
+        <div class="column-grid">
+          <label for="alert-title">Title:</label>
+          <input type="text" id="alert-title" required placeholder="Enter Title" />
         </div>
+        <div class="column-grid">
+          <label for="alert-category">Category:</label>
+          <select id="alert-category" required>
+            <option value="" disabled selected>Select Category</option>
+            <option value="System">System</option>
+            <option value="Route Update">Route Update</option>
+            <option value="Maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+
+      <textarea id="msg-box" placeholder="Message" rows="5" required></textarea>
+      <br />
+      <div class="center-submit">
+        <button type="submit" id="submit-btn">Send</button>
+      </div>
+    </form>
+  </div>
+
+  <br />
+
+  <!-- 📜 Notification History -->
+  <div class="notif-bg">
+    <h2>Notifications History</h2>
+    <div class="table-container1">
+      <table class="scrollable-table5">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Sent To</th>
+            <th>Timestamp</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody id="notifTableBody">
+          <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
-</div>
+
+<script>
+  const API_URL = "http://localhost:5002/api/notifications";
+
+  const form = document.getElementById("notifForm");
+  const tableBody = document.getElementById("notifTableBody");
+  const submitBtn = document.getElementById("submit-btn");
+
+  // 🔁 Load Notifications
+  async function loadNotifications() {
+    try {
+      console.log("🔄 Loading notifications...");
+      
+      const res = await fetch(API_URL);
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("📥 Notifications received:", data);
+
+      tableBody.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No notifications yet</td></tr>`;
+        return;
+      }
+
+      data.forEach((notif) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${notif.title}</td>
+          <td>${notif.category}</td>
+          <td>${notif.sent_to || "All Users"}</td>
+          <td>${new Date(notif.sent_time).toLocaleString()}</td>
+          <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${notif.message}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+      
+      console.log("✅ Notifications loaded successfully!");
+    } catch (error) {
+      console.error("❌ Error fetching notifications:", error);
+      tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:red;">Error loading data: ${error.message}</td></tr>`;
+    }
+  }
+
+  // 🚀 Send Notification
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById("alert-title").value.trim();
+    const category = document.getElementById("alert-category").value;
+    const message = document.getElementById("msg-box").value.trim();
+
+    if (!title || !category || !message) {
+      alert("⚠️ Please fill in all fields!");
+      return;
+    }
+
+    // Disable submit button to prevent double submissions
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
+
+    try {
+      console.log("💾 Sending notification:", { title, category, message });
+
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json" 
+        },
+        body: JSON.stringify({ 
+          title, 
+          category, 
+          sent_to: "All Users", 
+          message 
+        }),
+      });
+
+      const result = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(result.error || "Failed to send notification");
+      }
+
+      console.log("✅ Notification sent:", result);
+      alert(result.message || "✅ Notification sent successfully!");
+
+      // Reset form
+      form.reset();
+      
+      // Reload notifications table
+      await loadNotifications();
+      
+    } catch (err) {
+      console.error("❌ Error sending notification:", err);
+      alert(`❌ Error: ${err.message}`);
+    } finally {
+      // Re-enable submit button
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Send";
+    }
+  });
+
+  // Load notifications when page loads
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("🚀 Page loaded, fetching notifications...");
+    loadNotifications();
+  });
+</script>
