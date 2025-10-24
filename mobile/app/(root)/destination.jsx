@@ -15,7 +15,7 @@ import BottomNav from "../../components/BottomNav";
 import { WebView } from "react-native-webview";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 const API_URL = "https://komyut-we5n.onrender.com";
 
@@ -195,6 +195,8 @@ function calculateDuration(mode, distance) {
 
 // ---- SCREEN ----
 export default function RoutesScreen() {
+  const params = useLocalSearchParams(); // ✅ Get params from saved routes
+  
   const [loadingRoutes, setLoadingRoutes] = useState(false);
   const [quickRoute, setQuickRoute] = useState(null);
   const [affordableRoute, setAffordableRoute] = useState(null);
@@ -213,6 +215,45 @@ export default function RoutesScreen() {
   const [showEndDropdown, setShowEndDropdown] = useState(false);
 
   const webviewRef = useRef(null);
+
+  // ✅ AUTO-POPULATE fields from saved route params
+  useEffect(() => {
+    if (params.start_location) {
+      setStart(params.start_location);
+      // Get coordinates for the start location
+      geocodeAddress(params.start_location).then(coords => {
+        if (coords) setStartCoords(coords);
+      });
+    }
+    
+    if (params.destination) {
+      setEnd(params.destination);
+      // Get coordinates for the destination
+      geocodeAddress(params.destination).then(coords => {
+        if (coords) setEndCoords(coords);
+      });
+    }
+  }, [params.start_location, params.destination]);
+
+  // ✅ Helper function to geocode address to coordinates
+  const geocodeAddress = async (address) => {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data.status === 'OK' && data.results[0]) {
+        return {
+          lat: data.results[0].geometry.location.lat,
+          lng: data.results[0].geometry.location.lng
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      return null;
+    }
+  };
 
   // Helper: post to webview reliably (postMessage if available, fallback injectJavaScript)
   const postToWebView = useCallback((payload) => {

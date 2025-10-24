@@ -68,6 +68,20 @@ export default function SavedRoutesScreen() {
     ]);
   };
 
+  // ✅ New: redirect to destination.jsx
+  const goToDestination = (item) => {
+    router.push({
+      pathname: "/(root)/destination",
+      params: {
+        id: item.id,
+        type: item.type,
+        start_location: item.start_location,
+        destination: item.destination,
+        description: item.description,
+      },
+    });
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.safeArea}>
@@ -113,7 +127,7 @@ export default function SavedRoutesScreen() {
                 <Swipeable
                   renderRightActions={() => (
                     <View style={styles.swipeActions}>
-                      {/* Update Icon (no background) */}
+                      {/* Update Icon */}
                       <TouchableOpacity onPress={() => confirmUpdate(item)}>
                         <Image
                           source={require("../../assets/images/edit-icon.png")}
@@ -122,7 +136,7 @@ export default function SavedRoutesScreen() {
                         />
                       </TouchableOpacity>
 
-                      {/* Delete Icon (no background) */}
+                      {/* Delete Icon */}
                       <TouchableOpacity onPress={() => confirmDelete(item)}>
                         <Image
                           source={require("../../assets/images/delete-icon.png")}
@@ -133,30 +147,32 @@ export default function SavedRoutesScreen() {
                     </View>
                   )}
                 >
-                  {/* Card content */}
-                  <View style={styles.routeCard}>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.routeName}>{item.type}</Text>
-                        <Text style={styles.routeDescription}>
-                          {item.start_location}
-                        </Text>
-                        <Text style={styles.routeDescription}>
-                          {item.destination}
-                        </Text>
+                  {/* ✅ Make card clickable → destination.jsx */}
+                  <TouchableOpacity activeOpacity={0.8} onPress={() => goToDestination(item)}>
+                    <View style={styles.routeCard}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.routeName}>{item.type}</Text>
+                          <Text style={styles.routeDescription}>
+                            {item.start_location}
+                          </Text>
+                          <Text style={styles.routeDescription}>
+                            {item.destination}
+                          </Text>
+                        </View>
+                        <Image
+                          source={require("../../assets/images/slide-icon.png")}
+                          style={styles.slideHint}
+                          resizeMode="contain"
+                        />
                       </View>
-                      <Image
-                        source={require("../../assets/images/slide-icon.png")}
-                        style={styles.slideHint}
-                        resizeMode="contain"
-                      />
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 </Swipeable>
               )}
               ListFooterComponent={
@@ -271,7 +287,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     paddingVertical: 10,
     paddingRight: 10,
-    gap: 5, // spacing between icons
+    gap: 5,
   },
   plainIcon: {
     width: 50,

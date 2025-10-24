@@ -19,6 +19,7 @@ export default function ChangePasswordScreen() {
   const { signOut } = useAuth();
 
   const [step, setStep] = useState(1);
+  const [currentPassword, setCurrentPassword] = useState(""); // ✅ added
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,8 +37,11 @@ export default function ChangePasswordScreen() {
     return () => clearTimeout(countdown);
   }, [timer]);
 
-  // ✅ Send code to the existing user email
   const handleSendVerification = async () => {
+    if (!currentPassword) {
+      setError("Please enter your current password.");
+      return;
+    }
     if (!isValidPassword(newPassword) || !isValidPassword(confirmPassword)) {
       setError("Password must be 8–15 characters, no spaces.");
       return;
@@ -55,9 +59,7 @@ export default function ChangePasswordScreen() {
         return;
       }
 
-      await primaryEmail.prepareVerification({
-        strategy: "email_code",
-      });
+      await primaryEmail.prepareVerification({ strategy: "email_code" });
 
       setStep(2);
       setTimer(30);
@@ -68,38 +70,36 @@ export default function ChangePasswordScreen() {
     }
   };
 
-  // ✅ Verify the code and update password
-const handleConfirmChange = async () => {
-  if (code.length < 6) {
-    setError("Enter a valid 6-digit code.");
-    return;
-  }
-
-  try {
-    await user.reload();
-    const primaryEmail = user.primaryEmailAddress;
-
-    // ✅ Skip if already verified
-    if (primaryEmail.verification?.status === "verified") {
-      console.log("Email already verified — skipping verification step");
-    } else {
-      await primaryEmail.attemptVerification({ code: code.trim() });
+  const handleConfirmChange = async () => {
+    if (code.length < 6) {
+      setError("Enter a valid 6-digit code.");
+      return;
     }
 
-    // ✅ Then update password
-    await user.update({ password: newPassword });
+    try {
+      await user.reload();
+      const primaryEmail = user.primaryEmailAddress;
 
-    Alert.alert("Success", "Your password has been changed. Please log in again.");
-    await signOut();
-    router.replace("/(root)/index");
-  } catch (err) {
-    console.error("Verification failed:", err);
-    setError("Invalid or expired code. Please check your email again.");
-  }
-};
+      if (primaryEmail.verification?.status === "verified") {
+        console.log("Email already verified — skipping verification step");
+      } else {
+        await primaryEmail.attemptVerification({ code: code.trim() });
+      }
 
+      // ✅ include currentPassword here
+      await user.updatePassword({
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      });
 
-
+      Alert.alert("Success", "Your password has been changed. Please log in again.");
+      await signOut();
+      router.replace("/(root)/index");
+    } catch (err) {
+      console.error("Verification failed:", err);
+      setError("Invalid or expired code. Please check your email again.");
+    }
+  };
 
   const handleResend = async () => {
     if (timer === 0) {
@@ -133,7 +133,6 @@ const handleConfirmChange = async () => {
         </View>
 
         {step === 1 ? (
-          // ---------- PAGE 1: NEW PASSWORD ----------
           <View style={styles.middleSection}>
             <Text style={styles.title}>Change Password</Text>
             <Text style={styles.subtitle}>
@@ -145,6 +144,19 @@ const handleConfirmChange = async () => {
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
+            {/* ✅ Current Password Field */}
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={[styles.input, { paddingRight: 80 }]}
+                placeholder="Enter current password"
+                placeholderTextColor="#999"
+                secureTextEntry={!showPassword}
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                maxLength={15}
+              />
+            </View>
+
             <View style={styles.inputWrapper}>
               <TextInput
                 style={[styles.input, { paddingRight: 80 }]}
@@ -155,20 +167,6 @@ const handleConfirmChange = async () => {
                 onChangeText={setNewPassword}
                 maxLength={15}
               />
-              <View style={styles.iconRow}>
-                {newPassword.length > 0 && (
-                  <TouchableOpacity onPress={() => setNewPassword("")}>
-                    <Text style={styles.clearIcon}>✕</Text>
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Text style={styles.eyeIcon}>
-                    {showPassword ? "🙈" : "👁️"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
 
             <View style={styles.inputWrapper}>
@@ -181,18 +179,6 @@ const handleConfirmChange = async () => {
                 onChangeText={setConfirmPassword}
                 maxLength={15}
               />
-              <View style={styles.iconRow}>
-                {confirmPassword.length > 0 && (
-                  <TouchableOpacity onPress={() => setConfirmPassword("")}>
-                    <Text style={styles.clearIcon}>✕</Text>
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
-                  <Text style={styles.eyeIcon}>
-                    {showConfirm ? "🙈" : "👁️"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
 
             <TouchableOpacity
@@ -200,7 +186,9 @@ const handleConfirmChange = async () => {
                 styles.actionBtn,
                 {
                   backgroundColor:
-                    newPassword && confirmPassword ? Colors.primary : "#ccc",
+                    currentPassword && newPassword && confirmPassword
+                      ? Colors.primary
+                      : "#ccc",
                 },
               ]}
               onPress={handleSendVerification}
@@ -209,7 +197,6 @@ const handleConfirmChange = async () => {
             </TouchableOpacity>
           </View>
         ) : (
-          // ---------- PAGE 2: VERIFY CODE ----------
           <View style={styles.middleSection}>
             <Text style={styles.title}>Verify Your Email</Text>
             <Text style={styles.subtitle}>
@@ -232,14 +219,6 @@ const handleConfirmChange = async () => {
                 value={code}
                 onChangeText={setCode}
               />
-              {code.length > 0 && (
-                <TouchableOpacity
-                  onPress={() => setCode("")}
-                  style={styles.singleClearBtn}
-                >
-                  <Text style={styles.clearIcon}>✕</Text>
-                </TouchableOpacity>
-              )}
             </View>
 
             <Text style={styles.verifyText}>
@@ -307,16 +286,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#333",
   },
-  iconRow: {
-    position: "absolute",
-    right: 15,
-    top: "35%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  clearIcon: { fontSize: 14, color: "#999", marginRight: 10 },
-  eyeIcon: { fontSize: 16 },
   actionBtn: {
     width: "100%",
     paddingVertical: 14,
