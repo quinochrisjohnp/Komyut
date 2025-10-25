@@ -90,13 +90,15 @@ export default function SavedRoutesScreen() {
           <View style={styles.header}>
             <Text style={styles.title}>Saved Routes</Text>
           </View>
-
-          <TextInput
-            style={styles.search}
-            placeholder="Search"
-            value={search}
-            onChangeText={setSearch}
-          />
+          <View style={styles.searchBar}>
+            <Image source={require('../../assets/images/search-icon.png')} style={styles.searchIcon} />
+            <TextInput
+              style={styles.search}
+              placeholder="Search"
+              value={search}
+              onChangeText={setSearch}
+            />
+          </View>
 
           {isLoading ? (
             <ActivityIndicator size="large" style={{ marginTop: 50 }} />
@@ -208,7 +210,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#F9F9F9",
-    paddingHorizontal: 20,
     paddingTop: 10,
   },
   header: {
@@ -255,6 +256,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 8,
     paddingHorizontal: 12,
+    marginHorizontal: 15,
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: "#ddd",
@@ -264,6 +266,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 15,
     marginBottom: 10,
+    marginTop: 10,
+    marginHorizontal: 20,
     borderWidth: 2,
     borderColor: "#eee",
   },
@@ -300,6 +304,28 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   addButtonText: {
+    fontSize: 15,
     color: "white",
+    fontWeight: "bold",
+  },
+  searchIcon: {
+    width: 30,
+    height: 30,
+    marginRight: 10,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.lighter,
+    borderRadius: 40,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginHorizontal: 20,
+    elevation: 5,
+    marginBottom: 15,
+  },
+  search: {
+    flex: 1,
+    color: '#000',
   },
 });
