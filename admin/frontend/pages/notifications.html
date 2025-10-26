@@ -1,86 +1,88 @@
-<div class="content-body">
-  <h1>Notifications Manager</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications Manager</title>
+</head>
+<body>
+  <div class="content-body">
+    <h1>Notifications Manager</h1>
 
-  <!-- 📨 Compose Notification -->
-  <div class="notif-bg">
-    <h2>Compose Alert</h2>
-    <form id="notifForm">
-      <div class="container-grid">
-        <div class="column-grid">
-          <label for="alert-title">Title:</label>
-          <input type="text" id="alert-title" required placeholder="Enter Title" />
+    <!-- 📨 Compose Notification -->
+    <div class="notif-bg">
+      <h2>Compose Alert</h2>
+      <form id="notifForm">
+        <div class="container-grid">
+          <div class="column-grid">
+            <label for="alert-title">Title:</label>
+            <input type="text" id="alert-title" required placeholder="Enter Title" />
+          </div>
+          <div class="column-grid">
+            <label for="alert-category">Category:</label>
+            <select id="alert-category" required>
+              <option value="" disabled selected>Select Category</option>
+              <option value="System">System</option>
+              <option value="Route Update">Route Update</option>
+              <option value="Maintenance">Maintenance</option>
+            </select>
+          </div>
         </div>
-        <div class="column-grid">
-          <label for="alert-category">Category:</label>
-          <select id="alert-category" required>
-            <option value="" disabled selected>Select Category</option>
-            <option value="System">System</option>
-            <option value="Route Update">Route Update</option>
-            <option value="Maintenance">Maintenance</option>
-          </select>
+
+        <textarea id="msg-box" placeholder="Message" rows="5" required></textarea>
+        <br />
+        <div class="center-submit">
+          <button type="submit" id="submit-btn">Send</button>
         </div>
+      </form>
+    </div>
+
+    <br />
+
+    <!-- 📜 Notification History -->
+    <div class="notif-bg">
+      <h2>Notifications History</h2>
+      <div class="table-container1">
+        <table class="scrollable-table5">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Sent To</th>
+              <th>Timestamp</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody id="notifTableBody">
+            <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+          </tbody>
+        </table>
       </div>
-
-      <textarea id="msg-box" placeholder="Message" rows="5" required></textarea>
-      <br />
-      <div class="center-submit">
-        <button type="submit" id="submit-btn">Send</button>
-      </div>
-    </form>
-  </div>
-
-  <br />
-
-  <!-- 📜 Notification History -->
-  <div class="notif-bg">
-    <h2>Notifications History</h2>
-    <div class="table-container1">
-      <table class="scrollable-table5">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Sent To</th>
-            <th>Timestamp</th>
-            <th>Message</th>
-          </tr>
-        </thead>
-        <tbody id="notifTableBody">
-          <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
-        </tbody>
-      </table>
     </div>
   </div>
-</div>
 
 <script>
-  const API_URL = "http://localhost:5002/api/notifications";
+  console.log("✅ Script loaded!");
 
-  const form = document.getElementById("notifForm");
-  const tableBody = document.getElementById("notifTableBody");
-  const submitBtn = document.getElementById("submit-btn");
+  // ✅ Correct API route
+  const API_URL = "http://localhost:5002/notifications";
 
-  // 🔁 Load Notifications
-  async function loadNotifications() {
+  // 🟢 Fetch notifications and render them in the table
+  async function fetchNotifications() {
+    const tbody = document.getElementById("notifTableBody");
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>`;
+
     try {
-      console.log("🔄 Loading notifications...");
-      
-      const res = await fetch(API_URL);
-      
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error("Failed to fetch notifications");
+      const data = await response.json();
 
-      const data = await res.json();
-      console.log("📥 Notifications received:", data);
-
-      tableBody.innerHTML = "";
-
-      if (!data || data.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No notifications yet</td></tr>`;
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No notifications found.</td></tr>`;
         return;
       }
 
+      tbody.innerHTML = "";
       data.forEach((notif) => {
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -88,79 +90,56 @@
           <td>${notif.category}</td>
           <td>${notif.sent_to || "All Users"}</td>
           <td>${new Date(notif.sent_time).toLocaleString()}</td>
-          <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${notif.message}</td>
+          <td>${notif.message}</td>
         `;
-        tableBody.appendChild(row);
+        tbody.appendChild(row);
       });
-      
-      console.log("✅ Notifications loaded successfully!");
     } catch (error) {
-      console.error("❌ Error fetching notifications:", error);
-      tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:red;">Error loading data: ${error.message}</td></tr>`;
+      console.error("Error fetching notifications:", error);
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:red;">Error loading notifications</td></tr>`;
     }
   }
 
-  // 🚀 Send Notification
-  form.addEventListener("submit", async (e) => {
+  // 🟢 Handle new notification submission
+  document.getElementById("notifForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    console.log("🟢 Form submitted!");
+
     const title = document.getElementById("alert-title").value.trim();
-    const category = document.getElementById("alert-category").value;
+    const category = document.getElementById("alert-category").value.trim();
     const message = document.getElementById("msg-box").value.trim();
 
     if (!title || !category || !message) {
-      alert("⚠️ Please fill in all fields!");
+      alert("Please fill in all required fields!");
       return;
     }
 
-    // Disable submit button to prevent double submissions
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Sending...";
+    const payload = { title, category, sent_to: "All Users", message };
 
     try {
-      console.log("💾 Sending notification:", { title, category, message });
-
       const res = await fetch(API_URL, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json" 
-        },
-        body: JSON.stringify({ 
-          title, 
-          category, 
-          sent_to: "All Users", 
-          message 
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       const result = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(result.error || "Failed to send notification");
-      }
+      if (!res.ok) throw new Error(result.error || "Failed to save notification");
 
-      console.log("✅ Notification sent:", result);
       alert(result.message || "✅ Notification sent successfully!");
-
-      // Reset form
-      form.reset();
-      
-      // Reload notifications table
-      await loadNotifications();
-      
-    } catch (err) {
-      console.error("❌ Error sending notification:", err);
-      alert(`❌ Error: ${err.message}`);
-    } finally {
-      // Re-enable submit button
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Send";
+      document.getElementById("notifForm").reset();
+      fetchNotifications(); // refresh table
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      alert("❌ Error: Could not send notification.");
     }
   });
 
-  // Load notifications when page loads
-  document.addEventListener("DOMContentLoaded", () => {
-    console.log("🚀 Page loaded, fetching notifications...");
-    loadNotifications();
-  });
+  // 🟢 Auto-load notifications and refresh every 5 seconds
+  fetchNotifications();
+  setInterval(fetchNotifications, 5000);
 </script>
+
+</body>
+</html>

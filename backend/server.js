@@ -4,6 +4,7 @@ import { sql } from "./config/db.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 import saved_routesPath from './path/saved_routesPath.js';
 import search_routesPath from './path/search_routesPath.js';
+import user_notificationsPath from './path/user_notificationsPath.js';
 
 import job from "./config/cron.js";
 
@@ -57,6 +58,7 @@ async function initDB() {
 
 app.use("/api/saved_routes", saved_routesPath);
 app.use("/api/search_routes", search_routesPath);
+app.use("/api/notifications", user_notificationsPath);
 
 app.get("/", (req,res) => {
   res.send("It's working")

@@ -1,4 +1,4 @@
-\document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const systemStatusEl = document.getElementById("system-status");
   const totalUsersEl = document.getElementById("total-users");
   const activeRoutesEl = document.getElementById("active-routes");

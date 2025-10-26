@@ -1,62 +1,68 @@
-import { useCallback, useState } from "react";
-import { Alert } from "react-native";
+import { useState, useCallback, useEffect } from "react";
+import { Alert } from "react-native"; // remove this line if using plain React (web)
 
-const API_URL = "http://localhost:5002"; // 🔁 Change if using Render or another host
+const API_URL = "http://localhost:5002"; // ✅ your backend URL
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Fetch all notifications
+  // 🟢 GET: Fetch all notifications
   const fetchNotifications = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/notifications`);
+      const response = await fetch(`${API_URL}/notifications`);
       if (!response.ok) throw new Error("Failed to fetch notifications");
 
       const data = await response.json();
       setNotifications(data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      Alert.alert("Error", "Unable to load notifications.");
+      Alert?.alert?.("Error", "Could not fetch notifications.");
     }
   }, []);
 
-  // ✅ Create a new notification
-  const addNotification = useCallback(async (newNotification) => {
-    try {
-      const response = await fetch(`${API_URL}/api/notifications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newNotification),
-      });
+  // 🟢 POST: Add new notification
+  const addNotification = useCallback(
+    async (title, category, sent_to, message) => {
+      if (!title || !category || !message) {
+        Alert?.alert?.("Error", "Title, category, and message are required.");
+        return;
+      }
 
-      if (!response.ok) throw new Error("Failed to create notification");
+      try {
+        const response = await fetch(`${API_URL}/notifications`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            category,
+            sent_to: sent_to || "All Users",
+            message,
+          }),
+        });
 
-      const data = await response.json();
-      setNotifications((prev) => [data.data, ...prev]); // Add new one on top
-      Alert.alert("Success", "Notification added successfully!");
-    } catch (error) {
-      console.error("Error adding notification:", error);
-      Alert.alert("Error", error.message);
-    }
-  }, []);
+        if (!response.ok) throw new Error("Failed to save notification");
 
-  // ✅ Load data (like useEffect)
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      await fetchNotifications();
-    } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setIsLoading(false);
-    }
+        const result = await response.json();
+        const newNotif = result.data;
+        setNotifications((prev) => [newNotif, ...prev]);
+
+        return newNotif;
+      } catch (error) {
+        console.error("Error adding notification:", error);
+        Alert?.alert?.("Error", "Could not save notification.");
+      }
+    },
+    []
+  );
+
+  // Auto-fetch when mounted
+  useEffect(() => {
+    fetchNotifications();
   }, [fetchNotifications]);
 
   return {
     notifications,
-    isLoading,
-    loadData,
+    fetchNotifications,
     addNotification,
   };
 };
