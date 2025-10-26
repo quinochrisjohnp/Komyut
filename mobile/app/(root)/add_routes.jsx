@@ -8,12 +8,15 @@ import {
   StyleSheet,
   Alert,
   FlatList,
+  Modal,
+  Pressable,
   TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import BottomNav from "../../components/BottomNav";
 import { useUser } from "@clerk/clerk-expo";
+import Colors from "../Constant_Design";
 
 const API_URL = "https://komyut-we5n.onrender.com";
 const GOOGLE_MAPS_API_KEY = "AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI"; // ⚠️ Replace with your key
@@ -29,9 +32,23 @@ export default function AddRoutes() {
   const [destPredictions, setDestPredictions] = useState([]);
   const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
   const [showDestDropdown, setShowDestDropdown] = useState(false);
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
 
   const router = useRouter();
   const { user } = useUser();
+
+  const handleSwap = () => {
+    const temp = place;
+    setPlace(destination);
+    setDestination(temp);
+  };
+
+
+    // Checks if address is inside Sampaloc, Manila
+  const isInsideSampalocManila = (address) => {
+    return address.includes("Sampaloc") && address.includes("Manila");
+  };
+
 
   // 🔍 Google Places Autocomplete function
   const searchPlaces = async (text, setField, setPredictions, setShowDropdown) => {
@@ -67,10 +84,21 @@ export default function AddRoutes() {
 
   // ✋ Select from dropdown
   const handleSelectPrediction = (description, setField, setPredictions, setShowDropdown) => {
+    // Check restriction first
+    if (!isInsideSampalocManila(description)) {
+      setShowRestrictionModal(true);
+      setField("");               // clear text
+      setPredictions([]);         // clear dropdown
+      setShowDropdown(false);
+      return;
+    }
+
+    // ✅ valid area
     setField(description);
     setPredictions([]);
     setShowDropdown(false);
   };
+
 
   const handleSave = async () => {
     if (!place || !destination || !routeName) {
@@ -120,78 +148,101 @@ export default function AddRoutes() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>New Route</Text>
       </View>
-
+      <Text style={styles.sectionTitle}>Locations</Text>
       {/* Route Inputs */}
       <View style={styles.card}>
-        {/* Add a place */}
-        <TextInput
-          style={styles.input}
-          placeholder="Add a place"
-          value={place}
-          onChangeText={(text) =>
-            searchPlaces(text, setPlace, setPlacePredictions, setShowPlaceDropdown)
-          }
-        />
-        {showPlaceDropdown && placePredictions.length > 0 && (
-          <View style={styles.dropdown}>
-            <FlatList
-              data={placePredictions}
-              keyExtractor={(item) => item.place_id}
-              renderItem={({ item }) => (
-                <TouchableWithoutFeedback
-                  onPress={() =>
-                    handleSelectPrediction(
-                      item.description,
-                      setPlace,
-                      setPlacePredictions,
-                      setShowPlaceDropdown
-                    )
-                  }
-                >
-                  <View style={styles.dropdownItem}>
-                    <Text>{item.description}</Text>
-                  </View>
-                </TouchableWithoutFeedback>
-              )}
+        <View style={styles.locationContainer}>
+          <View style={{ flex: 1 }}>
+            {/* ADD A PLACE */}
+            <TextInput
+              style={styles.location}
+              placeholder="Add a place"
+              value={place}
+              onChangeText={(text) =>
+                searchPlaces(text, setPlace, setPlacePredictions, setShowPlaceDropdown)
+              }
             />
-          </View>
-        )}
+            {showPlaceDropdown && placePredictions.length > 0 && (
+              <View style={styles.dropdown}>
+                <FlatList
+                  data={placePredictions}
+                  keyExtractor={(item) => item.place_id}
+                  renderItem={({ item }) => (
+                    <TouchableWithoutFeedback
+                      onPress={() =>
+                        handleSelectPrediction(
+                          item.description,
+                          setPlace,
+                          setPlacePredictions,
+                          setShowPlaceDropdown
+                        )
+                      }
+                    >
+                      <View style={styles.dropdownItem}>
+                        <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+                          {item.structured_formatting?.main_text}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: "#555", opacity: 0.6 }}>
+                          {item.structured_formatting?.secondary_text}
+                        </Text>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  )}
+                />
+              </View>
+            )}
 
-        {/* Add a destination */}
-        <TextInput
-          style={styles.input}
-          placeholder="Add a destination"
-          value={destination}
-          onChangeText={(text) =>
-            searchPlaces(text, setDestination, setDestPredictions, setShowDestDropdown)
-          }
-        />
-        {showDestDropdown && destPredictions.length > 0 && (
-          <View style={styles.dropdown}>
-            <FlatList
-              data={destPredictions}
-              keyExtractor={(item) => item.place_id}
-              renderItem={({ item }) => (
-                <TouchableWithoutFeedback
-                  onPress={() =>
-                    handleSelectPrediction(
-                      item.description,
-                      setDestination,
-                      setDestPredictions,
-                      setShowDestDropdown
-                    )
-                  }
-                >
-                  <View style={styles.dropdownItem}>
-                    <Text>{item.description}</Text>
-                  </View>
-                </TouchableWithoutFeedback>
-              )}
+            {/* DESTINATION INPUT */}
+            <TextInput
+              style={styles.location}
+              placeholder="Destination"
+              value={destination}
+              onChangeText={(text) =>
+                searchPlaces(text, setDestination, setDestPredictions, setShowDestDropdown)
+              }
             />
+            {showDestDropdown && destPredictions.length > 0 && (
+              <View style={styles.dropdown}>
+                <FlatList
+                  data={destPredictions}
+                  keyExtractor={(item) => item.place_id}
+                  renderItem={({ item }) => (
+                    <TouchableWithoutFeedback
+                      onPress={() =>
+                        handleSelectPrediction(
+                          item.description,
+                          setDestination,
+                          setDestPredictions,
+                          setShowDestDropdown
+                        )
+                      }
+                    >
+                      <View style={styles.dropdownItem}>
+                        <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+                          {item.structured_formatting?.main_text}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: "#555", opacity: 0.6 }}>
+                          {item.structured_formatting?.secondary_text}
+                        </Text>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  )}
+                />
+              </View>
+            )}
           </View>
-        )}
+
+          {/* 🔄 SWITCH BUTTON */}
+          <TouchableOpacity onPress={handleSwap} style={styles.switchButton}>
+            <Image
+              source={require("../../assets/images/switch-black-icon.png")}
+              style={styles.switchIcon}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
+      <Text style={styles.sectionTitle}>Route Informations</Text>
       {/* Route Info */}
       <View style={styles.form}>
         <TextInput
@@ -219,6 +270,42 @@ export default function AddRoutes() {
       <View style={styles.navOverlay}>
         <BottomNav />
       </View>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showRestrictionModal}
+        onRequestClose={() => setShowRestrictionModal(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          <View style={{
+            backgroundColor: '#fff',
+            padding: 25,
+            borderRadius: 12,
+            width: '85%',
+            alignItems: 'center',
+          }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10, color: '#333' }}>
+              Unsupported Area
+            </Text>
+            <Text style={{ textAlign: 'center', fontSize: 15, marginBottom: 20, color: '#444' }}>
+              Sorry, the current version of the app is only supported inside the District of Sampaloc, Manila.
+            </Text>
+            <Pressable
+              style={{ backgroundColor: Colors.primary, paddingVertical: 10, paddingHorizontal: 25, borderRadius: 8 }}
+              onPress={() => setShowRestrictionModal(false)}
+            >
+              <Text style={{ color: '#fff', fontWeight: '600' }}>Continue</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -226,43 +313,59 @@ export default function AddRoutes() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9F9F9",
-    paddingHorizontal: 20,
+    backgroundColor: "#ffffffff",
     paddingTop: 10,
   },
   header: {
-    flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
   },
-  backButton: { padding: 5 },
-  backIcon: { width: 24, height: 24, marginRight: 10 },
-  headerTitle: { fontSize: 20, fontWeight: "bold" },
+  backButton: {     
+    position: "absolute",
+    top: 10,
+    left: 0,
+    padding: 10,
+    zIndex: 1,
+  },
+  backIcon: { width: 24, height: 24 },
+  headerTitle: { fontSize: 20, fontWeight: "700", marginTop: 30 },
   card: {
-    backgroundColor: "#A6D8F5",
-    borderRadius: 10,
-    padding: 15,
     marginBottom: 20,
+    marginHorizontal: 15,
+  },
+
+  location: {
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "#f9f9f9",
+    marginBottom: 10,
   },
   input: {
-    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    padding: 12,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    backgroundColor: "#f9f9f9",
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
+    marginHorizontal: 15,
   },
-  form: { marginBottom: 20 },
+
   textArea: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
+    height: 100,
     textAlignVertical: "top",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "#f9f9f9",
+    marginHorizontal: 15,
   },
+
+
+  form: { marginBottom: 20 },
+
   saveButton: {
     alignSelf: "center",
     backgroundColor: "#4CAFE8",
@@ -286,5 +389,30 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+  },
+  sectionTitle: { 
+    fontWeight: "600", 
+    fontSize: 16, 
+    marginVertical: 15,
+    marginHorizontal: 15,
+    borderBottomWidth: 1, 
+    borderColor: "#ccc", 
+    paddingBottom: 10,
+  },
+ locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  switchButton: {
+    marginLeft: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  switchIcon: {
+    width: 30,
+    height: 30,
+    resizeMode: "contain",
   },
 });
