@@ -289,17 +289,18 @@ export default function Index() {
             <Text style={{ color: 'gray' }}>{selectedPlaceData.description}</Text>
             <Text style={{ fontSize: 12, color: '#333' }}>{selectedPlaceData.address}</Text>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 16 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 16, }}>
               <IconButton icon={require('../../assets/images/directions-icon.png')} label="Direction" onPress={() => router.push({
                   pathname: '/destination',
                   params: { 
-                    destinationName: selectedPlaceData.name,        // title
-                    destinationAddress: selectedPlaceData.address   // full address
+                    destination: selectedPlaceData.address,      // full address (key: destination)
+                    destinationName: selectedPlaceData.name     // optional: keep name too
                   }
                 })}
               /> 
 
-              <IconButton icon={require('../../assets/images/saved-route-selected-logo.png')} label="Save" onPress={() => {}} />
+              <IconButton icon={require('../../assets/images/saved-route-selected-logo.png')} label="Save" onPress={() => router.push({
+                  pathname: '/routes'})} />
 
               <IconButton
                 icon={require('../../assets/images/share-icon.png')}
@@ -332,7 +333,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     position: 'absolute',
-    top: 40,
+    top: 60,
     left: 20,
     right: 20,
     zIndex: 20,

@@ -10,12 +10,17 @@ import {
   FlatList,
   Alert,
   Keyboard,
+  Image,
+  Modal,
+  Pressable,
+  TouchableWithoutFeedback,
 } from "react-native";
 import BottomNav from "../../components/BottomNav";
 import { WebView } from "react-native-webview";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@clerk/clerk-expo";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import Colors from '../Constant_Design'; 
 
 const API_URL = "https://komyut-we5n.onrender.com";
 
@@ -25,7 +30,7 @@ import jeepneyRoutesGeoJSON from "../../assets/routeData/jeepney_routes.json";
 import suvRoutesGeoJSON from "../../assets/routeData/suv_routes.json";
 import busRoutesGeoJSON from "../../assets/routeData/bus_routes.json";
 
-// ---- CONFIG ----
+// dddd
 const GOOGLE_MAPS_API_KEY = 'AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI';
 const MAP_ID = 'c189603921f4de17a7419bb7';
 
@@ -82,17 +87,19 @@ const htmlContent = `<!DOCTYPE html>
     <script>
       let map, polylines = [];
       let geoJsonLayers = [];
+      let routeMarkers = [];
 
-      function initMap() {
-        const center = { lat: 14.6078, lng: 120.9946 };
-        map = new google.maps.Map(document.getElementById('map'), {
-          center,
-          zoom: 14.5,
-          disableDefaultUI: true,
-          clickableIcons: false,
-          gestureHandling: 'greedy',
-        });
-      }
+          function initMap() {
+            const center = { lat: 14.607835931257247, lng: 120.99465234818744 };
+            map = new google.maps.Map(document.getElementById('map'), {
+              center: center,
+              zoom: 14.5,
+              mapId: '${MAP_ID}',
+              disableDefaultUI: true,
+              clickableIcons: false,
+              gestureHandling: 'greedy',
+            });
+          }
 
       function loadGeoJSON(data) {
         // intentionally empty so RN can decide when/what to render
@@ -103,13 +110,24 @@ const htmlContent = `<!DOCTYPE html>
         geoJsonLayers = [];
       }
 
-      function drawRouteSteps(steps) {
+      function drawRouteSteps(steps, iconStartUrl, iconEndUrl) {
+        // Clear previous polylines
         polylines.forEach(p => p.setMap(null));
         polylines = [];
+
+        // Clear old markers (if any)
+        if (routeMarkers.length > 0) {
+          routeMarkers.forEach(m => m.setMap(null));
+        }
+        routeMarkers = [];
+
+        // Collect all coordinates for bounds & start/end markers
+        let allPoints = [];
 
         steps.forEach((step) => {
           if (step.polyline && step.polyline.points) {
             const path = google.maps.geometry.encoding.decodePath(step.polyline.points);
+            allPoints.push(...path);
 
             const polyline = new google.maps.Polyline({
               path: path,
@@ -121,20 +139,38 @@ const htmlContent = `<!DOCTYPE html>
             });
 
             polylines.push(polyline);
-
-            // If this is the last polyline, fit bounds to all points
-            if (polylines.length === steps.length) {
-              const bounds = new google.maps.LatLngBounds();
-              steps.forEach(s => {
-                if (s.polyline && s.polyline.points) {
-                  const p = google.maps.geometry.encoding.decodePath(s.polyline.points);
-                  p.forEach(point => bounds.extend(point));
-                }
-              });
-              map.fitBounds(bounds);
-            }
           }
         });
+
+        // ✅ Add start and end markers (if we have any points)
+        if (allPoints.length > 0) {
+          // Start marker (first coordinate)
+          const startMarker = new google.maps.Marker({
+            position: allPoints[0],
+            map,
+            title: "Start Location",
+            icon: {
+              url: iconStartUrl || "https://maps.google.com/mapfiles/kml/paddle/grn-circle.png",
+              scaledSize: new google.maps.Size(25,25),   // resize
+              anchor: new google.maps.Point(20, 20)       // center (half of 40x40)
+            }
+          });
+          routeMarkers.push(startMarker);
+
+          // End marker (last coordinate)
+          const endMarker = new google.maps.Marker({
+            position: allPoints[allPoints.length - 1],
+            map,
+            title: "Destination"
+          });
+          routeMarkers.push(endMarker);
+
+          // Auto-fit map to route
+          const bounds = new google.maps.LatLngBounds();
+          allPoints.forEach(pt => bounds.extend(pt));
+          map.fitBounds(bounds);
+        }
+
       }
 
       function handleMessage(event) {
@@ -142,7 +178,8 @@ const htmlContent = `<!DOCTYPE html>
           const payload = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
           if (payload.steps) {
-            drawRouteSteps(payload.steps);
+            // ✅ Now includes optional start/end icons from RN side
+            drawRouteSteps(payload.steps, payload.iconStart, payload.iconEnd);
           }
 
           if (payload.geojson) {
@@ -165,6 +202,7 @@ const htmlContent = `<!DOCTYPE html>
     </script>
   </body>
 </html>`;
+
 
 // ---- UTILITY FUNCTIONS ----
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -213,6 +251,14 @@ export default function RoutesScreen() {
   const [endPredictions, setEndPredictions] = useState([]);
   const [showStartDropdown, setShowStartDropdown] = useState(false);
   const [showEndDropdown, setShowEndDropdown] = useState(false);
+  const [destination, setDestination] = useState('');
+  const { destinationName, destinationAddress } = useLocalSearchParams();
+  useEffect(() => {
+    if (destinationName || destinationAddress) {
+      setDestination(destinationName || destinationAddress);
+    }
+  }, [destinationName, destinationAddress]);
+
 
   const webviewRef = useRef(null);
 
@@ -683,7 +729,7 @@ export default function RoutesScreen() {
     };
   };
 
-
+///dddd
   const searchPlaces = async (text, setPredictions, setShowDropdown) => {
     if (text.length < 2) {
       setPredictions([]);
@@ -755,6 +801,8 @@ export default function RoutesScreen() {
         return;
       }
       setStartCoords(coords);
+      addRecentSearch(item.description);
+      setIsSearchMode(false);
     }
   };
 
@@ -773,6 +821,8 @@ export default function RoutesScreen() {
         return;
       }
       setEndCoords(coords);
+      addRecentSearch(item.description);
+      setIsSearchMode(false);
     }
   };
 
@@ -798,7 +848,8 @@ export default function RoutesScreen() {
 
       setAffordableRoute({
         type: 'affordable',
-        title: '💰 Most Affordable',
+        title: 'Most Affordable',
+        icon: require('../../assets/images/affordable-icon.png'),
         ...affordableRouteData.summary,
         steps: affordableRouteData.steps,
         routeData: affordableRouteData
@@ -806,7 +857,8 @@ export default function RoutesScreen() {
 
       setQuickRoute({
         type: 'fastest',
-        title: '⚡ Fastest',
+        title: 'Fastest',
+        icon: require('../../assets/images/quick-icon.png'),
         ...quickRouteData.summary,
         steps: quickRouteData.steps,
         routeData: quickRouteData
@@ -817,66 +869,173 @@ export default function RoutesScreen() {
       Alert.alert("Error", error.message || "Unable to calculate routes");
     } finally {
       setLoadingRoutes(false);
+      setIsSearchMode(false); // <-- important: kapag tapos na mag compute, exit search mode para ipakita map+routes
     }
+
   };
 
   const showRouteOnMap = (route) => {
     setSelectedRoute(route);
+
     if (route && route.steps) {
+      // Convert local image paths to accessible URIs
+      const startIcon = Image.resolveAssetSource(require('../../assets/images/current-location-icon.png')).uri;
+      const endIcon = Image.resolveAssetSource(require('../../assets/images/pin-red-icon.png')).uri;
+
       postToWebView({
-        steps: route.steps.filter(step => step.polyline)
+        steps: route.steps.filter(step => step.polyline),
+        iconStart: startIcon,
+        iconEnd: endIcon
       });
     }
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.searchContainer}>
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter start location"
-            value={start}
-            onChangeText={handleStartChange}
-            onFocus={() => setShowStartDropdown(startPredictions.length > 0)}
-          />
-          {showStartDropdown && (
-            <View style={styles.dropdownContainer}>
+  // 🔁 NEW STATES
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
+
+  // 🔁 Swap locations
+  const handleSwap = () => {
+    const temp = start;
+    setStart(end);
+    setEnd(temp);
+    const tempCoords = startCoords;
+    setStartCoords(endCoords);
+    setEndCoords(tempCoords);
+  };
+
+  // ✅ Check if address is inside Sampaloc, Manila
+  const isInsideSampalocManila = (address) => {
+    return address.includes("Sampaloc") && address.includes("Manila");
+  };
+
+  // ✋ Updated dropdown selection handler with restriction check
+  const handleSelectPrediction = async (
+    item,
+    setField,
+    setPredictions,
+    setShowDropdown,
+    type
+  ) => {
+    const description = item.description;
+
+    if (!isInsideSampalocManila(description)) {
+      setShowRestrictionModal(true);
+      setField("");
+      setPredictions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    setField(description);
+    setPredictions([]);
+    setShowDropdown(false);
+
+    // Optional: trigger geocoding immediately
+    const coords = await geocodeAddress(description);
+    if (type === "start") setStartCoords(coords);
+    else setEndCoords(coords);
+    addRecentSearch(description);
+  };
+
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [recentSearches, setRecentSearches] = useState([]);
+
+  // save to recent
+  const addRecentSearch = (item) => {
+    setRecentSearches(prev => {
+      const updated = [item, ...prev.filter(i => i !== item)];
+      return updated.slice(0, 5);
+    });
+  };
+
+  const showMapAndRoutes = !isSearchMode && (quickRoute || affordableRoute);
+
+
+return (
+  <SafeAreaView style={styles.container}>
+    {/* 🔍 SEARCH CONTAINER */}
+    <View style={styles.searchContainer}>
+      <View style={styles.locationContainer}>
+        <View style={{ flex: 1 }}>
+          {/* START INPUT */}
+          <View style={styles.searchBar}>
+            <Image source={require('../../assets/images/search-icon.png')} style={styles.searchIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter start location"
+              value={start}
+              onChangeText={handleStartChange}
+              onFocus={() => {
+                setIsSearchMode(true);
+                setShowStartDropdown(startPredictions.length > 0);
+              }}
+            />
+          </View>
+
+          {/* START DROPDOWN (main + sub text) */}
+          {showStartDropdown && startPredictions.length > 0 && (
+            <View style={styles.dropdown}>
               <FlatList
+                keyboardShouldPersistTaps="handled"
                 data={startPredictions}
                 keyExtractor={(item) => item.place_id}
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     style={styles.dropdownItem}
-                    onPress={() => handleStartSelection(item)}
+                    onPress={() =>
+                      // reuse your selection handler which validates and geocodes
+                      handleSelectPrediction(item, setStart, setStartPredictions, setShowStartDropdown, "start")
+                    }
                   >
-                    <Text style={styles.dropdownText}>{item.description}</Text>
+                    <Text style={{ fontWeight: "700", fontSize: 14 }}>
+                      {item.structured_formatting?.main_text || item.description}
+                    </Text>
+                    {item.structured_formatting?.secondary_text ? (
+                      <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
+                        {item.structured_formatting.secondary_text}
+                      </Text>
+                    ) : null}
                   </TouchableOpacity>
                 )}
               />
             </View>
           )}
-        </View>
-
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter destination"
-            value={end}
-            onChangeText={handleEndChange}
-            onFocus={() => setShowEndDropdown(endPredictions.length > 0)}
-          />
-          {showEndDropdown && (
-            <View style={styles.dropdownContainer}>
+          <View style={styles.searchBar2}>
+            <Image source={require('../../assets/images/pin-black-icon.png')} style={styles.searchIcon} />
+            {/* DESTINATION INPUT */}
+            <TextInput
+              style={styles.input}
+              placeholder="Enter destination"
+              value={end}
+              onChangeText={handleEndChange}
+              onFocus={() => {
+                setIsSearchMode(true);
+                setShowEndDropdown(endPredictions.length > 0);
+              }}
+            />
+          </View>
+          {/* DESTINATION DROPDOWN (main + sub text) */}
+          {showEndDropdown && endPredictions.length > 0 && (
+            <View style={styles.dropdown}>
               <FlatList
+                keyboardShouldPersistTaps="handled"
                 data={endPredictions}
                 keyExtractor={(item) => item.place_id}
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     style={styles.dropdownItem}
-                    onPress={() => handleEndSelection(item)}
+                    onPress={() =>
+                      handleSelectPrediction(item, setEnd, setEndPredictions, setShowEndDropdown, "end")
+                    }
                   >
-                    <Text style={styles.dropdownText}>{item.description}</Text>
+                    <Text style={{ fontWeight: "700", fontSize: 14 }}>
+                      {item.structured_formatting?.main_text || item.description}
+                    </Text>
+                    {item.structured_formatting?.secondary_text ? (
+                      <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
+                        {item.structured_formatting.secondary_text}
+                      </Text>
+                    ) : null}
                   </TouchableOpacity>
                 )}
               />
@@ -884,148 +1043,203 @@ export default function RoutesScreen() {
           )}
         </View>
 
-        <TouchableOpacity
-          style={styles.searchButton}
-          onPress={async () => {
-            try {
-              await computeRoutes();
-
-              await saveRoute({
-                starting_loc: start,
-                destination_loc: end,
-                event_time: new Date().toTimeString().split(" ")[0],
-                event_date: new Date().toISOString().split("T")[0],
-              });
-              
-            } catch (error) {
-              console.error("Find/Save error:", error);
-              Alert.alert("Error", "Could not calculate or save route.");
-            }
-          }}
-        >
-          <Text style={styles.searchButtonText}>
-            {loadingRoutes ? "Calculating Routes..." : "Find Routes"}
-          </Text>
+        {/* 🔄 SWAP BUTTON */}
+        <TouchableOpacity onPress={handleSwap} style={styles.switchButton}>
+          <Image
+            source={require("../../assets/images/switch-black-icon.png")}
+            style={styles.switchIcon}
+          />
         </TouchableOpacity>
       </View>
+    </View>
 
-      <View style={styles.mapContainer}>
-        <WebView
-          ref={webviewRef}
-          originWhitelist={["*"]}
-          source={{ html: htmlContent }}
-          javaScriptEnabled
-          style={{ flex: 1 }}
-          onLoad={() => sendGeoJSON()}
-        />
-      </View>
+    {/* CONDITIONAL: kapag nagta-type pa (isSearchMode=true) o wala pang routes */}
+    {isSearchMode || (!quickRoute && !affordableRoute) ? (
+      <>
+        {/* ✨ SEARCH MODE — show only recent searches under inputs */}
+          <View style={styles.recentContainer}>
+            <Text style={styles.recentTitle}>Recent Searches</Text>
 
-      <View style={styles.routesContainer}>
-        {loadingRoutes && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
-            <Text style={styles.loadingText}>Finding best routes...</Text>
-          </View>
-        )}
+            <FlatList
+              data={recentSearches}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                
+                <TouchableOpacity
+                  style={styles.recentItemWrapper}
+                  onPress={async () => {
+                    // set end and trigger compute; your computeRoutes needs startCoords & endCoords
+                    setEnd(item);
+                    // Optional: geocode and set endCoords here if you prefer immediate geocode:
+                    const coords = await geocodeAddress(item);
+                    if (coords) setEndCoords(coords);
 
-        {!selectedRoute ? (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {affordableRoute && (
-              <TouchableOpacity
-                style={[styles.routeCard, styles.affordableCard]}
-                onPress={() => showRouteOnMap(affordableRoute)}
-              >
-                <View style={styles.routeHeader}>
-                  <Text style={styles.routeTitle}>{affordableRoute.title}</Text>
-                  <Text style={styles.routeFare}>₱{affordableRoute.fare}</Text>
-                </View>
-                <Text style={styles.routeInfo}>
-                  {affordableRoute.duration} • {affordableRoute.distance}
-                </Text>
-                <Text style={styles.routePreview}>
-                  {affordableRoute.steps.length} steps • Tap to view details
-                </Text>
-              </TouchableOpacity>
-            )}
-
-            {quickRoute && (
-              <TouchableOpacity
-                style={[styles.routeCard, styles.fastestCard]}
-                onPress={() => showRouteOnMap(quickRoute)}
-              >
-                <View style={styles.routeHeader}>
-                  <Text style={styles.routeTitle}>{quickRoute.title}</Text>
-                  <Text style={styles.routeFare}>₱{quickRoute.fare}</Text>
-                </View>
-                <Text style={styles.routeInfo}>
-                  {quickRoute.duration} • {quickRoute.distance}
-                </Text>
-                <Text style={styles.routePreview}>
-                  {quickRoute.steps.length} steps • Tap to view details
-                </Text>
-              </TouchableOpacity>
-            )}
-          </ScrollView>
-        ) : (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.detailCard}>
-              <View style={styles.detailHeader}>
-                <Text style={styles.detailTitle}>{selectedRoute.title}</Text>
-                <Text style={styles.detailFare}>₱{selectedRoute.fare}</Text>
-              </View>
-              <Text style={styles.detailInfo}>
-                {selectedRoute.duration} • {selectedRoute.distance}
-              </Text>
-
-              <View style={styles.stepsContainer}>
-                <Text style={styles.stepsTitle}>Step-by-step directions:</Text>
-                {selectedRoute.steps.map((step, index) => (
-                  <View key={index} style={styles.stepItem}>
-                    <View style={[styles.stepIcon, { backgroundColor: step.color || '#ccc' }]}>
-                      <Text style={styles.stepNumber}>{index + 1}</Text>
-                    </View>
-                    <View style={styles.stepContent}>
-                      <Text style={[styles.stepInstruction, { color: step.color || "#000" }]}>
-                      {step.instructions}
-                      </Text>
-                      <Text style={styles.stepDetails}>
-                        {step.duration} • {step.distance}
-                        {step.fare > 0 && ` • ₱${step.fare}`}
-                      </Text>
-                    </View>
+                    setIsSearchMode(false);
+                    try {
+                      await computeRoutes();
+                      await saveRoute({
+                        starting_loc: start,
+                        destination_loc: item,
+                        event_time: new Date().toTimeString().split(" ")[0],
+                        event_date: new Date().toISOString().split("T")[0],
+                      });
+                      addRecentSearch(item);
+                    } catch (err) {
+                      console.error(err);
+                      Alert.alert("Error", "Could not calculate or save route.");
+                    }
+                  }}
+                >
+                  <View style={styles.recentBar}>
+                    <Image source={require('../../assets/images/time-icon.png')} style={styles.recentIcon} />
+                    <Text style={styles.recentItem}>{item}</Text>
                   </View>
-                ))}
-              </View>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.primary,
+                paddingVertical: 10,
+                borderRadius: 20,
+                alignItems: "center",
+                marginTop: 10,
+                marginBottom: 15,
+                marginHorizontal: "auto",
+                width: 130,
+              }}
+              onPress={computeRoutes}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+                Find Route
+              </Text>
+            </TouchableOpacity>
+          </View>
+          
+      </>
+    ) : (
+      <>
+        {/* 🗺️ MAP VIEW */}
+        <View style={styles.filler}>
+        </View>
 
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => setSelectedRoute(null)}
-              >
-                <Text style={styles.backButtonText}>← Back to Routes</Text>
-              </TouchableOpacity>
+        <View style={styles.mapContainer}>
+          <WebView
+            ref={webviewRef}
+            originWhitelist={["*"]}
+            source={{ html: htmlContent }}
+            style={{ flex: 1 }}
+            javaScriptEnabled
+            domStorageEnabled
+            onLoad={() => sendGeoJSON()}
+          />
+        </View>
+
+        {/* 🚗 ROUTE OPTIONS (Fastest / Cheapest) */}
+        <View style={styles.routesContainer}>
+          {loadingRoutes && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#007AFF" />
+              <Text style={styles.loadingText}>Finding best routes...</Text>
             </View>
-          </ScrollView>
-        )}
-      </View>
+          )}
 
-      <BottomNav />
-    </SafeAreaView>
-  );
+          {!selectedRoute ? (
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {affordableRoute && (
+                <TouchableOpacity
+                  style={[styles.routeCard, styles.affordableCard]}
+                  onPress={() => showRouteOnMap(affordableRoute)}
+                >
+                  <View style={styles.routeHeader}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Image source={affordableRoute.icon} style={{ width: 24, height: 24, marginRight: 5,}} />
+                      <Text style={styles.routeTitle}>{affordableRoute.title}</Text>
+                    </View>
+                    <Text style={styles.routeFare}>₱{affordableRoute.fare}</Text>
+                  </View>
+
+                  <View style={styles.routedetail}>
+                    <Text style={styles.routeInfo}>{affordableRoute.duration} • {affordableRoute.distance}</Text>
+                    <Text style={styles.routePreview}>Tap to view details</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+
+              {quickRoute && (
+                <TouchableOpacity
+                  style={[styles.routeCard, styles.fastestCard]}
+                  onPress={() => showRouteOnMap(quickRoute)}
+                >
+                  <View style={styles.routeHeader}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Image source={quickRoute.icon} style={{ width: 24, height: 24, marginRight: 5,}} />
+                      <Text style={styles.routeTitle}>{quickRoute.title}</Text>
+                    </View>
+                    <Text style={styles.routeFare}>₱{quickRoute.fare}</Text>
+                  </View>
+                  <View style={styles.routedetail}>
+                    <Text style={styles.routeInfo}>{quickRoute.duration} • {quickRoute.distance} </Text>
+                  <Text style={styles.routePreview}>Tap to view details</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            </ScrollView>
+          ) : (
+            /* Selected route detail view (unchanged) */
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.detailCard}>
+                <View style={styles.detailHeader}>
+                  <Text style={styles.detailTitle}>{selectedRoute.title}</Text>
+                  <Text style={styles.detailFare}>₱{selectedRoute.fare}</Text>
+                </View>
+                <Text style={styles.detailInfo}>
+                  {selectedRoute.duration} • {selectedRoute.distance}
+                </Text>
+
+                <View style={styles.stepsContainer}>
+                  <Text style={styles.stepsTitle}>Step-by-step directions:</Text>
+                  {selectedRoute.steps.map((step, index) => (
+                    <View key={index} style={styles.stepItem}>
+                      <View style={[styles.stepIcon, { backgroundColor: step.color || '#ccc' }]}>
+                        <Text style={styles.stepNumber}>{index + 1}</Text>
+                      </View>
+                      <View style={styles.stepContent}>
+                        <Text style={[styles.stepInstruction, { color: step.color || "#000" }]}>
+                          {step.instructions}
+                        </Text>
+                        <Text style={styles.stepDetails}>
+                          {step.duration} • {step.distance}
+                          {step.fare > 0 && ` • ₱${step.fare}`}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+
+                <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={() => setSelectedRoute(null)}
+                >
+                  <Text style={styles.backButtonText}>← Back to Routes</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          )}
+        </View> 
+      </>
+    )}
+    {/* 🧭 BOTTOM NAVIGATION (always visible) */}
+    <BottomNav />
+  </SafeAreaView>
+);
 }
 
 // ----- Styles -----
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8f9fa" },
-  searchContainer: { padding: 12, backgroundColor: "#fff", elevation: 2 },
+  container: { flex: 1, backgroundColor: "#ffffffff" },
+  searchContainer: { padding: 12, backgroundColor: "#fff", elevation: 0 },
   inputWrapper: { marginBottom: 8 },
-  input: {
-    height: 44,
-    borderColor: "#ddd",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    backgroundColor: "#fff"
-  },
   dropdownContainer: {
     maxHeight: 160,
     backgroundColor: "#fff",
@@ -1034,7 +1248,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     borderRadius: 6,
   },
-  dropdownItem: { padding: 10, borderBottomColor: "#f1f1f1", borderBottomWidth: 1 },
   dropdownText: { fontSize: 14 },
   searchButton: {
     marginTop: 6,
@@ -1045,22 +1258,42 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   searchButtonText: { color: "#fff", fontWeight: "600" },
-  mapContainer: { height: 260, marginVertical: 8, backgroundColor: "#e9ecef" },
-  routesContainer: { flex: 1, padding: 12 },
+  mapContainer: { 
+    height: 590,  
+    backgroundColor: "#ffffffff", 
+    zindex: -1,
+    position: 'absolute',
+    top: 0, 
+    left: 0,
+    right: 0,
+    paddingBottom: 35,
+  },
+  routesContainer: { 
+    position: 'absolute',
+    bottom: 50, 
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: Colors.primary,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 35,
+  },
   loadingContainer: { alignItems: "center", padding: 20 },
   loadingText: { marginTop: 8, color: "#666" },
   routeCard: {
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 15,
     padding: 12,
-    marginBottom: 10,
+    marginBottom: 8,
     elevation: 1
   },
   affordableCard: {},
   fastestCard: {},
   routeHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  routedetail: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   routeTitle: { fontWeight: "700" },
-  routeFare: { fontWeight: "700" },
+  routeFare: { fontWeight: "700",},
   routeInfo: { color: "#666", marginTop: 6 },
   routePreview: { color: "#888", marginTop: 4, fontSize: 13 },
   detailCard: { backgroundColor: "#fff", borderRadius: 10, padding: 12 },
@@ -1077,5 +1310,131 @@ const styles = StyleSheet.create({
   stepInstruction: { fontWeight: "600" },
   stepDetails: { color: "#666", marginTop: 4 },
   backButton: { marginTop: 10 },
-  backButtonText: { color: "#007AFF", fontWeight: "600" }
+  backButtonText: { color: "#007AFF", fontWeight: "600" },
+
+  switchIcon: {
+    width: 30,
+    height: 30,
+    resizeMode: "contain",
+  },
+  dropdown: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    maxHeight: 150,
+    marginBottom: 10,
+    zIndex: 999,
+  },
+  dropdownItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 5,
+    marginBottom: -15,
+    marginTop: 10,
+    paddingLeft: 10,
+  },
+
+  input: {
+    flex: 1,
+    color: '#000',
+  },
+  searchIcon: {
+    width: 25,
+    height: 25,
+    marginRight: 5,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.lighter,
+    borderRadius: 40,
+    paddingHorizontal: 15,
+    paddingVertical: 3,
+    elevation: 3,
+    marginBottom: 10,
+  },
+
+  searchBar2: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: "#ffffffff",
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    borderRadius: 40,
+    paddingHorizontal: 15,
+    paddingVertical: 3,
+    elevation: 3,
+    marginBottom: 10,
+  },
+
+  switchButton: {
+    marginLeft: 10,
+    justifyContent: "center", // centers vertically
+    alignItems: "center",
+  },
+
+  switchIcon: {
+    width: 28,
+    height: 28,
+    resizeMode: "contain",
+  },
+
+  recentContainer: {
+    marginTop: 0,
+    borderTopWidth: 1,
+    borderColor: "#ffffffff",
+    padding: 20,
+    height: 526,
+  },
+
+  recentTitle: {
+    fontWeight: "600",
+    fontSize: 16,
+    marginBottom: 10,
+    color: "#bdbdbdff",
+  },
+
+  recentItem: {
+    fontSize: 15,
+    paddingVertical: 8,
+  },
+
+  recentIcon: {
+    width: 25,
+    height: 25,
+    marginRight: 8,
+    marginLeft: -12,
+  },
+
+  recentBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: "#ffffffff",
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    marginBottom: 10,
+    color: "#363636ff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#cececeff",
+  },
+  filler: {
+    height: 526,
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 35,
+  }
 });

@@ -124,13 +124,6 @@ export default function ChangePasswordScreen() {
       </TouchableOpacity>
 
       <View style={styles.container}>
-        <View style={styles.logoSection}>
-          <Image
-            source={require("../../../assets/images/app_logo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
 
         {step === 1 ? (
           <View style={styles.middleSection}>
@@ -258,8 +251,8 @@ export default function ChangePasswordScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#fff" },
-  backBtn: { position: "absolute", top: 40, left: 25, zIndex: 10 },
-  backIcon: { width: 28, height: 28 },
+  backBtn: { position: "absolute", top: 60, left: 25, zIndex: 1 },
+  backIcon: { width: 20, height: 20 },
   container: {
     flex: 1,
     alignItems: "center",
@@ -269,7 +262,7 @@ const styles = StyleSheet.create({
   logoSection: { marginBottom: 40 },
   logo: { width: 120, height: 120 },
   middleSection: { width: "100%", alignItems: "center" },
-  title: { fontSize: 22, fontWeight: "600", marginBottom: 10, color: "#333" },
+  title: { fontSize: 22, fontWeight: "600", marginBottom: 100, marginTop: 50, color: "#000000ff" },
   subtitle: {
     fontSize: 14,
     color: "#666",

@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 
 // ✅ Change this to your actual backend (the mobile backend, NOT the admin one)
-const API_URL = "http://10.0.2.2:5001"; 
+const API_URL = "https://komyut-we5n.onrender.com"; 
 // or http://192.168.x.x:5001 if running locally
 
 export const useNotifications = () => {

@@ -71,6 +71,9 @@ const styles = StyleSheet.create({
   wrapper: {
     alignItems: 'center',
     marginBottom: 0,
+        bottom: 50, 
+    left: 0,
+    right: 0,
   },
   container: {
     flexDirection: 'row',
@@ -86,6 +89,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 3, height: 3 },
     shadowRadius: 5,
     elevation: 5,
+    bottom: -50, 
+    left: 0,
+    right: 0,
   },
   button: {
     backgroundColor: Colors.secondary,
