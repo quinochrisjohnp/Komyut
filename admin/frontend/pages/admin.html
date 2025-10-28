@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Management</title>
+
+  <!-- ✅ CSS -->
+  <link rel="stylesheet" href="./../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+</head>
+
+<body data-page="admin">
+
+  <!-- ✅ SIDEBAR -->
+  <aside class="sidebar">
+    <div class="profile">
+      <div class="icon">👤</div>
+      <h2>Super Admin</h2>
+    </div>
+
+    <ul class="menu" id="menu">
+      <li data-page="dashboard"><a href="dashboard.html">📊 Dashboard</a></li>
+      <li data-page="users"><a href="users.html">👥 User Management</a></li>
+      <li data-page="routes"><a href="routes.html">📍 Route Management</a></li>
+      <li data-page="notifications"><a href="notifications.html">🔔 Notifications Manager</a></li>
+      <li data-page="feedback"><a href="feedback.html">💬 Feedbacks & Reports</a></li>
+      <li data-page="admin" class="active"><a href="admin.html">⚙️ Admin Management</a></li>
+      <li data-page="logs"><a href="logs.html">📜 Activity Logs</a></li>
+      <li data-page="logout"><a href="logout.html">🚪 Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- ✅ CONTENT -->
+  <div class="content-body">
+    <h1>Admin Management</h1>
+
+    <div class="admin-management">
+
+      <!-- 🔎 Search -->
+      <div class="admin-header">
+        <form>
+          <div class="search-route">
+            <input class="search-input-route" type="search" placeholder="Search">
+            <button type="submit" class="search-submit-route">
+              <span class="search-icon-route material-symbols-outlined">search</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 📋 Admins Table -->
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Admin Name</th>
+              <th>Email</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+
+          <tbody id="adminTableBody">
+            <tr><td colspan="3">Loading admins...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Highlight active menu -->
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const tbody = document.getElementById("adminTableBody");
+
+    try {
+      // ✅ Corrected endpoint
+      const response = await fetch("http://localhost:5002/api/clerk-users/admins");
+      if (!response.ok) throw new Error("Failed to fetch admins");
+
+      const data = await response.json();
+      const admins = data.admins || [];
+
+      tbody.innerHTML = ""; // Clear table first
+
+      if (admins.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3">No admins found.</td></tr>`;
+      } else {
+        admins.forEach((admin) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${admin.username || "(no name)"}</td>
+            <td>${admin.email || "(no email)"}</td>
+            <td>${admin.role || "N/A"}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    } catch (error) {
+      console.error("Error loading admins:", error);
+      tbody.innerHTML = `<tr><td colspan="3">Error fetching admins.</td></tr>`;
+    }
+  });
+</script>
+
+
+</body>
+</html>

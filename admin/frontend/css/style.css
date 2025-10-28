@@ -1,3 +1,206 @@
+/* ====== Global Styling ====== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: #f4faff;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+}
+
+/* ====== Sidebar ====== */
+.sidebar {
+  width: 260px;
+  background: #2e8ec4;
+  color: white;
+  min-height: 100vh;
+  padding: 20px;
+  border-top-right-radius: 25px;
+  border-bottom-right-radius: 25px;
+}
+
+.profile {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.profile .icon {
+  font-size: 40px;
+}
+
+.menu {
+  list-style: none;
+}
+
+.menu li {
+  padding: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 25px;
+  margin-bottom: 5px;
+}
+
+.menu li:hover,
+.menu .active {
+  background: white;
+  color: #2e8ec4;
+  font-weight: bold;
+}
+
+/* ====== Dashboard Content ====== */
+.dashboard {
+  padding: 30px;
+  width: 100%;
+}
+
+.dashboard h1 {
+  margin-bottom: 20px;
+}
+
+/* ====== Stats Cards ====== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.card {
+  background: #e9f5ff;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card .value {
+  font-size: 26px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.card .active {
+  color: #28a745;
+}
+
+/* ====== Table ====== */
+.system-reports {
+  background: #e9f5ff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.system-reports table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.system-reports th {
+  background: #2e8ec4;
+  color: white;
+  padding: 10px;
+}
+
+.system-reports td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #cccccc;
+}
+
+.print {
+  color: #00b33c;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.print:hover {
+  text-decoration: underline;
+}
+
+/* ====== Buttons ====== */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 200px;
+}
+
+.btn {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.primary {
+  background: #2e8ec4;
+  color: white;
+}
+
+.primary:hover {
+  background: #2578a8;
+}
+
+.secondary {
+  background: #4da3d9;
+  color: white;
+}
+
+.secondary:hover {
+  background: #3a8bbd;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 900px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-radius: 0;
+    text-align: center;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ====== Page Visibility ====== */
+.page {
+  display: none;
+}
+
+.active-page {
+  display: block;
+}
+
+.menu .active {
+  background: white;
+  color: #2e8ec4;
+  font-weight: bold;
+  box-shadow: 0 0 8px rgba(255,255,255,0.7);
+}
+
+/* ====== for design ====== */
 body {
   margin: 0;
   background-color: #eaf5fc;
@@ -1567,4 +1770,92 @@ textarea {
 
 .activity-container table tbody tr:hover {
   background-color: #f4faff;
+}
+
+.menu li a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  padding: 10px 0;
+}
+
+/* ✅ Modal background */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgba(0,0,0,0.4);
+}
+
+/* ✅ Popup box */
+.modal-content {
+  background: white;
+  width: 65%;
+  margin: 60px auto;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+/* ✅ Close button */
+.close {
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* ✅ Inputs section */
+.modal-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+/* ✅ Arrow */
+.arrow {
+  font-size: 26px;
+  padding-top: 8px;
+}
+
+/* ✅ Fake map area */
+.map {
+  margin-top: 15px;
+  width: 100%;
+  height: 280px;
+  background: #e6e6e6;
+  border-radius: 10px;
+}
+
+/* ✅ Button */
+.submit-btn {
+  margin-top: 15px;
+  padding: 10px 20px;
+  cursor: pointer;
+  background: #3e99c6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+/* ✅ Add Route button styling */
+.add-route-btn {
+  padding: 10px 20px;
+  background: #3e99c6;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
 }

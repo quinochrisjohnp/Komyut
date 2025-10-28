@@ -4,60 +4,100 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Notifications Manager</title>
+  <link rel="stylesheet" href="./../css/style.css" />
 </head>
 <body>
-  <div class="content-body">
-    <h1>Notifications Manager</h1>
 
-    <!-- 📨 Compose Notification -->
-    <div class="notif-bg">
-      <h2>Compose Alert</h2>
-      <form id="notifForm">
-        <div class="container-grid">
-          <div class="column-grid">
-            <label for="alert-title">Title:</label>
-            <input type="text" id="alert-title" required placeholder="Enter Title" />
-          </div>
-          <div class="column-grid">
-            <label for="alert-category">Category:</label>
-            <select id="alert-category" required>
-              <option value="" disabled selected>Select Category</option>
-              <option value="System">System</option>
-              <option value="Route Update">Route Update</option>
-              <option value="Maintenance">Maintenance</option>
-            </select>
-          </div>
-        </div>
-
-        <textarea id="msg-box" placeholder="Message" rows="5" required></textarea>
-        <br />
-        <div class="center-submit">
-          <button type="submit" id="submit-btn">Send</button>
-        </div>
-      </form>
+  <!-- ✅ Sidebar -->
+  <aside class="sidebar">
+    <div class="profile">
+      <div class="icon">👤</div>
+      <h2>Super Admin</h2>
     </div>
 
-    <br />
+    <ul class="menu">
+      <li><a href="dashboard.html">📊 Dashboard</a></li>
+      <li><a href="users.html">👥 User Management</a></li>
+      <li><a href="route-management.html">📍 Route Management</a></li>
+      <li class="active"><a href="notifications.html">🔔 Notifications Manager</a></li>
+      <li><a href="feedback.html">💬 Feedbacks & Reports</a></li>
+      <li><a href="admin.html">⚙️ Admin Management</a></li>
+      <li><a href="logs.html">📜 Activity Logs</a></li>
+      <li><a href="index.html">🚪 Logout</a></li>
+    </ul>
+  </aside>
 
-    <!-- 📜 Notification History -->
-    <div class="notif-bg">
-      <h2>Notifications History</h2>
-      <div class="table-container1">
-        <table class="scrollable-table5">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Sent To</th>
-              <th>Timestamp</th>
-              <th>Message</th>
-            </tr>
-          </thead>
-          <tbody id="notifTableBody">
-            <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
-          </tbody>
-        </table>
+  <!-- ✅ Main Content -->
+  <div class="content">
+
+    <!-- ✅ Page Header -->
+    <header class="header">
+      <h1>Notifications Manager</h1>
+    </header>
+
+    <!-- ✅ Body -->
+    <div class="content-body">
+
+      <!-- ========================= -->
+      <!-- 📨 Compose Notification -->
+      <!-- ========================= -->
+      <div class="notif-bg">
+        <h2>Compose Alert</h2>
+        <form id="notifForm">
+          <div class="container-grid">
+            <div class="column-grid">
+              <label for="alert-title">Title:</label>
+              <input type="text" id="alert-title" required placeholder="Enter Title" />
+            </div>
+            <div class="column-grid">
+              <label for="alert-category">Category:</label>
+              <select id="alert-category" required>
+                <option value="" disabled selected>Select Category</option>
+                <option value="System">System</option>
+                <option value="Route Update">Route Update</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+            </div>
+          </div>
+
+          <textarea id="msg-box" placeholder="Message" rows="5" required></textarea>
+          <br />
+
+          <div class="center-submit">
+            <button type="submit" id="submit-btn">Send</button>
+          </div>
+        </form>
       </div>
+
+      <br />
+
+      <!-- ========================= -->
+      <!-- 📜 Notification History -->
+      <!-- ========================= -->
+      <div class="notif-bg">
+        <h2>Notifications History</h2>
+        <div class="table-container1">
+          <table class="scrollable-table5">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Sent To</th>
+                <th>Timestamp</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+
+            <tbody id="notifTableBody">
+              <tr>
+                <td colspan="5" style="text-align:center;">Loading...</td>
+              </tr>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -65,7 +105,7 @@
   console.log("✅ Script loaded!");
 
   // ✅ Correct API route
-  const API_URL = "http://localhost:5002/notifications";
+  const API_URL = "http://localhost:5002/api/notifications";
 
   // 🟢 Fetch notifications and render them in the table
   async function fetchNotifications() {
@@ -138,8 +178,9 @@
 
   // 🟢 Auto-load notifications and refresh every 5 seconds
   fetchNotifications();
-  setInterval(fetchNotifications, 5000);
+  setInterval(fetchNotifications, 60000);
 </script>
+
 
 </body>
 </html>

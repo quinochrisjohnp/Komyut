@@ -1,157 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="./../css/style.css" />
 </head>
+
 <body>
-  <div class="content-body">
-  <h1 class="dash-title">Dashboard</h1>
-  <section class="dash-page" aria-label="Dashboard">
+  <div class="container">
 
-    <!-- KPI cards -->
-    <div class="kpis">
-      <article class="kpi">
-        <p class="kpi__label">System Status</p>
-        <p class="kpi__value" id="system-status">Loading...</p>
-      </article>
-      <article class="kpi">
-        <p class="kpi__label">Total Users</p>
-        <p class="kpi__value" id="total-users">0</p>
-      </article>
-      <article class="kpi">
-        <p class="kpi__label">Active Routes</p>
-        <p class="kpi__value" id="active-routes">0</p>
-      </article>
-      <article class="kpi">
-        <p class="kpi__label">Unread Feedback</p>
-        <p class="kpi__value" id="unread-feedback">0</p>
-      </article>
-    </div>
-
-    <!-- Main grid -->
-    <div class="content-grid">
-      <!-- Add Route Modal -->
-      <div class="modal" id="modal-add-route" role="dialog" aria-modal="true" aria-labelledby="add-route-title" hidden>
-        <div class="modal-card wide">
-          <button class="modal-close" data-close aria-label="Close">×</button>
-          <h3 id="add-route-title" class="modal-title">New Route</h3>
-
-          <form class="route-form" autocomplete="off">
-            <div class="row row-top">
-              <input type="text" class="pill" name="start" placeholder="Start location" aria-label="Start location">
-              <button type="button" class="swap" title="Swap"><span>⇄</span></button>
-              <input type="text" class="pill" name="destination" placeholder="Destination" aria-label="Destination">
-            </div>
-
-            <div class="row row-mid">
-              <select class="pill" name="vehicle" aria-label="Vehicle Type">
-                <option value="" selected>Vehicle Type</option>
-                <option>Jeep</option>
-                <option>Bus</option>
-                <option>UV Express</option>
-                <option>Tricycle</option>
-              </select>
-
-              <input type="number" class="pill" name="price" placeholder="Price" aria-label="Price" min="0" step="1">
-              <input type="text" class="pill" name="desc" placeholder="Description" aria-label="Description">
-            </div>
-
-            <div class="map-box" aria-label="Map preview">Map preview</div>
-
-            <div class="modal-actions end">
-              <button type="button" class="btn btn--primary" data-demo="add-route">Add Route</button>
-            </div>
-          </form>
-        </div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="profile">
+        <div class="icon">👤</div>
+        <h2>Super Admin</h2>
       </div>
+    <ul class="menu" id="menu">
+        <li data-page="dashboard" class="active">
+            <a href="dashboard.html">📊 Dashboard</a>
+        </li>
+        <li data-page="users">
+            <a href="users.html">👥 User Management</a>
+        </li>
+        <li data-page="routes">
+            <a href="routes.html">📍 Route Management</a>
+        </li>
+        <li data-page="notifications">
+            <a href="notifications.html">🔔 Notifications Manager</a>
+        </li>
+        <li data-page="feedback">
+            <a href="feedback.html">💬 Feedbacks & Reports</a>
+        </li>
+        <li data-page="admin">
+            <a href="admin.html">⚙️ Admin Management</a>
+        </li>
+        <li data-page="logs">
+            <a href="logs.html">📜 Activity Logs</a>
+        </li>
+        <li data-page="logout">
+            <a href="logout.html">🚪 Logout</a>
+        </li>
+    </ul>
+    </aside>
 
-      <!-- Send System Notifications -->
-      <div class="modal" id="modal-send" role="dialog" aria-modal="true" aria-labelledby="send-title" hidden>
-        <div class="modal-card">
-          <button class="modal-close" data-close aria-label="Close">×</button>
-          <h3 id="send-title" class="modal-title">Compose Alert</h3>
-          <form autocomplete="off">
-            <div class="container-grid">
-              <div class="column-grid">
-                <label for="alert-title">Title : </label>
-                <input type="text" class="pill" id="alert-title" name="alert-title" required placeholder="Enter Title">
-              </div>
-              <div class="column-grid">
-                <label for="alert-category">Category : </label>
-                <select id="alert-category" class="pill" name="alert-category" required>
-                  <option selected>Select Category</option>
-                  <option>System</option>
-                  <option>Route Update</option>
-                  <option>Maintenance</option>
-                </select>
-              </div>
-            </div>
-            <textarea id="msg-box" name="msg-box" placeholder="Message" rows="5" cols="50" required></textarea>
-            <br>
-            <div class="center-submit">
-              <input type="submit" id="submit-btn" name="submit-btn" value="Send">
-            </div>
-          </form>
+    <div class="content-body">
+
+      <h1 class="dash-title">Dashboard</h1>
+
+      <section class="dash-page" aria-label="Dashboard">
+
+        <!-- KPI Cards -->
+        <div class="kpis">
+          <article class="kpi">
+            <p class="kpi__label">System Status</p>
+            <p class="kpi__value" id="system-status">Loading...</p>
+          </article>
+
+          <article class="kpi">
+            <p class="kpi__label">Total Users</p>
+            <p class="kpi__value" id="total-users">0</p>
+          </article>
+
+          <article class="kpi">
+            <p class="kpi__label">Active Routes</p>
+            <p class="kpi__value" id="active-routes">0</p>
+          </article>
+
+          <article class="kpi">
+            <p class="kpi__label">Unread Feedback</p>
+            <p class="kpi__value" id="unread-feedback">0</p>
+          </article>
         </div>
-      </div>
 
-      <!-- Reports -->
-      <section class="panel">
-        <header class="panel__hd">
-          <h2>System Reports</h2>
-        </header>
-        <div class="panel__bd">
-          <div class="table-wrap">
-            <table class="tbl tbl--activity" aria-label="Recent User Activity">
-              <colgroup>
-                <col style="width:440px">
-                <col style="width:180px">
-                <col>
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Reports</th>
-                  <th>Date Generated</th>
-                  <th>Document</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Peak Hour Usage Report</td>
-                  <td>03/03/2025</td>
-                  <td><a href="#" class="tbl-link">Print</a></td>
-                </tr>
-                <tr>
-                  <td>Weekly Travel Demand Report</td>
-                  <td>03/26/2025</td>
-                  <td><a href="#" class="tbl-link">Print</a></td>
-                </tr>
-                <tr>
-                  <td>Most Common Trip Origins Report</td>
-                  <td>02/12/2025</td>
-                  <td><a href="#" class="tbl-link">Print</a></td>
-                </tr>
-                <tr>
-                  <td>Most Common Trip Destination Report</td>
-                  <td>05/25/2025</td>
-                  <td><a href="#" class="tbl-link">Print</a></td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- System Reports -->
+        <section class="panel">
+          <header class="panel__hd">
+            <h2>System Reports</h2>
+          </header>
+
+          <div class="panel__bd">
+            <div class="table-wrap">
+              <table class="tbl tbl--activity" aria-label="Recent User Activity">
+                <colgroup>
+                  <col style="width:440px">
+                  <col style="width:180px">
+                  <col>
+                </colgroup>
+
+                <thead>
+                  <tr>
+                    <th>Reports</th>
+                    <th>Date Generated</th>
+                    <th>Document</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td>Peak Hour Usage Report</td>
+                    <td>03/03/2025</td>
+                    <td><a href="#" class="tbl-link">Print</a></td>
+                  </tr>
+
+                  <tr>
+                    <td>Weekly Travel Demand Report</td>
+                    <td>03/26/2025</td>
+                    <td><a href="#" class="tbl-link">Print</a></td>
+                  </tr>
+
+                  <tr>
+                    <td>Most Common Trip Origins Report</td>
+                    <td>02/12/2025</td>
+                    <td><a href="#" class="tbl-link">Print</a></td>
+                  </tr>
+
+                  <tr>
+                    <td>Most Common Trip Destination Report</td>
+                    <td>05/25/2025</td>
+                    <td><a href="#" class="tbl-link">Print</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <aside class="actions" aria-label="Quick Actions">
+          <button class="btn btn--primary" data-action="add-route">Add Route</button>
+          <button class="btn btn--primary" data-action="send-system">Send System Notifications</button>
+        </aside>
+
       </section>
-
-      <aside class="actions" aria-label="Quick Actions">
-        <button class="btn btn--primary" data-action="add-route">Add Route</button>
-        <button class="btn btn--primary" data-action="send-system">Send System Notifications</button>
-      </aside>
-
     </div>
-  </section>
-</div>
-<script src="../js/dashboard.js"></script>
+
+  </div>
 </body>
 </html>

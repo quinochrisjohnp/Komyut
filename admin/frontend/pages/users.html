@@ -1,92 +1,109 @@
-<div class="content-body">
-    <!-- Users Management (drop-in section; no <body> needed if you load into #content-area) -->
-    <h1>User Management</h1>
-    <section class="users-page" data-page="users">
-        <div class="users-header">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Management</title>
+  <link rel="stylesheet" href="./../css/style.css" />
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="profile">
+        <div class="icon">👤</div>
+        <h2>Super Admin</h2>
+      </div>
+      <ul class="menu" id="menu">
+        <li data-page="dashboard"><a href="dashboard.html">📊 Dashboard</a></li>
+        <li data-page="users" class="active"><a href="users.html">👥 User Management</a></li>
+        <li data-page="routes"><a href="routes.html">📍 Route Management</a></li>
+        <li data-page="notifications"><a href="notifications.html">🔔 Notifications Manager</a></li>
+        <li data-page="feedback"><a href="feedback.html">💬 Feedbacks & Reports</a></li>
+        <li data-page="admin"><a href="admin.html">⚙️ Admin Management</a></li>
+        <li data-page="logs"><a href="logs.html">📜 Activity Logs</a></li>
+        <li data-page="logout"><a href="logout.html">🚪 Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Section -->
+    <section id="page-users" class="page active-page">
+      <div class="content-body">
+        <h1>User Management</h1>
+
+        <section class="users-page" data-page="users">
+
+          <!-- Search -->
+          <div class="users-header">
             <form>
-                <div class="search-route">
-                    <input class="search-input-route" type="search" placeholder="Search">
-                    <button type="submit" class="search-submit-route"><span
-                            class="search-icon-route material-symbols-outlined">search</span></button>
-                </div>
+              <div class="search-route">
+                <input class="search-input-route" type="search" placeholder="Search">
+                <button type="submit" class="search-submit-route">
+                  <span class="search-icon-route material-symbols-outlined">search</span>
+                </button>
+              </div>
             </form>
-        </div>
+          </div>
 
-
-
-        <div class="users-card">
+          <!-- Users Table -->
+          <div class="users-card">
             <table class="users-table">
-                <thead>
-                    <tr>
-                    <th>User Name</th>
-                    <th>Email</th>
-                    <th>Password</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTbody">
-                    <!-- Sample placeholder rows (replace with real data later) -->
-                    <tr>
-                        <td class="col-name">Liam Carter</td>
-                        <td class="col-email"><a href="mailto:LiamCarter@gmail.com">LiamCarter@gmail.com</a></td>
-                        <td class="col-password">
-                            <div class="password-wrapper">
-                                <span class="password-text" data-password="MySecret123">••••••••</span>
-                                <button type="button" class="toggle-password" aria-label="Show/Hide Password">
-                                <span class="material-symbols-outlined">visibility</span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="col-name">Sophia Ramirez</td>
-                        <td class="col-email"><a href="mailto:Sophirez@gmail.com">Sophirez@gmail.com</a></td>
-                        <td class="col-password">
-                            <div class="password-wrapper">
-                                <span class="password-text" data-password="MySecret123">••••••••</span>
-                                <button type="button" class="toggle-password" aria-label="Show/Hide Password">
-                                <span class="material-symbols-outlined">visibility</span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="col-name">Ethan Nakamura</td>
-                        <td class="col-email"><a href="mailto:ENakamura@gmail.com">ENakamura@gmail.com</a></td>
-                        <td class="col-password">
-                            <div class="password-wrapper">
-                                <span class="password-text" data-password="MySecret123">••••••••</span>
-                                <button type="button" class="toggle-password" aria-label="Show/Hide Password">
-                                <span class="material-symbols-outlined">visibility</span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="col-name">Isabella Chen</td>
-                        <td class="col-email"><a href="mailto:Chanbella@gmail.com">Chanbella@gmail.com</a></td>
-                        <td class="col-password">
-                            <div class="password-wrapper">
-                                <span class="password-text" data-password="MySecret123">••••••••</span>
-                                <button type="button" class="toggle-password" aria-label="Show/Hide Password">
-                                <span class="material-symbols-outlined">visibility</span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="col-name">Noah Thompson</td>
-                        <td class="col-email"><a href="mailto:NoahThompson@gmail.com">NoahThompson@gmail.com</a></td>
-                        <td class="col-password">
-                            <div class="password-wrapper">
-                                <span class="password-text" data-password="MySecret123">••••••••</span>
-                                <button type="button" class="toggle-password" aria-label="Show/Hide Password">
-                                <span class="material-symbols-outlined">visibility</span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
+              <thead>
+                <tr>
+                  <th>User Name</th>
+                  <th>Email</th>
+                </tr>
+              </thead>
+              <tbody id="usersTbody">
+                <tr>
+                  <td colspan="2">Loading users...</td>
+                </tr>
+              </tbody>
             </table>
-        </div>
+          </div>
+
+        </section>
+      </div>
     </section>
-</div>
+  </div>
+
+  <!-- 🪝 Fetch users dynamically -->
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const tbody = document.getElementById("usersTbody");
+
+    try {
+      // ✅ Use the correct endpoint name from your adminServer.js
+      const response = await fetch("http://localhost:5002/api/clerk-users");
+      if (!response.ok) throw new Error("Failed to fetch users");
+
+      const data = await response.json();
+      const users = data.users || [];
+
+      tbody.innerHTML = ""; // Clear existing rows
+
+      if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="2">No users found.</td></tr>`;
+      } else {
+        users.forEach((user) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="col-name">${user.username || "(no username)"}</td>
+            <td class="col-email">
+              <a href="mailto:${user.email}">${user.email}</a>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    } catch (error) {
+      console.error("Error loading users:", error);
+      tbody.innerHTML = `<tr><td colspan="2">Error fetching users.</td></tr>`;
+    }
+  });
+</script>
+
+</body>
+</html>
