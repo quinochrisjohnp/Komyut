@@ -9,6 +9,9 @@ import {
   RefreshControl,
 } from "react-native";
 import { useNotifications } from "../../hooks/useNotifications";
+import { SafeAreaView } from "react-native-safe-area-context";
+import BottomNav from "../../components/BottomNav";
+import Colors from "../Constant_Design";
 
 export default function NotificationsScreen() {
   const { notifications, isLoading, loadNotifications } = useNotifications();
@@ -32,39 +35,49 @@ export default function NotificationsScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>📢 Notifications</Text>
+    <SafeAreaView style={styles.containerSafe}>
+      <View style={styles.container}>
+        <Text style={styles.header}>Notifications</Text>
+        <Text style={styles.clear}>Clear Notifications</Text>
 
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 50 }} />
-      ) : notifications.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>🔔</Text>
-          <Text style={styles.emptyText}>No notifications yet</Text>
-          <Text style={styles.emptySubText}>
-            Notifications you receive will appear here.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={notifications}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderNotification}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          refreshControl={
-            <RefreshControl refreshing={isLoading} onRefresh={loadNotifications} />
-          }
-        />
-      )}
-    </View>
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 50 }} />
+        ) : notifications.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>🔔</Text>
+            <Text style={styles.emptyText}>No notifications yet</Text>
+            <Text style={styles.emptySubText}>
+              Notifications you receive will appear here.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={notifications}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderNotification}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            refreshControl={
+              <RefreshControl refreshing={isLoading} onRefresh={loadNotifications} />
+            }
+          />
+        )}
+      </View>
+        <BottomNav />
+    </SafeAreaView>
+    
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#ffffffff",
     paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  containerSafe: {
+    flex: 1,
+    backgroundColor: "#ffffffff",
     paddingTop: 16,
   },
   header: {
@@ -72,6 +85,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111827",
     marginBottom: 12,
+    marginHorizontal: "auto",
+  },
+  clear: {
+    fontSize: 12,
+    color: "#747474ff",
+    marginVertical: 12,
+    marginRight: 10,
+    textAlign: 'right',
   },
   card: {
     backgroundColor: "#FFFFFF",
