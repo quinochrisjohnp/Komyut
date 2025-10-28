@@ -317,7 +317,7 @@ body {
   padding: 20px;
   /* max-height: 500px; /* activate for scroll */
   /* overflow-y: auto;  /* activate for scroll */
-}
+} 
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -1858,4 +1858,165 @@ textarea {
   border-radius: 8px;
   cursor: pointer;
   border: none;
+}
+
+/* ====== Feedback Table Fix ====== */
+.table-container3 {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.bg-table2 {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* makes all columns align evenly */
+}
+
+.bg-table2 thead th {
+  background: #3e99c6;
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  padding: 12px;
+}
+
+.bg-table2 tbody td {
+  text-align: center;
+  padding: 12px;
+  border-bottom: 1px solid #ccc;
+  word-wrap: break-word;
+}
+
+.scrollable-body2 {
+  display: block;
+  max-height: 400px; /* allows scrolling without misalignment */
+  overflow-y: auto;
+}
+
+.bg-table2 thead,
+.bg-table2 tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed; /* keeps header and rows aligned */
+}
+
+.actions2 a {
+  display: inline-block;
+  margin: 2px 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.resolved {
+  color: #2e8ec4;
+}
+
+.urgent {
+  color: #d9534f;
+}
+
+.respond {
+  color: #34a853;
+}
+
+/* ===== Unified Search Bar Style ===== */
+.search-bar,
+.search-bar2,
+.search-bar3,
+.search-bar4 {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.search-bar input,
+.search-bar2 input,
+.search-bar3 input,
+.search-bar4 input {
+  width: 260px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-bar input:focus,
+.search-bar2 input:focus,
+.search-bar3 input:focus,
+.search-bar4 input:focus {
+  border-color: #3e99c6;
+  outline: none;
+  box-shadow: 0 0 4px rgba(62, 153, 198, 0.4);
+}
+
+.search-bar button,
+.search-bar2 button,
+.search-bar3 button,
+.search-bar4 button {
+  background-color: #3e99c6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search-bar button:hover,
+.search-bar2 button:hover,
+.search-bar3 button:hover,
+.search-bar4 button:hover {
+  background-color: #2e8ec4;
+}
+
+/* General page content spacing */
+.content-body {
+  padding: 2rem;              /* adds breathing room inside main content */
+}
+
+/* Make sure page titles have proper bottom spacing */
+.content-body h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;      /* pushes filters down */
+  color: #333;
+}
+
+/* Fix spacing for filters section */
+.activity-container .filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;      /* separates filters from table */
+}
+
+/* Consistent spacing for each filter group */
+.activity-container .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Ensure table doesn’t stick to filters */
+.activity-table-wrapper {
+  margin-top: 1rem;
+}
+
+/* Optional: improve responsiveness */
+@media (max-width: 768px) {
+  .activity-container .filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
