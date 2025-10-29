@@ -1183,6 +1183,10 @@ body.modal-open { overflow:hidden; }
 }
 
 /* Actions column */
+.actions{
+  text-align: center;
+}
+
 .actions a {
   text-decoration: none;
   margin: 0 6px;
