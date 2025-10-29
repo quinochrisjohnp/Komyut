@@ -34,7 +34,7 @@
             <a href="logs.html">Activity Logs</a>
         </li>
         <li data-page="logout">
-            <a href="logout.html">Logout</a>
+            <a href="logout.html">🚪 Logout</a>
         </li>
     </ul>
     </aside>
@@ -114,7 +114,20 @@
   </div> <!-- END content-body -->
 
   <!-- ✅ Your script -->
-  <script src="script.js"></script>
+  <script>
+    // Highlight the active menu item based on the current page
+    const currentPage = window.location.pathname.split("/").pop(); // e.g. 'feedback.html'
+    const menuItems = document.querySelectorAll(".menu li");
+
+    menuItems.forEach(item => {
+      const link = item.querySelector("a");
+      if (link && link.getAttribute("href") === currentPage) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
+      }
+    });
+  </script>
 
 </body>
 </html>
