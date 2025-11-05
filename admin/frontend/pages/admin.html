@@ -83,6 +83,7 @@
     </div>
   </div>
 
+  <script src="./../js/filter.js"></script>
   <script src="./../js/sidebar.js"></script>
   
   <!-- ✅ Highlight active menu -->
@@ -117,6 +118,25 @@
       console.error("Error loading admins:", error);
       tbody.innerHTML = `<tr><td colspan="3">Error fetching admins.</td></tr>`;
     }
+
+    // 🔎 Search filter
+    function setupSearch() {
+      const searchInput = document.querySelector(".search-input-route");
+      searchInput.addEventListener("input", () => {
+        const searchValue = searchInput.value.toLowerCase();
+        const rows = document.querySelectorAll(".scrollable-body2 tr");
+        rows.forEach((row) => {
+          const username = row.cells[0]?.textContent.toLowerCase() || "";
+          const message = row.cells[1]?.textContent.toLowerCase() || "";
+          row.style.display =
+            username.includes(searchValue) || message.includes(searchValue)
+              ? ""
+              : "none";
+        });
+      });
+    }
+
+
   });
 </script>
 

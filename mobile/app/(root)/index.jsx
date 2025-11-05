@@ -9,8 +9,8 @@ import { router } from 'expo-router';
 
 
 
-const GOOGLE_MAPS_API_KEY = '';
-const MAP_ID = '';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyA9qApbYwSHGUJLhbsRU8nfDRoa7sKBm_A';
+const MAP_ID = '47d5b949890d7d9d66722f1a';
 
 export default function Index() {
   const [query, setQuery] = useState('');
