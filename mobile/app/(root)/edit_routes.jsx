@@ -19,7 +19,7 @@ import { useUser } from "@clerk/clerk-expo";
 import BottomNav from "../../components/BottomNav";
 import Colors from "../Constant_Design";
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI";
+const GOOGLE_MAPS_API_KEY = '';
 
 export default function EditRouteScreen() {
   const {

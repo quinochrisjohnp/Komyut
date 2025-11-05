@@ -70,6 +70,7 @@ export default function ResetPasswordScreen() {
 
   const resetPassword = async () => {
     if (!isLoaded) return;
+
     if (!isValidPassword(newPassword)) {
       setError("Password must be 8–15 characters, no spaces.");
       return;
@@ -86,12 +87,46 @@ export default function ResetPasswordScreen() {
         await setActive({ session: result.createdSessionId });
         router.replace("/(root)");
       } else {
-        setError("Unexpected status. Try again.");
+        setError("Unexpected status. Please try again.");
       }
     } catch (err) {
-      setError(err.errors[0]?.longMessage || "Failed to reset password.");
+      const clerkError = err.errors?.[0];
+      console.log("RESET ERROR:", JSON.stringify(err, null, 2));
+
+      switch (clerkError?.code) {
+        case "form_password_pwned":
+          setError(
+            "This password has appeared in a data breach. Please use a stronger one — include uppercase letters, numbers, or symbols."
+          );
+          break;
+
+        case "form_code_incorrect":
+          setError("The verification code you entered is incorrect.");
+          break;
+
+        case "form_code_expired":
+          setError("Your verification code has expired. Please request a new one.");
+          break;
+
+        case "form_identifier_not_found":
+          setError("No account found with that email address.");
+          break;
+
+        case "form_password_length_too_short":
+          setError("Password too short. It must be at least 8 characters.");
+          break;
+
+        case "form_password_length_too_long":
+          setError("Password too long. It must not exceed 15 characters.");
+          break;
+
+        default:
+          setError(clerkError?.longMessage || "Failed to reset password. Please try again.");
+          break;
+      }
     }
   };
+
 
   return (
     <SafeAreaView style={authStyles.safeArea}>
