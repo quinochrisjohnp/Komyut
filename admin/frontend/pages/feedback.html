@@ -8,55 +8,39 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-<aside class="sidebar">
-      <div class="profile">
-        
-        <h2>Super Admin</h2>
-      </div>
-    <ul class="menu" id="menu">
-        <li data-page="dashboard" class="active">
-            <a href="dashboard.html">Dashboard</a>
-        </li>
-        <li data-page="users">
-            <a href="users.html">User Management</a>
-        </li>
-        <li data-page="routes">
-            <a href="routes.html">Route Management</a>
-        </li>
-        <li data-page="notifications">
-            <a href="notifications.html">Notifications Manager</a>
-        </li>
-        <li data-page="feedback">
-            <a href="feedback.html">Feedbacks & Reports</a>
-        </li>
-        <li data-page="admin">
-            <a href="admin.html">Admin Management</a>
-        </li>
-        <li data-page="logs">
-            <a href="logs.html">Activity Logs</a>
-        </li>
-        <li data-page="logout">
-            <a href="/admin/frontend/login.html">Logout</a>
-        </li>
-    </ul>
-    </aside>
 
+  <!-- ✅ Sidebar -->
+  <aside class="sidebar">
+    <div class="profile">
+      <h2>Super Admin</h2>
+    </div>
+    <ul class="menu" id="menu">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="users.html">User Management</a></li>
+      <li><a href="routes.html">Route Management</a></li>
+      <li><a href="notifications.html">Notifications Manager</a></li>
+      <li class="active"><a href="feedback.html">Feedbacks & Reports</a></li>
+      <li><a href="admin.html">Admin Management</a></li>
+      <li><a href="logs.html">Activity Logs</a></li>
+      <li><a href="/admin/frontend/login.html">Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- ✅ Main Content -->
   <div class="content-body">
-    
-    <!-- ✅ FEEDBACK & REPORTS -->
     <h1>Feedback & Reports</h1>
 
-    <!-- 🔎 Search & Filter -->
-      <div class="admin-header">
-        <form>
-          <div class="search-route">
-            <input class="search-input-route" type="search" placeholder="Search">
-            <button type="submit" class="search-submit-route">
-              <span class="material-icons">search</span>
-            </button>
-          </div>
-        </form>
-      </div>
+    <!-- 🔎 Search -->
+    <div class="admin-header">
+      <form>
+        <div class="search-route">
+          <input class="search-input-route" type="search" placeholder="Search">
+          <button type="submit" class="search-submit-route">
+            <span class="material-icons">search</span>
+          </button>
+        </div>
+      </form>
+    </div>
 
     <br>
 
@@ -71,66 +55,81 @@
             <th>Status</th>
           </tr>
         </thead>
-
         <tbody class="scrollable-body2">
-          <tr>
-            <td>tester101</td>
-            <td>Help po Thank you</td>
-            <td>10/28/2025</td>
-            <td class="actions2">
-              <a href="#" class="resolved">Resolved</a>
-              <a href="#" class="respond">Respond</a>
-            </td>
-          </tr>
-          <tr>
-            <td>tester08</td>
-            <td>Testing</td>
-            <td>10/10/2025</td>
-            <td class="actions2">
-              <a href="#" class="urgent">Urgent</a>
-              <a href="#" class="respond">Respond</a>
-            </td>
-          </tr>
-          <tr>
-            <td>seanny08</td>
-            <td>Hellooo</td>
-            <td>10/9/2025</td>
-            <td class="actions2">
-              <a href="#" class="resolved">Resolved</a>
-              <a href="#" class="respond">Respond</a>
-            </td>
-          </tr>
-          <tr>
-            <td>kiana_</td>
-            <td>Hi</td>
-            <td>10/8/2025</td>
-            <td class="actions2">
-              <a href="#" class="urgent">Urgent</a>
-              <a href="#" class="respond">Respond</a>
-            </td>
-          </tr>
+          <tr><td colspan="4">Loading...</td></tr>
         </tbody>
       </table>
     </div>
-
-  </div> <!-- END content-body -->
+  </div>
 
   <script src="./../js/sidebar.js"></script>
-  <!-- ✅ Your script -->
-  <script>
-    // Highlight the active menu item based on the current page
-    const currentPage = window.location.pathname.split("/").pop(); // e.g. 'feedback.html'
-    const menuItems = document.querySelectorAll(".menu li");
 
-    menuItems.forEach(item => {
-      const link = item.querySelector("a");
-      if (link && link.getAttribute("href") === currentPage) {
-        item.classList.add("active");
-      } else {
-        item.classList.remove("active");
+  <script>
+    // ✅ API endpoint (correct one)
+    const REPORTS_API = "http://localhost:5002/api/all_reports";
+
+    // ✅ Fetch all reports
+    async function fetchAllReports() {
+      const tableBody = document.querySelector(".scrollable-body2");
+      tableBody.innerHTML = `<tr><td colspan="4">Loading...</td></tr>`;
+
+      try {
+        const response = await fetch(REPORTS_API);
+        const result = await response.json();
+
+        if (!response.ok) throw new Error(result.message || "Failed to fetch reports");
+
+        const data = result.data || [];
+
+        if (data.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="4">No reports found.</td></tr>`;
+          return;
+        }
+
+        tableBody.innerHTML = "";
+        data.forEach((report) => {
+          const createdDate = new Date(report.created_at).toLocaleDateString();
+          const row = `
+            <tr>
+              <td>${report.username || "Unknown User"}</td>
+              <td>${report.message || "(No message)"}</td>
+              <td>${createdDate}</td>
+              <td class="actions2">
+                <a href="#" class="resolved">Resolved</a>
+                <a href="#" class="respond">Respond</a>
+              </td>
+            </tr>
+          `;
+          tableBody.insertAdjacentHTML("beforeend", row);
+        });
+      } catch (error) {
+        console.error("Error fetching reports:", error);
+        tableBody.innerHTML = `<tr><td colspan="4">❌ Failed to load reports.</td></tr>`;
       }
+    }
+
+    // 🔎 Search filter
+    function setupSearch() {
+      const searchInput = document.querySelector(".search-input-route");
+      searchInput.addEventListener("input", () => {
+        const searchValue = searchInput.value.toLowerCase();
+        const rows = document.querySelectorAll(".scrollable-body2 tr");
+        rows.forEach((row) => {
+          const username = row.cells[0]?.textContent.toLowerCase() || "";
+          const message = row.cells[1]?.textContent.toLowerCase() || "";
+          row.style.display =
+            username.includes(searchValue) || message.includes(searchValue)
+              ? ""
+              : "none";
+        });
+      });
+    }
+
+    // 🚀 Initialize
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchAllReports();
+      setupSearch();
     });
   </script>
-
 </body>
 </html>

@@ -5,41 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin Login</title>
 
-  <!-- IMPORTANT: path is from /pages to /css -->
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="../frontend/css/style.css" />
 </head>
-<body class="login-page"><!-- scoped class so styles don't touch other pages -->
 
-  <!-- Outer padding to keep uniform space on all sides -->
+<body class="login-page">
+
   <div class="login-wrap">
-    <!-- Main card (rounded) -->
     <div class="login-card">
       
-      <!-- LEFT: blue panel with logo, centered vertically and horizontally -->
+      <!-- LEFT: Logo -->
       <section class="login-left">
-        <!-- Use your image: /image/LogInLogo.png. It won't distort. -->
-        <img src="image/LogInLogo.png" alt="Komyut" class="login-logo">
+        <img src="../frontend/image/LogInLogo.png" alt="Komyut" class="login-logo">
       </section>
 
-      <!-- RIGHT: light panel with the form -->
+      <!-- RIGHT: Login Form -->
       <section class="login-right">
-      <div class="login-panel"><!-- new: inner rounded white card -->
+        <div class="login-panel">
           <h1 class="login-title">Admin</h1>
-          <form class="login-form" action="#" method="post" autocomplete="on">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="Enter email" required>
 
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter password" required>
+          <form id="loginForm" class="login-form" autocomplete="on">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter email" required>
 
-          <button type="submit" class="login-btn">Login</button>
-          <a href="#" class="forgot-link">Forgot Password?</a>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter password" required>
+
+            <button type="submit" class="login-btn">Login</button>
+            <a href="#" class="forgot-link">Forgot Password?</a>
           </form>
-      </div>
+        </div>
       </section>
 
     </div>
   </div>
-  <script src="js/script.js"></script>
+
+  <script>
+    // ✅ Only allow admins to access
+    const ADMIN_EMAILS = [
+      "quino.chrisjohnp@gmail.com",
+      "seangabbyperalta@gmail.com",
+      "tester@gmail.com"
+    ];
+
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = document.getElementById("password").value.trim();
+
+      if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+      }
+
+      // ✅ Check if email is an allowed admin
+      if (!ADMIN_EMAILS.includes(email)) {
+        alert("Access denied. Only admin users can log in.");
+        return;
+      }
+
+      // ✅ Redirect to dashboard page
+      window.location.href = "/admin/frontend/pages/dashboard.html";
+    });
+  </script>
+
 </body>
 </html>

@@ -14,7 +14,7 @@ export const useUserReports = (user_id) => {
       const data = await response.json();
       setUserReports(data);
     } catch (error) {
-      console.error("Error fetching user reports:", error);
+      console.error("❌ Error fetching user reports:", error);
     }
   }, [user_id]);
 
@@ -25,7 +25,7 @@ export const useUserReports = (user_id) => {
     try {
       await fetchUserReports();
     } catch (error) {
-      console.error("Error loading user reports:", error);
+      console.error("❌ Error loading user reports:", error);
     } finally {
       setIsLoading(false);
     }
@@ -34,18 +34,30 @@ export const useUserReports = (user_id) => {
   // 🔹 Submit a new report
   const addUserReport = async (reportData) => {
     try {
+      // ✅ Debug log before sending
+      console.log("📤 Sending report data:", reportData);
+
       const response = await fetch(`${API_URL}/api/user_reports`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reportData),
       });
 
-      if (!response.ok) throw new Error("Failed to submit report");
+      // ✅ Get raw text to see actual response from Render
+      const rawResponse = await response.text();
+      console.log("📩 Raw server response:", rawResponse);
 
-      await loadData(); // refresh reports after submitting
-      Alert.alert("Success", "Report submitted successfully!");
+      if (!response.ok) {
+        throw new Error(`Failed to submit report: ${response.status} ${rawResponse}`);
+      }
+
+      // ✅ Parse JSON only if response is ok
+      const data = JSON.parse(rawResponse);
+      console.log("✅ Parsed server response:", data);
+
+      await loadData(); // Refresh reports after submitting
     } catch (error) {
-      console.error("Error submitting report:", error);
+      console.error("❌ Error submitting report:", error);
       Alert.alert("Error", error.message);
     }
   };

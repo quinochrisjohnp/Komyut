@@ -8,35 +8,30 @@ import { sql } from "./config/db.js";
 import notificationsPath from "./Path/notificationsPath.js";
 import addRoutesPath from "./Path/addRoutesPath.js";
 import usersInfoPath from "./Path/usersInfoPath.js";
-
+import all_reportsPath from "./Path/all_reportsPath.js";
+import all_usersPath from "./Path/all_usersPath.js";
 
 dotenv.config();
 const app = express();
 
-// ✅ ES6 module equivalent of __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // ✅ Allow frontend connections
 app.use(cors());
-
 app.use(rateLimiter);
 app.use(express.json());
 
-// ✅ Serve static files from frontend folder
-app.use(express.static(path.join(__dirname, '../frontend')));
 
-// ✅ API routes (put BEFORE catch-all)
+
+// ✅ API routes
 app.use("/api/notifications", notificationsPath);
 app.use("/api/add-route", addRoutesPath);
 app.use("/api/clerk-users", usersInfoPath);
+app.use("/api/all_reports", all_reportsPath);
+app.use("/api/all_users", all_usersPath);
 
-// ✅ FIXED: Use regex instead of '*'
-app.get(/^(?!\/api\/).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
-});
 
-// ✅ Auto-create table if not exists
+
+// ✅ Auto-create tables if not exists
 async function initDB() {
   try {
     await sql`
@@ -66,9 +61,8 @@ async function initDB() {
   }
 }
 
-
 // ✅ Start server
 app.listen(5002, async () => {
-  console.log("🚀 Admin Server running on http://localhost:5002");
+  console.log("🚀 Admin Server running at http://localhost:5002");
   await initDB();
 });

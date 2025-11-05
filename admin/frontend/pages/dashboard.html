@@ -13,37 +13,21 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile">
-        
         <h2>Super Admin</h2>
       </div>
-    <ul class="menu" id="menu">
-        <li data-page="dashboard" class="active">
-            <a href="dashboard.html">Dashboard</a>
-        </li>
-        <li data-page="users">
-            <a href="users.html">User Management</a>
-        </li>
-        <li data-page="routes">
-            <a href="routes.html">Route Management</a>
-        </li>
-        <li data-page="notifications">
-            <a href="notifications.html">Notifications Manager</a>
-        </li>
-        <li data-page="feedback">
-            <a href="feedback.html">Feedbacks & Reports</a>
-        </li>
-        <li data-page="admin">
-            <a href="admin.html">Admin Management</a>
-        </li>
-        <li data-page="logs">
-            <a href="logs.html">Activity Logs</a>
-        </li>
-        <li data-page="logout">
-            <a href="/admin/frontend/login.html">Logout</a>
-        </li>
-    </ul>
+      <ul class="menu" id="menu">
+        <li data-page="dashboard" class="active"><a href="dashboard.html">Dashboard</a></li>
+        <li data-page="users"><a href="users.html">User Management</a></li>
+        <li data-page="routes"><a href="routes.html">Route Management</a></li>
+        <li data-page="notifications"><a href="notifications.html">Notifications Manager</a></li>
+        <li data-page="feedback"><a href="feedback.html">Feedbacks & Reports</a></li>
+        <li data-page="admin"><a href="admin.html">Admin Management</a></li>
+        <li data-page="logs"><a href="logs.html">Activity Logs</a></li>
+        <li data-page="logout"><a href="/admin/frontend/login.html">Logout</a></li>
+      </ul>
     </aside>
 
+    <!-- Main Content -->
     <div class="content-body">
 
       <h1 class="dash-title">Dashboard</h1>
@@ -59,7 +43,7 @@
 
           <article class="kpi">
             <p class="kpi__label">Total Users</p>
-            <p class="kpi__value" id="total-users">11</p>
+            <p class="kpi__value" id="total-users">Loading...</p>
           </article>
 
           <article class="kpi">
@@ -126,12 +110,35 @@
           </div>
         </section>
 
-        <!-- Quick Actions -->
-
       </section>
     </div>
-
   </div>
+
   <script src="./../js/sidebar.js"></script>
+  <script>
+    const API_URL = "http://localhost:5002/api/all_users";
+
+    async function fetchUserCount() {
+      const totalUsersEl = document.getElementById("total-users");
+      totalUsersEl.textContent = "Loading...";
+
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.error || "Failed to fetch users.");
+
+        // ✅ Update total user count
+        totalUsersEl.textContent = data.count || data.data?.length || 0;
+
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        totalUsersEl.textContent = "Error";
+      }
+    }
+
+    // 🚀 Fetch when dashboard loads
+    document.addEventListener("DOMContentLoaded", fetchUserCount);
+  </script>
 </body>
 </html>
