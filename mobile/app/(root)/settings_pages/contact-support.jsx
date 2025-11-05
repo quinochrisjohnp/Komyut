@@ -7,22 +7,29 @@ import {
   StyleSheet,
   Image,
   Modal,
+  Alert,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useUserReports } from "../../../hooks/useUserReports"; // 👈 your hook
+import { useUser } from "@clerk/clerk-expo"; // 👈 to get Clerk user info
 import Colors from "../../Constant_Design";
 
 export default function ContactSupport() {
   const router = useRouter();
+  const { user } = useUser(); // Clerk current user
+
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [attachment, setAttachment] = useState(null);
 
   const [subjectError, setSubjectError] = useState("");
   const [messageError, setMessageError] = useState("");
-
   const [modalVisible, setModalVisible] = useState(false);
+
+  // 🟢 Initialize hook with Clerk user_id
+  const { addUserReport } = useUserReports(user?.id);
 
   const handleUpload = async () => {
     try {
@@ -35,7 +42,7 @@ export default function ContactSupport() {
     }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     let valid = true;
 
     // Validate subject
@@ -54,8 +61,27 @@ export default function ContactSupport() {
       setMessageError("");
     }
 
+    if (!user) {
+      Alert.alert("Error", "User not logged in!");
+      return;
+    }
+
     if (valid) {
-      setModalVisible(true);
+      try {
+        await addUserReport({
+          user_id: user.id,
+          username: user.username || user.firstName || "Unknown",
+          subject,
+          message,
+        });
+        setModalVisible(true);
+        setSubject("");
+        setMessage("");
+        setAttachment(null);
+      } catch (error) {
+        console.error("Error submitting report:", error);
+        Alert.alert("Error", "Failed to send report.");
+      }
     }
   };
 
@@ -69,7 +95,6 @@ export default function ContactSupport() {
         />
       </TouchableOpacity>
 
-      {/* Title */}
       <Text style={styles.title}>Contact Support</Text>
 
       {/* Subject */}
@@ -125,7 +150,7 @@ export default function ContactSupport() {
               style={styles.modalBtn}
               onPress={() => {
                 setModalVisible(false);
-                router.push("/(root)/settings"); // placeholder redirect
+                router.push("/(root)/settings");
               }}
             >
               <Text style={styles.modalBtnText}>OK</Text>
@@ -138,22 +163,9 @@ export default function ContactSupport() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
-  },
-  backBtn: {
-    position: "absolute",
-    top: 50,
-    left: 0,
-    padding: 10,
-    zIndex: 1,
-  },
-  backIcon: {
-    width: 20,
-    height: 20,
-  },
+  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+  backBtn: { position: "absolute", top: 50, left: 0, padding: 10, zIndex: 1 },
+  backIcon: { width: 20, height: 20 },
   title: {
     textAlign: "center",
     fontSize: 20,
@@ -161,12 +173,7 @@ const styles = StyleSheet.create({
     marginTop: 50,
     marginBottom: 20,
   },
-  label: {
-    fontWeight: "600",
-    marginTop: 15,
-    marginBottom: 5,
-    color: "#333",
-  },
+  label: { fontWeight: "600", marginTop: 15, marginBottom: 5, color: "#333" },
   input: {
     borderBottomWidth: 1,
     borderColor: "#ccc",
@@ -174,15 +181,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#f9f9f9",
   },
-  textarea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  error: {
-    color: "red",
-    marginTop: 4,
-    fontSize: 12,
-  },
+  textarea: { height: 100, textAlignVertical: "top" },
+  error: { color: "red", marginTop: 4, fontSize: 12 },
   uploadBtn: {
     backgroundColor: Colors.primary,
     paddingVertical: 10,
@@ -191,15 +191,8 @@ const styles = StyleSheet.create({
     marginTop: 5,
     alignSelf: "flex-start",
   },
-  uploadText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  attachmentText: {
-    fontSize: 12,
-    color: "#555",
-    marginTop: 5,
-  },
+  uploadText: { color: "#fff", fontWeight: "600" },
+  attachmentText: { fontSize: 12, color: "#555", marginTop: 5 },
   sendBtn: {
     marginTop: 40,
     backgroundColor: Colors.primary,
@@ -207,11 +200,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: "center",
   },
-  sendText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  sendText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -243,8 +232,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 20,
   },
-  modalBtnText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
+  modalBtnText: { color: "#fff", fontWeight: "600" },
 });

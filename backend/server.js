@@ -37,7 +37,6 @@ async function initDB() {
         created_at TIMESTAMP DEFAULT NOW()
       );
     `;
-
     await sql`
       CREATE TABLE IF NOT EXISTS search_routes (
         id SERIAL PRIMARY KEY,
@@ -46,6 +45,16 @@ async function initDB() {
         destination_loc VARCHAR(255) NOT NULL,
         event_time TIME NOT NULL,
         event_date DATE NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_reports (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        username VARCHAR(255),
+        subject VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
       );
     `;
