@@ -19,7 +19,8 @@ import { useUser } from "@clerk/clerk-expo";
 import Colors from "../Constant_Design";
 
 const API_URL = "https://komyut-we5n.onrender.com";
-const GOOGLE_MAPS_API_KEY = "AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI"; // ⚠️ Replace with your key
+const GOOGLE_MAPS_API_KEY = 'AAIzaSyA9qApbYwSHGUJLhbsRU8nfDRoa7sKBm_A';
+
 
 export default function AddRoutes() {
   const [place, setPlace] = useState("");

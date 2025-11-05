@@ -31,8 +31,8 @@ import suvRoutesGeoJSON from "../../assets/routeData/suv_routes.json";
 import busRoutesGeoJSON from "../../assets/routeData/bus_routes.json";
 
 // dddd
-const GOOGLE_MAPS_API_KEY = 'AIzaSyCd2dKiKFBQ3C9M0WszyPHHLbBrWafGSvI';
-const MAP_ID = 'c189603921f4de17a7419bb7';
+const GOOGLE_MAPS_API_KEY = 'AAIzaSyA9qApbYwSHGUJLhbsRU8nfDRoa7sKBm_A';
+const MAP_ID = '47d5b949890d7d9d66722f1a';
 
 // ---- UPDATED FARE CONFIGURATION (with SUV) ----
 const TRANSPORT_CONFIG = {
